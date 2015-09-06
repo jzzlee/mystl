@@ -1,13 +1,14 @@
 #ifndef __vector_H_
 #define __vector_H_
-#include <memory>
+//#include <memory>
+#include "my_memory.h"
 #include <iterator>
 #include <initializer_list>
 
 namespace my_stl
 {
 	using  std::random_access_iterator_tag;
-	template<typename T, typename Allocator = std::allocator<T>> class vector
+	template<typename T, typename Allocator = allocator<T>> class vector
 	{
 	public:
 		class iterator;

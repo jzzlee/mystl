@@ -13,6 +13,9 @@ void print(vector<T> vec, const int num)
 		cout<<vec[i]<<" ";
 	cout << endl;
 }
+
+
+
 int main()
 {
 	vector<int> vec;
@@ -23,7 +26,6 @@ int main()
 	vector<int> vec4(vec3.begin(), vec3.end());
 	vector<int> vec5{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	vector<int> vec6 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-
 
 
 	cout << vec.size() << " " << vec.capcity() << endl;

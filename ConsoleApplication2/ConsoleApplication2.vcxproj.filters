@@ -24,9 +24,6 @@
     <ClInclude Include="my_alloc.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="my_construct.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="源.cpp">

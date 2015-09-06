@@ -5,6 +5,11 @@
 
 namespace my_stl
 {
+	inline void throw_bad_alloc()
+	{
+		std::cerr << "out of memory" << std::endl; exit(1);
+	}
+
 	//Ò»¼¶ÄÚ´æÅäÖÃÆ÷
 	template<int inst>
 	class __malloc_alloc_template
@@ -56,7 +61,7 @@ namespace my_stl
 		{
 			my_malloc_handler = __malloc_alloc_oom_handler;
 			if (my_malloc_handler == 0)
-				_THROW_BAD_ALLOC;
+				throw_bad_alloc();
 			(*my_malloc_handler)();
 			result = malloc(n);
 			if (result)
@@ -74,7 +79,7 @@ namespace my_stl
 		{
 			my_malloc_handler = __malloc_alloc_oom_handler;
 			if (my_malloc_handler == 0)
-				_THROW_BAD_ALLOC;
+				throw_bad_alloc();
 			(*my_malloc_handler)();
 			result = realloc(p, n);
 			if (result)
@@ -82,7 +87,7 @@ namespace my_stl
 		}
 	}
 
-	typedef typename __malloc_alloc_template<0> malloc_alloc;
+	typedef __malloc_alloc_template<0> malloc_alloc;
 }
 
 
