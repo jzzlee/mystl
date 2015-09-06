@@ -1,4 +1,4 @@
-#ifndef __MY_ALLOC_H_
+ï»¿#ifndef __MY_ALLOC_H_
 #define __MY_ALLOC_H_
 
 #include<iostream>
@@ -10,7 +10,7 @@ namespace my_stl
 		std::cerr << "out of memory" << std::endl; exit(1);
 	}
 
-	//Ò»¼¶ÄÚ´æÅäÖÃÆ÷
+	//the first level of memory configurator
 	template<int inst>
 	class __malloc_alloc_template
 	{
@@ -88,6 +88,43 @@ namespace my_stl
 	}
 
 	typedef __malloc_alloc_template<0> malloc_alloc;
+
+
+	//the second level of memory configurator
+	enum {__ALIGN = 8}; //raised boundry of the size of small block
+	enum {__MAX_BYTES = 128}; //limit to the size of small block
+	enum {__NFREELISTS = __MAX_BYTES / __ALIGN}; //the number of free-lists
+
+	template<bool threads, int inst>
+	class __default_alloc_template
+	{
+	private:
+		//raise to a mutiple of 8
+		static size_t ROUND_UP(size_t bytes)
+		{
+			return ((bytes)+__ALIGN - 1) & ~(__ALIGN - 1);
+		}
+
+		//node of free-list, using union calss to save memory
+		union obj
+		{
+			union obj * free_list_link;
+			char client_data[1];
+		};
+
+		//free-lists
+		static obj * volatile free_list[__NFREELISTS];
+		
+		//chose which free-list is based on the size of block
+		static size_t DREELIST_INDEX(size_t bytes)
+		{
+			return (((bytes)+__ALIGN - 1) / __ALIGN - 1);
+		}
+
+
+	};
+
+
 }
 
 

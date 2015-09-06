@@ -1,4 +1,4 @@
-#ifndef __vector_H_
+﻿#ifndef __vector_H_
 #define __vector_H_
 //#include <memory>
 #include "my_memory.h"

@@ -1,4 +1,4 @@
-#ifndef __MY_MEMORY_H_
+ï»¿#ifndef __MY_MEMORY_H_
 #define __MY_MEMORY_H_
 #include <new.h>
 #include <limits>
@@ -19,7 +19,7 @@ namespace my_stl
 		typedef typename ptrdiff_t difference_type;
 
 
-		//ËÄ¸öº¯ÊıÖ»ÊÇ¼òµ¥µÄ×ªµ÷ÓÃ£¬µ÷ÓÃ´«µİ¸øÅäÖÃÆ÷£¨¿ÉÄÜÊÇÒ»¼¶»ò¶ş¼¶ÅäÖÃÆ÷£©µÄ³ÉÔ±º¯Êı¡£
+		//å››ä¸ªå‡½æ•°åªæ˜¯ç®€å•çš„è½¬è°ƒç”¨ï¼Œè°ƒç”¨ä¼ é€’ç»™é…ç½®å™¨ï¼ˆå¯èƒ½æ˜¯ä¸€çº§æˆ–äºŒçº§é…ç½®å™¨ï¼‰çš„æˆå‘˜å‡½æ•°ã€‚
 		T * allocate(size_t n)
 		{
 			return n == 0 ? nullptr : (T*)Alloc::allocate(n * sizeof(T));
