@@ -6,7 +6,13 @@
 
 namespace my_stl
 {
-	template<typename T, typename Alloc = malloc_alloc>
+#ifdef __USE_MALLOC
+	typedef malloc_alloc alloc;
+#else
+	typedef default_alloc alloc;
+#endif
+
+	template<typename T, typename Alloc = alloc>
 	class allocator
 	{
 	public:

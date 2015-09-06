@@ -248,9 +248,6 @@ namespace my_stl
 
 
 
-
-
-
 	//returns the number of elements 
 	template<typename T, typename Allocator>
 	std::size_t vector<T, Allocator>::size() const
