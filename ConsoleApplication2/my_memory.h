@@ -1,8 +1,13 @@
-﻿#ifndef __MY_MEMORY_H_
+﻿///////////////////////////////////////////////////////////////////
+//定义了allocator类。
+//包含4个基本的内存处理工具
+///////////////////////////////////////////////////////////////////
+#ifndef __MY_MEMORY_H_
 #define __MY_MEMORY_H_
 #include <new.h>
 #include <limits>
 #include "my_alloc.h"
+#include "my_uninitialized.h"
 
 namespace my_stl
 {

@@ -24,10 +24,18 @@
     <ClInclude Include="my_alloc.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="my_uninitialized.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="源.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Readme.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
 </Project>

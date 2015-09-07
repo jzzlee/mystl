@@ -80,10 +80,14 @@
   <ItemGroup>
     <ClInclude Include="my_alloc.h" />
     <ClInclude Include="my_memory.h" />
+    <ClInclude Include="my_uninitialized.h" />
     <ClInclude Include="my_vector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="源.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Readme.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

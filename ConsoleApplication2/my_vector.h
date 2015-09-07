@@ -1,4 +1,7 @@
-﻿#ifndef __vector_H_
+﻿///////////////////////////////////////////////////////////////////
+//实现了基本的vector类
+///////////////////////////////////////////////////////////////////
+#ifndef __vector_H_
 #define __vector_H_
 //#include <memory>
 #include "my_memory.h"
@@ -169,7 +172,7 @@ namespace my_stl
 		: vec_size(vec.size()), vec_capcity(vec_size + EXTRA_SPACE)
 	{
 		head_pointer = alloc.allocate(vec_capcity);
-		end_pointer = std::uninitialized_copy(vec.begin(), vec.end(), head_pointer);
+		end_pointer = my_stl::uninitialized_copy(vec.begin(), vec.end(), head_pointer);
 	}
 
 	//Move constructor
@@ -215,7 +218,7 @@ namespace my_stl
 		: vec_size(end - beg), vec_capcity(vec_size + EXTRA_SPACE)
 	{
 		head_pointer = alloc.allocate(vec_capcity);
-		std::uninitialized_copy(beg, end, head_pointer);
+		my_stl::uninitialized_copy(beg, end, head_pointer);
 		end_pointer = head_pointer + (end - beg);
 	}
 
@@ -225,7 +228,7 @@ namespace my_stl
 		: vec_size(lst.end() - lst.begin()), vec_capcity(vec_size + EXTRA_SPACE)
 	{
 		head_pointer = alloc.allocate(vec_capcity);
-		std::uninitialized_copy(lst.begin(), lst.end(), head_pointer);
+		my_stl::uninitialized_copy(lst.begin(), lst.end(), head_pointer);
 		end_pointer = head_pointer + vec_size;
 	}
 
