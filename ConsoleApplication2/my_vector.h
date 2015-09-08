@@ -5,12 +5,12 @@
 #define __vector_H_
 //#include <memory>
 #include "my_memory.h"
-#include <iterator>
+//#include <iterator>
+#include "my_iterator.h"
 #include <initializer_list>
 
 namespace my_stl
 {
-	using  std::random_access_iterator_tag;
 	template<typename T, typename Allocator = allocator<T>> class vector
 	{
 	public:

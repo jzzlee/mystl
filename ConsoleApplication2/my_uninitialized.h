@@ -11,6 +11,16 @@
 
 namespace my_stl
 {
+	//Obtains the actual address of the object or function arg, even in presence of overloaded operator&
+	template< class T >
+	T* addressof(T& arg)
+	{
+		return reinterpret_cast<T*>(
+			&const_cast<char&>(
+			reinterpret_cast<const volatile char&>(arg)));
+	}
+
+
 	//Copies elements from the range [first, last) to an uninitialized memory area beginning at d_first
 	template< class InputIt, class ForwardIt >
 	ForwardIt uninitialized_copy(InputIt first, InputIt last, ForwardIt d_first)
@@ -26,7 +36,7 @@ namespace my_stl
 			ForwardIt current = d_first;
 			try {
 				for (; first != last; ++first, ++current) {
-					::new (static_cast<void*>(std::addressof(*current))) Value(*first); //use placement new to initialize the object
+					::new (static_cast<void*>(my_stl::addressof(*current))) Value(*first); //use placement new to initialize the object
 				}
 				return current;
 			}
@@ -55,7 +65,7 @@ namespace my_stl
 			ForwardIt current = d_first;
 			try {
 				for (; count > 0; ++first, ++current, --count) {
-					::new (static_cast<void*>(std::addressof(*current))) Value(*first); //use placement new to initialize the object
+					::new (static_cast<void*>(my_stl::addressof(*current))) Value(*first); //use placement new to initialize the object
 				}
 			}
 			catch (...) {
@@ -83,7 +93,7 @@ namespace my_stl
 			ForwardIt current = first;
 			try {
 				for (; current != last; ++current) {
-					::new (static_cast<void*>(std::addressof(*current))) Value(value); //use placement new to initialize the object
+					::new (static_cast<void*>(my_stl::addressof(*current))) Value(value); //use placement new to initialize the object
 				}
 			}
 			catch (...) {
@@ -111,7 +121,7 @@ namespace my_stl
 			ForwardIt current = first;
 			try {
 				for (; count > 0; ++current, (void) --count) {
-					::new (static_cast<void*>(std::addressof(*current))) Value(value); //use placement new to initialize the object
+					::new (static_cast<void*>(my_stl::addressof(*current))) Value(value); //use placement new to initialize the object
 				}
 				return current;
 			}

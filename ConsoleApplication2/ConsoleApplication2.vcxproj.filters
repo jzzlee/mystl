@@ -27,6 +27,9 @@
     <ClInclude Include="my_uninitialized.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="my_iterator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="源.cpp">
