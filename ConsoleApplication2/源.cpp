@@ -27,6 +27,14 @@ int main()
 	vector<int> vec5{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	vector<int> vec6 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
+	vector<int> vec7(100);
+	uninitialized_copy(vec1.begin(), vec1.end(), vec7.begin());
+	uninitialized_copy_n(vec1.begin(), 10, vec7.begin() + 10);
+	uninitialized_fill(vec7.begin() + 20, vec7.begin() + 30, 20);
+	uninitialized_fill_n(vec7.begin() + 30, 10, 30);
+	std::cout << "ok" << std::endl;
+	print<int>(vec7, 40);
+
 
 	cout << vec.size() << " " << vec.capcity() << endl;
 	cout << vec1.size() << " " << vec1.capcity() << endl;
@@ -35,6 +43,8 @@ int main()
 	print<int>(vec1, vec1.size());
 	print<int>(vec2, vec2.size());
 	vec2[1] = 2;
+	print<int>(vec1, vec1.size());
+	print<int>(vec2, vec2.size());
 	print<int>(vec4, vec4.size());
 	print<int>(vec5, vec5.size());
 
@@ -46,6 +56,9 @@ int main()
 	cout << "sum:" << sum << endl;  
 	cout << vec2.end() - vec2.begin() << endl;
 	vec2.~vector();
+
+
+
 	return 0;
 }
 

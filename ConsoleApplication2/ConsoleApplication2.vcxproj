@@ -81,6 +81,7 @@
     <ClInclude Include="my_alloc.h" />
     <ClInclude Include="my_iterator.h" />
     <ClInclude Include="my_memory.h" />
+    <ClInclude Include="my_type_traits.h" />
     <ClInclude Include="my_uninitialized.h" />
     <ClInclude Include="my_vector.h" />
   </ItemGroup>

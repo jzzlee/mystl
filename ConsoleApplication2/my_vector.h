@@ -17,7 +17,10 @@ namespace my_stl
 		class iterator;
 		typedef typename T value_type;
 		typedef typename Allocator alloc_type;
-
+		typedef typename ptrdiff_t			   difference_type;
+		typedef typename T&                    reference;
+		typedef typename T*                    pointer;
+		typedef typename std::random_access_iterator_tag  iterator_category;
 		vector();//Default constructor
 		vector(const vector &vec); //Copy constructor
 		vector(vector &&vec); //Move constructor

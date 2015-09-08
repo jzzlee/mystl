@@ -11,3 +11,6 @@
 
 	v1.0.3
 	实现iterator, iterator_traits, advance, distance
+
+	v1.0.4
+	实现type_traits,修正了uninitialized_copy, uninitialized_copy_n, uninitialized_fill and uninitialized_fill_n.
