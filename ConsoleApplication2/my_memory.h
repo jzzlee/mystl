@@ -21,33 +21,33 @@ namespace my_stl
 	class allocator
 	{
 	public:
-		typedef typename T value_type;
-		typedef typename T* pointer;
-		typedef typename const T* const_pointer;
-		typedef typename T& reference;
-		typedef typename const T& const_reference;
-		typedef typename size_t size_type;
-		typedef typename ptrdiff_t difference_type;
+		typedef typename T			value_type;
+		typedef typename T*			pointer;
+		typedef typename const T*	const_pointer;
+		typedef typename T&			reference;
+		typedef typename const T&	const_reference;
+		typedef typename size_t		size_type;
+		typedef typename ptrdiff_t	difference_type;
 
 
 		//四个函数只是简单的转调用，调用传递给配置器（可能是一级或二级配置器）的成员函数。
-		T * allocate(size_t n)
+		static T * allocate(size_t n)
 		{
 			return n == 0 ? nullptr : (T*)Alloc::allocate(n * sizeof(T));
 		}
 		
-		T * allocate(void)
+		static T * allocate(void)
 		{
 			return (T*)Alloc::allocate(sizeof(T));
 		}
 
-		void deallocate(T *p, size_t n)
+		static void deallocate(T *p, size_t n)
 		{
 			if (p != 0)
 				Alloc::deallocate(p, n * sizeof(T));
 		}
 
-		void deallocate(T *p)
+		static void deallocate(T *p)
 		{
 			if (p != 0)
 				Alloc::deallocate(p, sizeof(T));

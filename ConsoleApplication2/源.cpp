@@ -1,8 +1,11 @@
 ﻿#include<iostream>
 #include "my_vector.h"
 #include <numeric>
-#include <utility>
+
+#include<list>
+
 using namespace my_stl;
+using std::list;
 using std::cout;
 using std::endl;
 
@@ -36,13 +39,16 @@ int main()
 	print<int>(vec7, 40);
 
 
-	cout << vec.size() << " " << vec.capcity() << endl;
-	cout << vec1.size() << " " << vec1.capcity() << endl;
+	cout << vec.size() << " " << vec.capacity() << endl;
+	cout << vec1.size() << " " << vec1.capacity() << endl;
 //	cout << vec2.size() << " " << vec2.capcity() << endl;
 	
 	print<int>(vec1, vec1.size());
 	print<int>(vec2, vec2.size());
-	vec2[1] = 2;
+	vec2[0] = 2;
+	auto p = vec2.begin();
+	++p;
+	*p = 30;
 	print<int>(vec1, vec1.size());
 	print<int>(vec2, vec2.size());
 	print<int>(vec4, vec4.size());

@@ -14,266 +14,103 @@ namespace my_stl
 	template<typename T, typename Allocator = allocator<T>> class vector
 	{
 	public:
-		class iterator;
-		typedef typename T value_type;
-		typedef typename Allocator alloc_type;
-		typedef typename ptrdiff_t			   difference_type;
-		typedef typename T&                    reference;
-		typedef typename T*                    pointer;
-		typedef typename std::random_access_iterator_tag  iterator_category;
-		vector();//Default constructor
-		vector(const vector &vec); //Copy constructor
-		vector(vector &&vec); //Move constructor
-		vector & operator=(vector &&vec); //Move assign operator
-		vector(const int num, const T &node = T()); //Create a vector with n nodes
-		vector(iterator beg, iterator end); //Create a vector with the elements of range [beg, end)
-		vector(std::initializer_list<T> lst); //List constructor
-		~vector();//Destructor
+		typedef typename T							value_type;
+		typedef typename Allocator					allocator_type;
+		typedef typename ptrdiff_t					difference_type;
+		typedef typename value_type&				reference;
+		typedef typename const value_type&			const_reference;
+		typedef typename Allocator::pointer			pointer;
+		typedef typename Allocator::const_pointer	const_pointer;
+		typedef typename pointer					iterator;
+		typedef typename const_pointer				const_iterator;
+		typedef typename std::size_t				size_type;
+
+		//Default constructor
+		explicit vector(const Allocator &alloc = Allocator()) : start(nullptr), finish(nullptr), end_of_storage(nullptr){}
 		
+		//Create a vector with n nodes
+		vector(size_type num, const T &node, const Allocator &alloc = Allocator()) { fill_initialize(num, node); }
+		//这两个为了避免与范围初始化重载冲突
+		vector(int num, const T &node, const Allocator &alloc = Allocator()) { fill_initialize(num, node); }
+		vector(long num, const T &node, const Allocator &alloc = Allocator()) { fill_initialize(num, node); }
+		explicit vector(size_type n) { fill_initialize(n, T()); }
+
+		//Create a vector with the elements of range [beg, end)
+		template<typename InputIterator>
+		vector(InputIterator first, InputIterator last) { copy_initialize(first, last); }
+
+		//Copy constructor
+		vector(const vector &vec){ copy_initialize(vec.begin(), vec.end()); }
+		//Move constructor
+		vector(vector &&vec) : start(vec.start), finish(vec.finish), end_of_storage(vec.end_of_storage)
+		{ vec.start = vec.finish = vec.end_of_storage = nullptr; }
+		//Move assign operator
+		vector & operator=(vector &&vec)
+		{
+			//check if vec is the vector itself
+			if (this != &vec)
+			{
+				start = vec.start;
+				finish = vec.finish;
+				end_of_storage = vec.end_of_storage;
+				vec.start = vec.finish = vec.end_of_storage = nullptr;
+			}
+		}
+
+
 		
-		std::size_t  size() const;
-		std::size_t  capcity() const;
-
-		T & operator[](size_t i);
-
-		iterator begin() const
+		//List constructor
+		vector(std::initializer_list<T> lst) { copy_initialize(lst.begin(), lst.end()); }
+		//Destructor
+		~vector()
 		{
-			return iterator(head_pointer); 
+			//Release the elements
+			while (finish != start)
+				alloc.destroy(--finish);
+			//Release the memory
+			alloc.deallocate(start, end_of_storage - start);
 		}
-		iterator end() const
-		{
-			return iterator(end_pointer);  
-		}
+		
+		iterator begin() { return start; }
+		const_iterator begin() const { return start; }
+		iterator end() { return finish;  }
+		const_iterator end() const { return finish; }
+		size_type size() const { return size_type(end() - begin()); }
+		size_type max_size() const { return size_type(-1) / sizeof(T); }
+		size_type capacity() const { return size_type(end_of_storage - begin()); }
+		bool empty() const { return begin() == end(); }
+		reference operator[](size_type i) { return *(begin() + i); }
+		const_reference operator[](size_type i) const { return *(begin() + i); }
 
-		//const_iterator cbegin() const 
-		//{
-		//	return const_cast<const_iterator>(iterator(head_pointer));
-		//}
-		//const_iterator cend() const
-		//{
-		//	return iterator(end_pointer);
-		//}
 
 	private:
 		enum MORE_SIZE { EXTRA_SPACE = 5 };
-		Allocator alloc;
-		T *head_pointer, *end_pointer;
-		std::size_t vec_size, vec_capcity;
-		void initialize();
-	};
+		allocator_type alloc;
+		iterator start, finish;  //表示目前使用空间的头和尾
+		iterator end_of_storage;  //表示目前可用空间的尾
 
-	//***********************************************************************************************
-	//This part is class iterator
-	template<typename T, typename Allocator>
-	class vector<T, Allocator>::iterator
-	{
-	public:
-		typedef typename T                     value_type;
-		typedef typename ptrdiff_t			   difference_type;
-		typedef typename T&                    reference;
-		typedef typename T*                    pointer;
-		typedef typename std::random_access_iterator_tag  iterator_category;
-	protected:
-		T*      item;
-	public:
-		iterator() :item(nullptr){}
-		iterator(T* input_item) :item(input_item){}
-		iterator(iterator& iter) :item(iter.item){}
-
-		template<typename Iterator>
-		Iterator& operator=(Iterator iter)
+		void fill_initialize(size_type n, const T& x)
 		{
-			item = iter.item;
-			return *this;
+			start = alloc.allocate(n);
+			my_stl::uninitialized_fill_n(start, n, x);
+			finish = start + n;
+			end_of_storage = finish;
 		}
 
-		~iterator(){}
-
-		iterator& operator++()
+		template<typename ForwardIterator>
+		void copy_initialize(ForwardIterator first, ForwardIterator last)
 		{
-			++item;
-			return *this;
-		}
-
-		iterator operator++(int)
-		{
-			iterator temp = *this;
-			++(*this);
-			return temp;
-		}
-
-		iterator operator--()
-		{
-			--item;
-			return *this;
-		}
-
-		iterator operator--(int)
-		{
-			iterator temp = *this;
-			--(*this);
-			return temp;
-		}
-
-		iterator operator-(int n)
-		{
-			iterator temp = *this;
-			temp.item -= n;
-			return temp;
-		}
-
-		iterator operator+(int n)
-		{
-			iterator temp = *this;
-			temp.item += n;
-			return temp;
-		}
-
-		difference_type operator-(iterator other_iter)
-		{
-			return  item - other_iter.item;
-		}
-
-		T & operator*()
-		{
-			return *item;
-		}
-
-		bool operator== (const iterator &rv) const
-		{
-			return this->item == rv.item;
-		}
-
-		bool operator != (const iterator &rv) const
-		{
-			return this->item != rv.item;
-		}
-
-		bool operator < (const iterator &rv) const
-		{
-			return this->item < rv.item;
+			size_type n = last - first;
+			start = alloc.allocate(n);
+			my_stl::uninitialized_copy(first, last, start);
+			end_of_storage = finish = start + n;
 		}
 	};
 
-	//*********************************************************************************************
-
-	//********************************************************************************************
-	//This part is constructor and destructor
-	//
-	//Default Constructor 
-	template<typename T, typename Allocator >
-	vector<T, Allocator>::vector()
-		:head_pointer(nullptr), end_pointer(nullptr), vec_size(0), vec_capcity(0) 
-	{
-		head_pointer = alloc.allocate(vec_capcity);
-		end_pointer = head_pointer;
-	}
-
-	//Copy Constrictor
-	template<typename T, typename Allocator>
-	vector<T, Allocator>::vector(const vector &vec)
-		: vec_size(vec.size()), vec_capcity(vec_size + EXTRA_SPACE)
-	{
-		head_pointer = alloc.allocate(vec_capcity);
-		end_pointer = my_stl::uninitialized_copy(vec.begin(), vec.end(), head_pointer);
-	}
-
-	//Move constructor
-	template<typename T, typename Allocator>
-	vector<T, Allocator>::vector(vector &&vec)
-		: vec_size(vec.size()), vec_capcity(vec.capcity()), head_pointer(vec.head_pointer), end_pointer(vec.end_pointer)
-	{
-		vec.head_pointer = vec.end_pointer = nullptr;
-	}
-
-	//Move assignment operator
-	template<typename T, typename Allocator>
-	vector<T, Allocator> &vector<T, Allocator>::operator=(vector &&vec)
-	{
-		//check if vec is the vector itself
-		if (this != &vec)
-		{
-			vec_size = vec.size();
-			vec_capcity = vec.capcity();
-			head_pointer = vec.head_pointer;
-			end_pointer = vec.end_pointer;
-			vec.head_pointer = vec.end_pointer = nullptr;
-		}
-		
-	}
-
-	//Create a vector with n nodes
-	template<typename T, typename Allocator>
-	vector<T, Allocator>::vector(const int num, const T &node = T())
-		: vec_size(num), vec_capcity(num + EXTRA_SPACE)
-	{
-		head_pointer = alloc.allocate(vec_capcity);
-		end_pointer = head_pointer;
-		for (int i = 0; i != num; ++i)
-		{
-			alloc.construct(end_pointer++, node);
-		}
-	}
-
-	//Create a vector with the elements of the range [beg, end)
-	template<typename T, typename Allocator>
-	vector<T, Allocator>::vector(iterator beg, iterator end)
-		: vec_size(end - beg), vec_capcity(vec_size + EXTRA_SPACE)
-	{
-		head_pointer = alloc.allocate(vec_capcity);
-		my_stl::uninitialized_copy(beg, end, head_pointer);
-		end_pointer = head_pointer + (end - beg);
-	}
-
-	//List constructor
-	template<typename T, typename Allocator>
-	vector<T, Allocator>::vector(std::initializer_list<T> lst)
-		: vec_size(lst.end() - lst.begin()), vec_capcity(vec_size + EXTRA_SPACE)
-	{
-		head_pointer = alloc.allocate(vec_capcity);
-		my_stl::uninitialized_copy(lst.begin(), lst.end(), head_pointer);
-		end_pointer = head_pointer + vec_size;
-	}
-
-	//Destructor
-	template<typename T, typename Allocator>
-	vector<T, Allocator>::~vector()
-	{
-		//Release the elements
-		while (end_pointer != head_pointer)
-			alloc.destroy(--end_pointer);
-		//Release the memory
-		alloc.deallocate(head_pointer, vec_capcity);
-		//others
-		head_pointer = end_pointer = nullptr;
-		vec_size = vec_capcity = 0;
-	}
-	//
-	//************************************************************************************************
 
 
 
 
-	//returns the number of elements 
-	template<typename T, typename Allocator>
-	std::size_t vector<T, Allocator>::size() const
-	{
-		return vec_size;
-	}
-
-	//return the capcity of elements
-	template<typename T, typename Allocator>
-	std::size_t vector<T, Allocator>::capcity() const
-	{
-		return vec_capcity;
-	}
-
-	template<typename T, typename Allocator>
-	T & vector<T, Allocator>::operator[](size_t i)
-	{
-		return *(head_pointer + i);
-	}
-	
 
 
 }

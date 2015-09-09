@@ -49,7 +49,7 @@ namespace my_stl
 			return result;
 		}
 
-		static void(*set_malloc_handler(void(*f) ()))()
+		void(*set_malloc_handler(void(*f) ()))()
 		{
 			void(*old)() = __malloc_alloc_oom_handler;
 			__malloc_alloc_oom_handler = f;
