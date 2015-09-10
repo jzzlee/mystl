@@ -27,8 +27,10 @@ int main()
 	vector<int> vec3 = vec2;
 	print<int>(vec3, 10);
 	vector<int> vec4(vec3.begin(), vec3.end());
-	vector<int> vec5{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	vector<int> vec6 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	vector<int> vec5;
+	vec5 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	vector<int> vec6;
+	vec6 = std::move(vec5);
 
 	vector<int> vec7(100);
 	uninitialized_copy(vec1.begin(), vec1.end(), vec7.begin());
@@ -52,6 +54,7 @@ int main()
 	print<int>(vec1, vec1.size());
 	print<int>(vec2, vec2.size());
 	print<int>(vec4, vec4.size());
+	std::cout << "vec5" << endl;
 	print<int>(vec5, vec5.size());
 
 
