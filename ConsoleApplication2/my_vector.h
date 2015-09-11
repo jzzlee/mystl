@@ -266,6 +266,65 @@ namespace my_stl
 			end_of_storage = finish;
 		}
 
+		//Removes all elements from the container. 
+		void clear()
+		{
+			while (finish != start)
+				alloc.destroy(--finish);
+		}
+
+
+		// inserts value before pos
+		iterator insert(iterator pos, const T& value)
+		{
+			return __insert_n(pos, 1, value);
+		}
+		iterator insert(const_iterator pos, const T& value)
+		{
+			return  __insert_n(pos, 1, value);
+		}
+		iterator insert(const_iterator pos, T&& value)
+		{
+			return __insert_n(pos, 1, value);
+		}
+		void insert(iterator pos, size_type count, const T& value)
+		{
+			__insert_n(pos, count, value);
+		}
+		iterator insert(const_iterator pos, size_type count, const T& value)
+		{
+			return __insert_n(pos, count, value);
+		}
+		void insert(iterator pos, int count, const T& value)
+		{
+			__insert_n(pos, count, value);
+		}
+		iterator insert(const_iterator pos, int count, const T& value)
+		{
+			return __insert_n(pos, count, value);
+		}
+		void insert(iterator pos, long count, const T& value)
+		{
+			__insert_n(pos, count, value);
+		}
+		iterator insert(const_iterator pos, long count, const T& value)
+		{
+			return __insert_n(pos, count, value);
+		}
+		template< class InputIt >
+		void insert(iterator pos, InputIt first, InputIt last)
+		{
+			__insert(pos, first, last);
+		}
+		template< class InputIt >
+		iterator insert(const_iterator pos, InputIt first, InputIt last)
+		{
+			return __insert(pos, first, last);
+		}
+		iterator insert(const_iterator pos, std::initializer_list<T> lst)
+		{
+			return __insert(pos, lst.begin(), lst.end());
+		}
 
 	private:
 		enum MORE_SIZE { EXTRA_SPACE = 5 };
@@ -297,6 +356,161 @@ namespace my_stl
 			//Release the memory
 			if (start)
 				alloc.deallocate(start, end_of_storage - start);
+		}
+
+		iterator __insert_n(iterator pos, size_type n, const T &value)
+		{
+			if (size_type(end_of_storage - finish) >= n) //if there are enough empty spaces
+			{
+				size_type elem_count = finish - pos;
+				iterator old_finish = finish;
+				if (n <= elem_count) //插入点之后当前元素数量多于新增元素数量
+				{
+					my_stl::uninitialized_copy(finish - n, finish, finish);
+					std::copy(pos, (iterator)(old_finish - n), pos + n);
+					std::fill_n(pos, n, value);
+					finish += n;
+				}
+				else                 //插入点之后当前元素数量小于新增元素数量
+				{
+					my_stl::uninitialized_copy(pos, finish, pos + n);
+					my_stl::uninitialized_fill_n(finish, n - elem_count, value);
+					std::fill_n(pos, elem_count, value);
+					finish += n;
+				}
+				return pos;
+			}
+			else
+			{
+				size_type distance = pos - start;
+				size_type old_size = size();
+				size_type new_size = old_size > n ? 2 * old_size : 2 * n;
+				iterator new_start = alloc.allocate(new_size);
+				iterator new_finish = new_start;
+				try
+				{
+					new_finish = my_stl::uninitialized_copy(start, pos, new_start);
+					new_finish = my_stl::uninitialized_fill_n(new_finish, n, value);
+					new_finish = my_stl::uninitialized_copy(pos, finish, new_finish);
+				}
+				catch (...)
+				{
+					while (new_finish != new_start)
+						alloc.destroy(--new_finish);
+					if (new_start)
+						alloc.deallocate(new_start, new_size);
+					throw;
+				}
+				//Release the elements
+				while (finish != start)
+					alloc.destroy(--finish);
+				//Release the memory
+				if (start)
+					alloc.deallocate(start, end_of_storage - start);
+				start = new_start;
+				finish = new_finish;
+				end_of_storage = new_start + new_size;
+				return start + distance;
+			}
+		}
+		iterator __insert_n(iterator pos, int n, const T &value)
+		{
+			return __insert_n(pos, size_type(n), value);
+		}
+		iterator __insert_n(iterator pos, long n, const T &value)
+		{
+			return __insert_n(pos, size_type(n), value);
+		}
+		iterator __insert_n(const_iterator pos, size_type n, const T &value)
+		{
+			iterator tmp_pos = start + (pos - start);
+			return __insert_n(tmp_pos, n, value);
+		}
+		iterator __insert_n(const_iterator pos, int n, const T &value)
+		{
+			iterator tmp_pos = start + (pos - start);
+			return __insert_n(tmp_pos, n, value);
+		}
+		iterator __insert_n(const_iterator pos, long n, const T &value)
+		{
+			iterator tmp_pos = start + (pos - start);
+			return __insert_n(tmp_pos, n, value);
+		}
+
+		template<typename InputIt>
+		iterator __insert(iterator pos, int n, InputIt last)
+		{
+			;
+		}
+		template<typename InputIt>
+		iterator __insert(iterator pos, long n, InputIt last)
+		{
+			;
+		}
+		template< class InputIt >
+		iterator __insert(iterator pos, InputIt first, InputIt last)
+		{
+			size_type n = distance(first, last);
+			if (size_type(end_of_storage - finish) >= n) //if there are enough empty spaces
+			{
+				size_type elem_count = finish - pos;
+				iterator old_finish = finish;
+				if (n <= elem_count) //插入点之后当前元素数量多于新增元素数量
+				{
+					my_stl::uninitialized_copy(finish - n, finish, finish);
+					std::copy(pos, (iterator)(old_finish - n), pos + n);
+					std::copy(first, last, pos);
+					finish += n;
+				}
+				else                 //插入点之后当前元素数量小于新增元素数量
+				{
+					my_stl::uninitialized_copy(pos, finish, pos + n);
+					my_stl::uninitialized_copy_n(first + n, n - elem_count, finish);
+					std::copy_n(first, elem_count, pos);
+					finish += n;
+				}
+				return pos;
+			}
+			else
+			{
+				size_type diff = pos - start;
+				size_type old_size = size();
+				size_type new_size = old_size > n ? 2 * old_size : 2 * n;
+				iterator new_start = alloc.allocate(new_size);
+				iterator new_finish = new_start;
+				try
+				{
+					new_finish = my_stl::uninitialized_copy(start, pos, new_start);
+					new_finish = my_stl::uninitialized_copy(first, last, new_finish);
+					new_finish = my_stl::uninitialized_copy(pos, finish, new_finish);
+				}
+				catch (...)
+				{
+					while (new_finish != new_start)
+						alloc.destroy(--new_finish);
+					if (new_start)
+						alloc.deallocate(new_start, new_size);
+					throw;
+				}
+				//Release the elements
+				while (finish != start)
+					alloc.destroy(--finish);
+				//Release the memory
+				if (start)
+					alloc.deallocate(start, end_of_storage - start);
+				start = new_start;
+				finish = new_finish;
+				end_of_storage = new_start + new_size;
+				return start + diff;
+			}
+		}
+
+		template< class InputIt >
+		iterator __insert(const_iterator pos, InputIt first, InputIt last)
+		{
+			difference_type diff = pos - start;
+			iterator tmp_pos = start + diff;
+			return __insert(tmp_pos, first, last);
 		}
 	};
 

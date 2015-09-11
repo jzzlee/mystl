@@ -23,3 +23,6 @@
 
 	v1.0.7
 	实现了vector的assign, get_allocator, at, operator[], front, back, data, begin, cbegin, end, cend, empty, size, max_size, capacity, reverse, shrink_to_fit函数
+
+	v1.0.8
+	实现了vector的clear, insert函数

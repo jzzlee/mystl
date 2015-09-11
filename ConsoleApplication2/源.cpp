@@ -94,6 +94,22 @@ int main()
 	vec6.shrink_to_fit();
 	cout << vec6.size() << " " << vec6.capacity() << endl;
 	print<int>(vec6, vec6.size());
+	auto p6 = vec6.insert(vec6.cbegin(), vec8.begin(), vec8.end());
+	cout << *p6 << endl;
+	print<int>(vec6, vec6.size());
+	p6 = vec6.insert(vec6.cbegin() + 10, { 11, 12, 13, 14, 15 });
+	cout << *p6 << endl;
+	print<int>(vec6, vec6.size());
+	p6 = vec6.insert(vec6.cend(), 2, 12);
+	cout << *p6 << endl;
+	print<int>(vec6, vec6.size());
+	int a = 13;
+	p6 = vec6.insert(vec6.cend(), std::move(a));
+	cout << *p6 << endl;
+	print<int>(vec6, vec6.size());
+
+
+
 
 	return 0;
 }
