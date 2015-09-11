@@ -47,7 +47,14 @@ int main()
 	
 	print<int>(vec1, vec1.size());
 	print<int>(vec2, vec2.size());
-	vec2[0] = 2;
+	try{
+		vec2[10] = 2;
+	}
+	catch (std::out_of_range &x)
+	{
+		cout << x.what() << endl;
+	}
+	
 	auto p = vec2.begin();
 	++p;
 	*p = 30;
@@ -56,7 +63,12 @@ int main()
 	print<int>(vec4, vec4.size());
 	std::cout << "vec5" << endl;
 	print<int>(vec5, vec5.size());
-
+	vec6.assign({});
+	print<int>(vec6, vec6.size());
+	vec6.assign({ 1, 2, 3 });
+	print<int>(vec6, vec6.size());
+	vec6.assign({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5 });
+	print<int>(vec6, vec6.size());
 
 	for (auto iter = vec4.begin(); iter != vec4.end(); ++iter)
 		*iter += 1;
@@ -66,7 +78,22 @@ int main()
 	cout << vec2.end() - vec2.begin() << endl;
 	vec2.~vector();
 
+	const vector<int> vec8{ 1, 2, 3, 4 };
+	vec8[1]; 
+	cout << vec8.front() << " " << vec8.back() << " " << vec8.data() << endl;
 
+	auto p7 = vec7.cbegin();
+	++p7;
+	cout << vec6.size() << " " << vec6.capacity() << endl;
+	vec6.reserve(9);
+	cout << vec6.size() << " " << vec6.capacity() << endl;
+	print<int>(vec6, vec6.size());
+	vec6.reserve(20);
+	cout << vec6.size() << " " << vec6.capacity() << endl;
+	print<int>(vec6, vec6.size());
+	vec6.shrink_to_fit();
+	cout << vec6.size() << " " << vec6.capacity() << endl;
+	print<int>(vec6, vec6.size());
 
 	return 0;
 }

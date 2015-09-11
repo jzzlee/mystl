@@ -5,7 +5,6 @@
 #define __vector_H_
 //#include <memory>
 #include "my_memory.h"
-//#include <iterator>
 #include "my_iterator.h"
 #include <initializer_list>
 
@@ -14,6 +13,7 @@ namespace my_stl
 	template<typename T, typename Allocator = allocator<T>> class vector
 	{
 	public:
+		typedef vector<T, Allocator>				Myt;
 		typedef typename T							value_type;
 		typedef typename Allocator					allocator_type;
 		typedef typename ptrdiff_t					difference_type;
@@ -59,7 +59,6 @@ namespace my_stl
 				{
 					destroy_and_destruct();
 					copy_initialize(vec.begin(), vec.end());
-					end_of_storage = finish = start + (vec.end() - vec.begin());
 				}
 				else if (size() >= vec.size())
 				{
@@ -91,14 +90,14 @@ namespace my_stl
 			}
 			return *this;
 		}
-
+		
+		//List operator =
 		vector & operator=(std::initializer_list<T> lst)
 		{
 			if (lst.size() > capacity())
 			{
 				destroy_and_destruct();
 				copy_initialize(lst.begin(), lst.end());
-				end_of_storage = finish = start + lst.size();
 			}
 			else if (size() >= lst.size())
 			{
@@ -116,16 +115,156 @@ namespace my_stl
 			return *this;
 		}
 
+		//Replaces the contents with count copies of value value
+		void assign(size_type count, const T& value)
+		{
+			if (count > capacity())
+			{
+				destroy_and_destruct();
+				fill_initialize(count, value);
+			}
+			else if (size() >= count)
+			{
+				iterator i = std::fill_n(start, count, value);
+				while (finish != i)
+					alloc.destroy(--finish);
+				finish = start + count;
+			}
+			else
+			{
+				std::fill_n(start, size(), value);
+				uninitialized_fill_n(start + size(), count - size(), value);
+				finish = start + count;
+			}
+		}
+		//避免与迭代器范围assign函数重载冲突
+		void assign(int count, const T& value)
+		{
+			assign(size_type(count), value);
+		}
+		void assign(long count, const T& value)
+		{
+			assign(size_type(count), value);
+		}
+
+		//Replaces the contents with copies of those in the range [first, last)
+		template< class InputIt >
+		void assign(InputIt first, InputIt last)
+		{
+			size_type count = last - first;
+			if (count > capacity())
+			{
+				destroy_and_destruct();
+				copy_initialize(first, last);
+			}
+			else if (size() >= count)
+			{
+				iterator i = std::copy(first, last, start);
+				while (finish != i)
+					alloc.destroy(--finish);
+				finish = start + count;
+			}
+			else
+			{
+				std::copy(first, first + size(), start);
+				uninitialized_copy(first + size(), last, finish);
+				finish = start +count;
+			}
+		}
+
+		//Replaces the contents with the elements from the initializer list lst.
+		void assign(std::initializer_list<T> lst)
+		{
+			size_type count = lst.end() - lst.begin();
+			if (count > capacity())
+			{
+				destroy_and_destruct();
+				copy_initialize(lst.begin(), lst.end());
+			}
+			else if (size() >= count)
+			{
+				iterator i = std::copy(lst.begin(), lst.end(), start);
+				while (finish != i)
+					alloc.destroy(--finish);
+				finish = start + count;
+			}
+			else
+			{
+				std::copy(lst.begin(), lst.begin() + size(), start);
+				uninitialized_copy(lst.begin() + size(), lst.end(), finish);
+				finish = start + count;
+			}
+		}
+
+		//Returns the allocator associated with the container. 
+		allocator_type get_allocator() const { return alloc; }
+
+		//Returns a reference to the element at specified location pos, with bounds checking.
+		//If pos not within the range of the container, an exception of type std::out_of_range is thrown.
+		reference at(size_type pos)
+		{
+			if (pos >= size())
+				throw std::out_of_range("out of the range of the vector\n");
+			return *(begin() + pos);
+		}
+		const_reference at(size_type pos) const
+		{
+			if (pos >= size())
+				throw std::out_of_range("out of the range of the vector\n");
+			return *(begin() + pos);
+		}
+		
+		//Returns a reference to the element at specified location pos. No bounds checking is performed. 
+		reference operator[](size_type i) {	return *(begin() + i); }
+		const_reference operator[](size_type i) const { return *(begin() + i); }
+		
+		//Returns a reference to the first element in the container.
+		reference front(){ return *begin(); }
+		const_reference front() const { return *begin(); }
+
+		//Returns reference to the last element in the container. 
+		reference back() { auto tmp = end(); --tmp; return *tmp; }
+		const_reference back() const { auto tmp = end(); --tmp; return *tmp; }
+
+		//Returns pointer to the underlying array serving as element storage. 
+		T* data() { if (empty()) return nullptr; return &front(); }
+		const T* data() const { if (empty()) return nullptr; return &front(); }
+
 		iterator begin() { return start; }
 		const_iterator begin() const { return start; }
+		const_iterator cbegin() const { return (((const Myt *)this)->begin()); }
 		iterator end() { return finish;  }
 		const_iterator end() const { return finish; }
-		size_type size() const { return size_type(end() - begin()); }
-		size_type max_size() const { return size_type(-1) / sizeof(T); }
-		size_type capacity() const { return size_type(end_of_storage - begin()); }
+		const_iterator cend() const { return (((const Myt *)this)->end()); }
+	
 		bool empty() const { return begin() == end(); }
-		reference operator[](size_type i) { return *(begin() + i); }
-		const_reference operator[](size_type i) const { return *(begin() + i); }
+		size_type size() const { return size_type(end() - begin()); }
+		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
+		size_type capacity() const { return size_type(end_of_storage - begin()); }
+
+		//Increase the capacity of the container to a value that's greater or equal to new_cap.
+		//If new_cap is greater than the current capacity(), new storage is allocated, otherwise the method does nothing. 
+		void reserve(size_type new_cap)
+		{
+			if (new_cap < capacity())
+				return;
+			if (new_cap > max_size())
+				throw std::length_error("No enough memory.");
+			size_type tmp_size = size();
+			iterator tmp_start = alloc.allocate(new_cap);
+			my_stl::uninitialized_copy(start, finish, tmp_start);
+			destroy_and_destruct();
+			start = tmp_start;
+			finish = start + tmp_size;
+			end_of_storage = start + new_cap;
+		}
+
+		//Requests the removal of unused capacity. 
+		void shrink_to_fit()
+		{
+			alloc.deallocate(finish, end_of_storage - finish);
+			end_of_storage = finish;
+		}
 
 
 	private:
@@ -138,8 +277,7 @@ namespace my_stl
 		{
 			start = alloc.allocate(n);
 			my_stl::uninitialized_fill_n(start, n, x);
-			finish = start + n;
-			end_of_storage = finish;
+			end_of_storage = finish = start + n;
 		}
 
 		template<typename ForwardIterator>

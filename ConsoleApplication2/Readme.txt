@@ -20,3 +20,6 @@
 
 	v1.0.6
 	实现了vector的operator=
+
+	v1.0.7
+	实现了vector的assign, get_allocator, at, operator[], front, back, data, begin, cbegin, end, cend, empty, size, max_size, capacity, reverse, shrink_to_fit函数
