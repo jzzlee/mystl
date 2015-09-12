@@ -108,8 +108,12 @@ int main()
 	cout << *p6 << endl;
 	print<int>(vec6, vec6.size());
 
-
-
+	vector<int> vec9;
+	for (int i = 0; i != 10; ++i)
+	{
+		vec9.push_back(i);
+		print<int>(vec9, vec9.size());
+	}
 
 	return 0;
 }

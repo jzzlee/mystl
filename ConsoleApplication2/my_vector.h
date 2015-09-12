@@ -7,6 +7,7 @@
 #include "my_memory.h"
 #include "my_iterator.h"
 #include <initializer_list>
+#include <cstdio>
 
 namespace my_stl
 {
@@ -326,6 +327,74 @@ namespace my_stl
 			return __insert(pos, lst.begin(), lst.end());
 		}
 
+		//Removes the element at pos.
+		iterator erase(iterator pos)
+		{
+			std::copy(pos + 1, finish, pos);
+			alloc.destroy(--finish);
+			return pos;
+		}
+		iterator erase(const_iterator pos)
+		{
+			auto diff = pos - start;
+			iterator tmp_pos = start + diff;
+			return erase(tmp_pos);
+		}
+		//Removes the elements in the range [first; last).
+		iterator erase(iterator first, iterator last)
+		{
+			auto diff = last - first;
+			if (diff <= 0)
+				return first;
+			std::copy(last, finish, first);
+			while (diff--)
+				alloc.destroy(--finish);
+			return first;
+		}
+		iterator erase(const_iterator first, const_iterator last)
+		{
+			auto diff = first - start;
+			iterator tmp_first = start + diff;
+			iterator tmp_last = tmp_first + (last - first);
+			return erase(tmp_first, tmp_last);
+		}
+
+		void push_back(const T& value)
+		{
+			//如果有足够空间
+			if (finish + 1 <= end_of_storage)
+			{
+				::new (finish++) T(value);
+			}
+			else
+			{
+				size_type new_size = size() == 0 ? 1 : 2 * size();
+				iterator new_start = alloc.allocate(new_size);
+				iterator new_finish = new_start;
+				try
+				{
+					new_finish = my_stl::uninitialized_copy(start, finish, new_start);
+					::new (new_finish++) T(value);
+				}
+				catch (...)
+				{
+					while (new_finish != new_start)
+						alloc.destroy(--new_finish);
+					if (new_start)
+						alloc.deallocate(new_start, new_size);
+					throw;
+				}
+				//Release the elements
+				while (finish != start)
+					alloc.destroy(--finish);
+				//Release the memory
+				if (start)
+					alloc.deallocate(start, end_of_storage - start);
+				start = new_start;
+				finish = new_finish;
+				end_of_storage = new_start + new_size;
+			}
+		}
 	private:
 		enum MORE_SIZE { EXTRA_SPACE = 5 };
 		allocator_type alloc;
