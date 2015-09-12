@@ -395,6 +395,13 @@ namespace my_stl
 				end_of_storage = new_start + new_size;
 			}
 		}
+
+		void push_back(T&& value)
+		{
+			typedef typename __type_traits<T>::is_POD_type is_POD;
+			__push_back(std::move(value), is_POD());
+		}
+
 	private:
 		enum MORE_SIZE { EXTRA_SPACE = 5 };
 		allocator_type alloc;
@@ -581,6 +588,53 @@ namespace my_stl
 			iterator tmp_pos = start + diff;
 			return __insert(tmp_pos, first, last);
 		}
+
+		void __push_back(T &&value, __true_type)
+		{
+			//如果T是POD类型，直接内存移动
+			//如果有足够空间
+			if (finish + 1 <= end_of_storage)
+			{
+				memmove(finish, &value, sizeof(T) / sizeof(unsigned char));
+				++finish;
+			}
+			else
+			{
+				size_type new_size = size() == 0 ? 1 : 2 * size();
+				iterator new_start = alloc.allocate(new_size);
+				iterator new_finish = new_start;
+				try
+				{
+					new_finish = my_stl::uninitialized_copy(start, finish, new_start);
+					memmove(new_finish, &value, sizeof(T) / sizeof(unsigned char));
+					++new_finish;
+				}
+				catch (...)
+				{
+					while (new_finish != new_start)
+						alloc.destroy(--new_finish);
+					if (new_start)
+						alloc.deallocate(new_start, new_size);
+					throw;
+				}
+				//Release the elements
+				while (finish != start)
+					alloc.destroy(--finish);
+				//Release the memory
+				if (start)
+					alloc.deallocate(start, end_of_storage - start);
+				start = new_start;
+				finish = new_finish;
+				end_of_storage = new_start + new_size;
+			}
+		}
+		void __push_back(T &&value, __false_type)
+		{
+			//如果T不是POD类型，调用push_back(const T&)
+			push_back(T(value));
+		}
+
+
 	};
 
 

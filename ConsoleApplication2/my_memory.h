@@ -72,7 +72,7 @@ namespace my_stl
 
 		void construct(pointer p, const_reference value)
 		{
-			new((void *)p) T(value);    //placement new
+			::new((void *)p) T(value);    //placement new
 		}
 
 		void destroy(pointer p)

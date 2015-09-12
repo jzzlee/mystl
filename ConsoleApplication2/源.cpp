@@ -1,5 +1,6 @@
 ﻿#include<iostream>
 #include "my_vector.h"
+//#include<vector>
 #include <numeric>
 
 #include<list>
@@ -109,9 +110,11 @@ int main()
 	print<int>(vec6, vec6.size());
 
 	vector<int> vec9;
+	
 	for (int i = 0; i != 10; ++i)
 	{
-		vec9.push_back(i);
+		int aa = 10;
+		vec9.push_back(std::move(aa));
 		print<int>(vec9, vec9.size());
 	}
 
