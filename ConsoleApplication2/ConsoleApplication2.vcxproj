@@ -84,6 +84,7 @@
     <ClInclude Include="my_type_traits.h" />
     <ClInclude Include="my_uninitialized.h" />
     <ClInclude Include="my_vector.h" />
+    <ClInclude Include="my_xutility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="源.cpp" />

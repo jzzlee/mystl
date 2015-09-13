@@ -32,6 +32,7 @@ namespace my_stl
 	template< class InputIt, class ForwardIt >
 	ForwardIt __uninitialized_copy_aux(InputIt first, InputIt last, ForwardIt d_first, __false_type)
 	{
+		typedef typename iterator_traits<ForwardIt>::value_type Value;
 		ForwardIt current = d_first;
 		try {
 			for (; first != last; ++first, ++current) {
@@ -67,6 +68,7 @@ namespace my_stl
 	template<class InputIt, class Size, class ForwardIt>
 	ForwardIt __uninitialized_copy_n_aux(InputIt first, Size count, ForwardIt d_first, __false_type)
 	{
+		typedef typename iterator_traits<ForwardIt>::value_type Value;
 		ForwardIt current = d_first;
 		try {
 			for (; count > 0; ++first, ++current, --count) {

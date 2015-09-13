@@ -6,11 +6,14 @@
 //#include <memory>
 #include "my_memory.h"
 #include "my_iterator.h"
+#include "my_xutility.h"
 #include <initializer_list>
 #include <cstdio>
 
+
 namespace my_stl
 {
+	using size_type = std::size_t;
 	template<typename T, typename Allocator = allocator<T>> class vector
 	{
 	public:
@@ -274,7 +277,6 @@ namespace my_stl
 				alloc.destroy(--finish);
 		}
 
-
 		// inserts value before pos
 		iterator insert(iterator pos, const T& value)
 		{
@@ -364,7 +366,7 @@ namespace my_stl
 			//如果有足够空间
 			if (finish + 1 <= end_of_storage)
 			{
-				::new (finish++) T(value);
+				alloc.construct(finish++, value);
 			}
 			else
 			{
@@ -374,7 +376,7 @@ namespace my_stl
 				try
 				{
 					new_finish = my_stl::uninitialized_copy(start, finish, new_start);
-					::new (new_finish++) T(value);
+					alloc.construct(new_finish++, value);
 				}
 				catch (...)
 				{
@@ -401,6 +403,146 @@ namespace my_stl
 			typedef typename __type_traits<T>::is_POD_type is_POD;
 			__push_back(std::move(value), is_POD());
 		}
+
+		//Removes the last element of the container. 
+		void pop_back()
+		{
+			alloc.destroy(--finish);
+		}
+
+		void resize(size_type count)
+		{
+			size_type n = 0;
+			if (size() >= count)
+			{
+				auto dif = size() - count;
+				while (n++ < dif)
+				{
+					alloc.destroy(--finish);
+				}
+			}
+			else if (capacity() >= count)
+			{
+				//如果有足够的空间
+				auto dif = count - size();
+				while (n++ < dif)
+				{
+					alloc.construct(finish++, T());
+				}
+			}
+			else
+			{
+				__allocate_new_space(count - size(), T());
+			}
+		}
+		void resize(size_type count, const value_type& value)
+		{
+			size_type n = 0;
+			if (size() >= count)
+			{
+				auto dif = size() - count;
+				while (n++ < dif)
+				{
+					alloc.destroy(--finish);
+				}
+			}
+			else if (capacity() >= count)
+			{
+				//如果有足够的空间
+				auto dif = count - size();
+				while (n++ < diff)
+				{
+					alloc.construct(finish++, T());
+				}
+			}
+			else
+			{
+				__allocate_new_space(count - size(), value);
+			}
+		}
+
+		//Exchanges the contents of the container with those of other. 
+		void swap(vector& other)
+		{
+			std::swap(start, other.start);
+			std::swap(finish, other.finish);
+			std::swap(end_of_storage, other.end_of_storage);
+			std::swap(alloc, other.alloc);
+		}
+
+		void chk_n_alloc(size_type n)
+		{
+			//如果剩余空间不足
+			if (size_type(end_of_storage - finish) < n)
+			{
+				size_type new_size = size() == 0 ? 1 : 2 * size();
+				iterator new_start = alloc.allocate(new_size);
+				iterator new_finish = new_start;
+				try
+				{
+					new_finish = my_stl::uninitialized_copy(start, finish, new_start);
+				}
+				catch (...)
+				{
+					while (new_finish != new_start)
+						alloc.destroy(--new_finish);
+					if (new_start)
+						alloc.deallocate(new_start, new_size);
+					throw;
+				}
+				//Release the elements
+				while (finish != start)
+					alloc.destroy(--finish);
+				//Release the memory
+				if (start)
+					alloc.deallocate(start, end_of_storage - start);
+				start = new_start;
+				finish = new_finish;
+				end_of_storage = new_start + new_size;
+			}
+		}
+		//Appends a new element to the end of the container.
+		template< class... Args >
+		void emplace_back(Args&&... args)
+		{
+			chk_n_alloc(1);//如果剩余空间不够1，则重新申请空间。
+			alloc.construct(finish++, std::forward<Args>(args)...);
+		}
+
+		template< class... Args >
+		iterator emplace(const_iterator pos, Args&&... args)
+		{
+			size_type new_size = size() == 0 ? 1 : 2 * size();
+			iterator new_start = alloc.allocate(new_size);
+			iterator new_finish = new_start;
+			iterator result = nullptr;
+			try
+			{
+				new_finish = my_stl::uninitialized_copy(const_iterator(start), pos, new_start);//复制pos之前元素
+				result = new_finish;
+				alloc.construct(new_finish++, std::forward<Args>(args)...);//构造新元素
+				new_finish = my_stl::uninitialized_copy(pos, const_iterator(finish), new_finish);//复制pos之后元素
+			}
+			catch (...)
+			{
+				while (new_finish != new_start)
+					alloc.destroy(--new_finish);
+				if (new_start)
+					alloc.deallocate(new_start, new_size);
+				throw;
+			}
+			//Release the elements
+			while (finish != start)
+				alloc.destroy(--finish);
+			//Release the memory
+			if (start)
+				alloc.deallocate(start, end_of_storage - start);
+			start = new_start;
+			finish = new_finish;
+			end_of_storage = new_start + new_size;
+			return result;
+		}
+
 
 	private:
 		enum MORE_SIZE { EXTRA_SPACE = 5 };
@@ -634,8 +776,84 @@ namespace my_stl
 			push_back(T(value));
 		}
 
+		void __allocate_new_space(size_type n, const T &value)
+		{
+			size_type new_size = size() == 0 ? 1 : 2 * size();
+			iterator new_start = alloc.allocate(new_size);
+			iterator new_finish = new_start;
+			try
+			{
+				new_finish = my_stl::uninitialized_copy(start, finish, new_start);
+				while (n--)
+					alloc.construct(new_finish++, value);
+					//::new (new_finish++) T(value);
+			}
+			catch (...)
+			{
+				while (new_finish != new_start)
+					alloc.destroy(--new_finish);
+				if (new_start)
+					alloc.deallocate(new_start, new_size);
+				throw;
+			}
+			//Release the elements
+			while (finish != start)
+				alloc.destroy(--finish);
+			//Release the memory
+			if (start)
+				alloc.deallocate(start, end_of_storage - start);
+			start = new_start;
+			finish = new_finish;
+			end_of_storage = new_start + new_size;
+		}
 
 	};
+
+	template< class T, class Alloc >
+	bool operator==(const vector<T, Alloc>& lhs,
+		const vector<T, Alloc>& rhs)
+	{
+		if (lhs.size() != rhs.size())
+			return false;
+		for (size_type i = 0; i != lhs.size(); ++i)
+		{
+			if (lhs[i] != rhs[i])
+				return false;
+		}
+		return true;
+	}
+
+	template< class T, class Alloc >
+	bool operator!=(const vector<T, Alloc>& lhs,
+		const vector<T, Alloc>& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template< class T, class Alloc >
+	bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+	{
+		return (lexicographical_compare(lhs.begin(), lhs.end(),
+			rhs.begin(), rhs.end()));
+	}
+
+	template< class T, class Alloc >
+	bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+	{
+		return (lhs < rhs) || (lhs == rhs);
+	}
+
+	template< class T, class Alloc >
+	bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+	{
+		return (rhs < lhs);
+	}
+
+	template< class T, class Alloc >
+	bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+	{
+		return (lhs > rhs) || (lhs == rhs);
+	}
 
 
 

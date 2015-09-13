@@ -4,6 +4,9 @@
 
 更新说明
 	
+	v1.0.11
+	实现完整的vector容器（不包括反向迭代器）。
+
 	v1.0.9
 	实现vector的erase， push_back函数
 

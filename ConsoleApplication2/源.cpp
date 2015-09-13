@@ -2,7 +2,7 @@
 #include "my_vector.h"
 //#include<vector>
 #include <numeric>
-
+#include <string>
 #include<list>
 
 using namespace my_stl;
@@ -117,6 +117,47 @@ int main()
 		vec9.push_back(std::move(aa));
 		print<int>(vec9, vec9.size());
 	}
+
+	vector<int> c = { 1, 2, 3 };
+	std::cout << "The vector holds: ";
+	for (auto& el : c) std::cout << el << ' ';
+	std::cout << '\n';
+	c.resize(5);
+	std::cout << "After resize up 5: ";
+	for (auto& el : c) std::cout << el << ' ';
+	std::cout << '\n';
+	c.resize(2);
+	std::cout << "After resize down to 2: ";
+	for (auto& el : c) std::cout << el << ' ';
+	std::cout << '\n';
+
+	print<int>(vec6, vec6.size());
+	print<int>(vec3, vec3.size());
+	vec6.swap(vec3);
+	print<int>(vec6, vec6.size());
+	print<int>(vec3, vec3.size());
+	vec6.emplace_back(1);
+	vector<std::string> vs;
+	vs.emplace_back("haha");
+	cout << vs[0] << endl;
+
+	vec3.clear();
+	vec3.shrink_to_fit();
+	for (int i = 0; i != 10; i++)
+	{
+		vs.emplace(vs.begin(), std::string(i, 'a'));
+		print<std::string>(vs, vs.size());
+	}
+
+	cout << (vec1 == vec2) << endl;
+	cout << (vec1 < vec2) << endl;
+	cout << (vec1 > vec2) << endl;
+	cout << (vec1 <= vec2) << endl;
+	cout << (vec1 >= vec2) << endl;
+	cout << (vec1 != vec2) << endl;
+	cout << (vec1 < vec3) << endl;
+
+
 
 	return 0;
 }
