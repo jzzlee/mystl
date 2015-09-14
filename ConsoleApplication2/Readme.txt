@@ -4,6 +4,9 @@
 
 更新说明
 	
+	v1.1.1
+	实现list的constructor， destructor, iterator, reverse_iterator, front, back, begin, cbegin, end, cend, empty, size, max_size.
+
 	v1.0.11
 	实现完整的vector容器（不包括反向迭代器）。
 

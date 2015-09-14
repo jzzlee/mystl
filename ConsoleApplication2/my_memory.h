@@ -31,23 +31,23 @@ namespace my_stl
 
 
 		//四个函数只是简单的转调用，调用传递给配置器（可能是一级或二级配置器）的成员函数。
-		static T * allocate(size_t n)
+		T * allocate(size_t n)
 		{
 			return n == 0 ? nullptr : (T*)Alloc::allocate(n * sizeof(T));
 		}
 		
-		static T * allocate(void)
+		T * allocate(void)
 		{
 			return (T*)Alloc::allocate(sizeof(T));
 		}
 
-		static void deallocate(T *p, size_t n)
+		void deallocate(T *p, size_t n)
 		{
 			if (p != 0)
 				Alloc::deallocate(p, n * sizeof(T));
 		}
 
-		static void deallocate(T *p)
+		void deallocate(T *p)
 		{
 			if (p != 0)
 				Alloc::deallocate(p, sizeof(T));

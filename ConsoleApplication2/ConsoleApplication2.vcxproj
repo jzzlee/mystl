@@ -80,6 +80,7 @@
   <ItemGroup>
     <ClInclude Include="my_alloc.h" />
     <ClInclude Include="my_iterator.h" />
+    <ClInclude Include="my_list.h" />
     <ClInclude Include="my_memory.h" />
     <ClInclude Include="my_type_traits.h" />
     <ClInclude Include="my_uninitialized.h" />
@@ -87,10 +88,10 @@
     <ClInclude Include="my_xutility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="源.cpp" />
+    <Text Include="Readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Readme.txt" />
+    <ClCompile Include="list_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
