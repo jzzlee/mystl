@@ -1,10 +1,10 @@
-﻿
-
-
-更新说明
-
+﻿更新说明
+	
+	v1.1.3
+	实现list的operator=
+	
 	v1.1.2
-	实现vector的reverse_iterator
+	实现list的reverse_iterator
 
 	v1.1.1
 	实现list的constructor， destructor, iterator, reverse_iterator, front, back, begin, cbegin, end, cend, empty, size, max_size.

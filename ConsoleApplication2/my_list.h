@@ -13,9 +13,9 @@ namespace my_stl
 	template<typename T>
 	struct __list_node
 	{
-		typedef void* void_pointer;
-		void_pointer prev;
-		void_pointer next;
+		typedef __list_node<T>*	link_type;;
+		link_type prev;
+		link_type next;
 		T data;
 	};
 
@@ -138,6 +138,10 @@ namespace my_stl
 		typedef const reverse_iterator											const_reverse_iterator;
 		typedef std::size_t				size_type;
 
+		//////////////////////////////////////////
+		//Constructor
+		/////////////////////////////////////////////
+
 		//Default constructor
 		explicit list(const Allocator& alloc = Allocator())
 		{
@@ -188,7 +192,13 @@ namespace my_stl
 		{
 			allocat = other.allocat;
 			alloc_node = other.alloc_node;
-			node = other.node;
+			node = get_node();
+			node->next = other.node->next;
+			node->prev = other.node->prev;
+			other.node->next->prev = node;
+			other.node->prev->next = node;
+			//使other前后指针指向自己
+			other.node->prev = other.node->next = other.node;
 		}
 		list(list&& other, const Allocator& alloc)
 		{
@@ -205,7 +215,13 @@ namespace my_stl
 			{
 				allocat = other.allocat;
 				alloc_node = other.alloc_node;
-				node = other.node;
+				node = get_node();
+				node->next = other.node->next;
+				node->prev = other.node->prev;
+				other.node->next->prev = node;
+				other.node->prev->next = node;
+				//使other前后指针指向自己
+				other.node->prev = other.node->next = other.node;
 			}
 		}
 
@@ -215,7 +231,9 @@ namespace my_stl
 			__initialize_iter(lst.begin(), lst.end(), alloc);
 		}
 
+		/////////////////////////////////////////////
 		//Destructor
+		//////////////////////////////////////////////
 		~list()
 		{
 			//销毁list内的元素，释放空间
@@ -224,6 +242,117 @@ namespace my_stl
 			put_node(node);
 		}
 
+		////////////////////////////////////////////
+		//operator=
+		///////////////////////////////////////////
+
+		//Copy assignment operator.
+		list& operator=(const list& other)
+		{
+			iterator p, q;
+			for (p = begin(), q = other.begin(); p != end() && q != other.end(); ++p, ++q)
+			{
+				*p = *q;
+			}
+			//size()大于other.size()
+			if (p != end())
+			{
+				p.node->prev->next = node;
+				node->prev = p.node->prev;
+				//销毁list内的元素，释放空间
+				for (auto iter = p; iter != end(); ++iter)
+					destroy_node(iter);
+			}
+			else if (q != other.end())
+			{
+				//size()小于other.size()
+				for (auto iter = q; iter != other.end(); ++iter)
+					insert(end(), *iter);
+			}
+			return *this;
+		}
+		//Move assignment operator.
+		list& operator=(list&& other)
+		{
+			//销毁list内的元素，释放空间
+			for (auto iter = begin(); iter != end(); ++iter)
+				destroy_node(iter);
+			allocat = other.allocat;
+			alloc_node = other.alloc_node;
+
+			node->next = other.node->next;
+			node->prev = other.node->prev;
+			other.node->next->prev = node;
+			other.node->prev->next = node;
+
+			//使other前后指针指向自己
+			other.node->prev = other.node->next = other.node;
+
+			return *this;
+		}
+		//Replaces the contents with those identified by initializer list ilist.
+		list& operator=(std::initializer_list<T> other)
+		{
+			iterator p;
+			const_pointer q;
+			for (p = begin(), q = other.begin(); p != end() && q != other.end(); ++p, ++q)
+			{
+				*p = *q;
+			}
+			//size()大于other.size()
+			if (p != end())
+			{
+				p.node->prev->next = node;
+				node->prev = p.node->prev;
+				//销毁list内的元素，释放空间
+				for (auto iter = p; iter != end(); ++iter)
+					destroy_node(iter);
+			}
+			else if (q != other.end())
+			{
+				//size()小于other.size()
+				for (auto iter = q; iter != other.end(); ++iter)
+					insert(end(), *iter);
+			}
+			return *this;
+		}
+
+		////////////////////////////////////////////
+		//assign
+		///////////////////////////////////////////
+		void assign(size_type count, const T& value)
+		{
+			;
+		}
+
+		template< class InputIt >
+		void assign(InputIt first, InputIt last)
+		{
+			;
+		}
+
+		void assign(std::initializer_list<T> ilist)
+		{
+			;
+		}
+
+		//Returns the allocator associated with the container
+		Allocator get_allocator()
+		{
+			return allocat;
+		}
+
+		/////////////////////////////////////
+		//Element access 
+		//////////////////////////////////
+		reference front() { return *begin(); }
+		const_reference front() const { return *begin(); }
+		reference back() { return *(--end()); }
+		const_reference back() const { return *(const_iterator(end().node->prev)); }
+
+		/////////////////////////////////////////
+		//Iterators 
+		/////////////////////////////////////////////
 		iterator begin(){ return (link_type)(node->next); }
 		const_iterator begin() const { return (link_type)(node->next); }
 		const_iterator cbegin() const { return ((const Myt*)this)->begin(); }
@@ -237,12 +366,29 @@ namespace my_stl
 		const_reverse_iterator rend() const{ return node; }
 		const_reverse_iterator crend() const { return ((const Myt*)this)->node; }
 
+		/////////////////////////////////////////
+		//Capacity
+		/////////////////////////////////////////////
 		bool empty() const { return node->next == node; }
 		size_type size() const{ return distance(node->next, node); }
 		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
-		reference front() { return *begin(); }
-		reference back() { return *(--end()); }
 
+
+		//Removes the element at pos.
+		iterator erase(iterator pos)
+		{
+			;
+		}
+
+		iterator insert(const_iterator pos, const T& value)
+		{
+			link_type p = create_node(value);
+			p->next = pos.node;
+			p->prev = pos.node->prev;
+			pos.node->prev->next = p;
+			pos.node->prev = p;
+			return p;
+		}
 
 	private:
 		Allocator allocat;
@@ -271,10 +417,7 @@ namespace my_stl
 			allocat.destroy(&(p.node->data));
 			put_node(p);
 		}
-		Allocator get_allocator()
-		{
-			return allocat;
-		}
+
 		Allocator get_node_allocator()
 		{
 			return alloc_node;
