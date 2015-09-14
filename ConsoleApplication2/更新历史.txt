@@ -1,40 +1,40 @@
+ï»¿
 
 
-
-¸üĞÂËµÃ÷
+æ›´æ–°è¯´æ˜
 
 	v1.1.2
-	ÊµÏÖvectorµÄreverse_iterator
+	å®ç°vectorçš„reverse_iterator
 
 	v1.1.1
-	ÊµÏÖlistµÄconstructor£¬ destructor, iterator, reverse_iterator, front, back, begin, cbegin, end, cend, empty, size, max_size.
+	å®ç°listçš„constructorï¼Œ destructor, iterator, reverse_iterator, front, back, begin, cbegin, end, cend, empty, size, max_size.
 
 	v1.0.11
-	ÊµÏÖÍêÕûµÄvectorÈİÆ÷£¨²»°üÀ¨·´Ïòµü´úÆ÷£©¡£
+	å®ç°å®Œæ•´çš„vectorå®¹å™¨ï¼ˆä¸åŒ…æ‹¬åå‘è¿­ä»£å™¨ï¼‰ã€‚
 
 	v1.0.9
-	ÊµÏÖvectorµÄerase£¬ push_backº¯Êı
+	å®ç°vectorçš„eraseï¼Œ push_backå‡½æ•°
 
 	v1.0.8
-	ÊµÏÖÁËvectorµÄclear, insertº¯Êı
+	å®ç°äº†vectorçš„clear, insertå‡½æ•°
 
 	v1.0.7
-	ÊµÏÖÁËvectorµÄassign, get_allocator, at, operator[], front, back, data, begin, cbegin, end, cend, empty, size, max_size, capacity, reverse, shrink_to_fitº¯Êı
+	å®ç°äº†vectorçš„assign, get_allocator, at, operator[], front, back, data, begin, cbegin, end, cend, empty, size, max_size, capacity, reverse, shrink_to_fitå‡½æ•°
 
 	v1.0.6
-	ÊµÏÖÁËvectorµÄoperator=
+	å®ç°äº†vectorçš„operator=
 
 	v1.0.5
-	ÊµÏÖÁËvectorµÄ¹¹Ôìº¯Êı£¬Îö¹¹º¯Êı
+	å®ç°äº†vectorçš„æ„é€ å‡½æ•°ï¼Œææ„å‡½æ•°
 
 	v1.0.4
-	ÊµÏÖtype_traits,ĞŞÕıÁËuninitialized_copy, uninitialized_copy_n, uninitialized_fill and uninitialized_fill_n.
+	å®ç°type_traits,ä¿®æ­£äº†uninitialized_copy, uninitialized_copy_n, uninitialized_fill and uninitialized_fill_n.
 
 	v1.0.3
-	ÊµÏÖiterator, iterator_traits, advance, distance
+	å®ç°iterator, iterator_traits, advance, distance
 
 	v1.0.2
-	ÊµÏÖ4¸öÄÚ´æ»ù±¾´¦Àí¹¤¾ßuninitialized_copy, uninitialized_copy_n, uninitialized_fill and uninitialized_fill_n.
+	å®ç°4ä¸ªå†…å­˜åŸºæœ¬å¤„ç†å·¥å…·uninitialized_copy, uninitialized_copy_n, uninitialized_fill and uninitialized_fill_n.
 
 	v1.0.1
-	ÊµÏÖallocatorÀàµÄ»ù±¾²Ù×÷
+	å®ç°allocatorç±»çš„åŸºæœ¬æ“ä½œ
