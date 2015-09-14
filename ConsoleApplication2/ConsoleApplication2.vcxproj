@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Readme.txt" />
+    <Text Include="更新历史.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="list_test.cpp" />

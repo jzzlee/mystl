@@ -75,7 +75,7 @@ namespace my_stl
 	{
 		typedef	__list_reverse_iterator<T, T&, T*>			iterator;
 		typedef	__list_reverse_iterator<T, Ref, Ptr>		self;
-		typedef	bidirectional_iterator_tag					iterator_category;
+		typedef	bidirectional_reverse_iterator_tag			reverse_iterator_category;
 		typedef	T											value_type;
 		typedef Ref											reference;
 		typedef Ptr											pointer;
@@ -227,9 +227,16 @@ namespace my_stl
 		iterator begin(){ return (link_type)(node->next); }
 		const_iterator begin() const { return (link_type)(node->next); }
 		const_iterator cbegin() const { return ((const Myt*)this)->begin(); }
+		reverse_iterator rbegin() { return (link_type)(node->prev); }
+		reverse_iterator rbegin() const { return (link_type)(node->prev); }
+		const_reverse_iterator crbegin() const { return ((const Myt*)this)->rbegin(); }
 		iterator end() { return node; }
 		const_iterator end() const{ return node; }
 		const_iterator cend() const{ return ((const Myt*)this)->node; }
+		reverse_iterator rend() { return node; }
+		const_reverse_iterator rend() const{ return node; }
+		const_reverse_iterator crend() const { return ((const Myt*)this)->node; }
+
 		bool empty() const { return node->next == node; }
 		size_type size() const{ return distance(node->next, node); }
 		size_type max_size() const { return std::numeric_limits<size_type>::max(); }

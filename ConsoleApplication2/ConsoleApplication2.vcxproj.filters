@@ -44,6 +44,9 @@
     <Text Include="Readme.txt">
       <Filter>资源文件</Filter>
     </Text>
+    <Text Include="更新历史.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="list_test.cpp">
