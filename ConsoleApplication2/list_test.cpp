@@ -76,6 +76,37 @@ int main()
 	cout << lst1.back() << endl;
 	const list<int> lst5{ 1, 2, 3, 4, 5 };
 	cout << lst5.front() << " " << lst5.back() << endl;
+	auto lst6 = lst1;
+	lst1.assign(lst5.begin(), lst5.begin());
+	lst3.assign(lst5.begin(), lst5.end());
+	lst6.assign({ 1, 2, 3, 4, 5, 6, 7 });
+	lst6.clear();
+	cout << "**********" << endl;
+	lst6.insert(lst6.begin(), 1);
+	print<int>(lst6);
+	int a = 2;
+	lst6.insert(lst6.begin(), std::move(a));
+	print<int>(lst6);
+	lst6.insert(lst6.begin(), 3, 3);
+	print<int>(lst6);
+	lst6.insert(lst6.begin(), lst3.crbegin(), lst3.crend());
+	print<int>(lst6);
+	lst6.insert(lst6.begin(), { 4, 5, 6, 7 });
+	print<int>(lst6);
+	
+	words2.emplace_back("hello");
+	print(words2);
+	words2.emplace(words2.begin(), "first");
+	print(words2);
+
+	auto p = lst6.erase(lst6.begin());
+	print<int>(lst6);
+	cout << *p << endl;
+	p = lst6.end();
+	--p;
+	p = lst6.erase(lst6.begin(), p);
+	print<int>(lst6);
+	cout << *p << endl;
 
 	return 0;
 }

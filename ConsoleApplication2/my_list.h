@@ -6,7 +6,7 @@
 #include "my_xutility.h"
 #include <initializer_list>
 #include <cstdio>
-
+#include <iostream>
 namespace my_stl
 {
 	//list的节点结构
@@ -40,8 +40,8 @@ namespace my_stl
 		__list_iterator() {}
 		__list_iterator(const iterator &x) : node(x.node) {}
 
-		bool operator==(const self &x){ return node == x.node; }
-		bool operator!=(const self &x){ return node != x.node; }
+		bool operator==(const self &x) const { return node == x.node; }
+		bool operator!=(const self &x) const { return node != x.node; }
 		reference operator*() const { return (*node).data; }
 		pointer operator->() const { return &(operator*()); }
 
@@ -90,8 +90,8 @@ namespace my_stl
 		__list_reverse_iterator() {}
 		__list_reverse_iterator(const iterator &x) : node(x.node) {}
 
-		bool operator==(const self &x){ return node == x.node; }
-		bool operator!=(const self &x){ return node != x.node; }
+		bool operator==(const self &x) const { return node == x.node; }
+		bool operator!=(const self &x) const { return node != x.node; }
 		reference operator*() const { return (*node).data; }
 		pointer operator->() const { return &(operator*()); }
 
@@ -136,7 +136,8 @@ namespace my_stl
 		typedef const iterator													const_iterator;
 		typedef __list_reverse_iterator<value_type, reference, pointer>			reverse_iterator;
 		typedef const reverse_iterator											const_reverse_iterator;
-		typedef std::size_t				size_type;
+		typedef std::size_t														size_type;
+		typedef typename __type_traits<T>::is_POD_type							is_POD;
 
 		//////////////////////////////////////////
 		//Constructor
@@ -320,20 +321,49 @@ namespace my_stl
 		////////////////////////////////////////////
 		//assign
 		///////////////////////////////////////////
+
+		// Replaces the contents with count copies of value value
 		void assign(size_type count, const T& value)
 		{
-			;
+			__assign_n(count, value);
 		}
-
+		void assign(int count, const T& value)
+		{
+			__assign_n(count, value);
+		}
+		void assign(long count, const T& value)
+		{
+			__assign_n(count, value);
+		}
 		template< class InputIt >
 		void assign(InputIt first, InputIt last)
 		{
-			;
+			iterator p;
+			InputIt q;
+			for (p = begin(), q = first; p != end() && q != last; ++p, ++q)
+			{
+				*p = *q;
+			}
+			//size()大于other.size()
+			if (p != end())
+			{
+				p.node->prev->next = node;
+				node->prev = p.node->prev;
+				//销毁list内的元素，释放空间
+				for (auto iter = p; iter != end(); ++iter)
+					destroy_node(iter);
+			}
+			else if (q != last)
+			{
+				//size()小于other.size()
+				for (auto iter = q; iter != last; ++iter)
+					insert(end(), *iter);
+			}
 		}
 
-		void assign(std::initializer_list<T> ilist)
+		void assign(std::initializer_list<T> other)
 		{
-			;
+			operator=(other);
 		}
 
 		//Returns the allocator associated with the container
@@ -373,16 +403,26 @@ namespace my_stl
 		size_type size() const{ return distance(node->next, node); }
 		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
 
+		/////////////////////////////////////////
+		//Modifiers
+		/////////////////////////////////////////////
 
-		//Removes the element at pos.
-		iterator erase(iterator pos)
+		//Removes all elements from the container. 
+		void clear()
 		{
-			;
+			//销毁list内的元素，释放空间
+			for (auto iter = begin(); iter != end(); ++iter)
+				destroy_node(iter);
+			node->next = node;
+			node->prev = node;
 		}
 
+		//Inserts elements at the specified location in the container. 
 		iterator insert(const_iterator pos, const T& value)
 		{
+			//创建插入节点
 			link_type p = create_node(value);
+			//插入
 			p->next = pos.node;
 			p->prev = pos.node->prev;
 			pos.node->prev->next = p;
@@ -390,6 +430,120 @@ namespace my_stl
 			return p;
 		}
 
+		iterator insert(const_iterator pos, T&& value)
+		{
+			//创建插入节点
+			link_type p = __create_move_node(std::move(value), is_POD());
+			//插入
+			p->next = pos.node;
+			p->prev = pos.node->prev;
+			pos.node->prev->next = p;
+			pos.node->prev = p;
+			return p;
+		}
+
+		iterator insert(const_iterator pos, size_type count, const T& value)
+		{
+			size_type n = count;
+			link_type first = pos.node->prev;
+			link_type p = first, q;
+			while (n--)
+			{
+				q = create_node(value);
+				p->next = q;
+				q->prev = p;
+				p = q;
+			}
+			p->next = pos.node;
+			pos.node->prev = p;
+			return first->next;
+		}
+		iterator insert(const_iterator pos, int count, const T& value)
+		{
+			return insert(pos, size_type(count), value);
+		}
+		iterator insert(const_iterator pos, long count, const T& value)
+		{
+			return insert(pos, size_type(count), value);
+		}
+
+		template< class InputIt >
+		iterator insert(iterator pos, InputIt first, InputIt last)
+		{
+			link_type p_begin = pos.node->prev;
+			link_type p = p_begin, q;
+			for (InputIt iter = first; iter != last; ++iter)
+			{
+				q = create_node(*iter);
+				p->next = q;
+				q->prev = p;
+				p = q;
+			}
+			p->next = pos.node;
+			pos.node->prev = p;
+			return p_begin->next;
+		}
+
+		iterator insert(const_iterator pos, std::initializer_list<T> ilist)
+		{
+			return insert(pos, ilist.begin(), ilist.end());
+		}
+
+		//Appends a new element to the end of the container. 
+		template< class... Args >
+		void emplace_back(Args&&... args)
+		{
+			//创建插入节点
+			link_type p = get_node();
+			allocat.construct(&(p->data), std::forward<Args>(args)...);
+			//插入
+			p->next = node;
+			p->prev = node->prev;
+			node->prev->next = p;
+			node->prev = p;
+		}
+		//Inserts a new element into the container directly before pos.
+		template< class... Args >
+		iterator emplace(const_iterator pos, Args&&... args)
+		{
+			//创建插入节点
+			link_type p = get_node();
+			allocat.construct(&(p->data), std::forward<Args>(args)...);
+			//插入
+			p->next = pos.node;
+			p->prev = pos.node->prev;
+			pos.node->prev->next = p;
+			pos.node->prev = p;
+			return p;
+		}
+
+		//Removes the element at pos. Return the iterator following the last removed element.
+		iterator erase(const_iterator pos)
+		{
+			link_type pos_next = pos.node->next;
+			pos.node->prev->next = pos_next;
+			pos_next->prev = pos.node->prev;
+			destroy_node(pos);
+			return pos_next;
+		}
+
+		//Removes the elements in the range [first; last).
+		//Return the iterator following the last removed element.
+		iterator erase(const_iterator first, const_iterator last)
+		{
+			if (first == last)
+				return first;
+			link_type p = first.node->prev;
+			p->next = last.node;
+			last.node->prev = p;
+			iterator tmp = first.node;
+			for (; tmp != last.node; ++tmp)
+			{
+				destroy_node(tmp);
+			}
+			return tmp;
+		}
+		
 	private:
 		Allocator allocat;
 		allocator<node_type> alloc_node;
@@ -428,7 +582,7 @@ namespace my_stl
 		{
 			allocat = alloc;
 			node = get_node();
-			link_type p = nullptr, q;
+			link_type p = node, q;
 			for (size_type i = 0; i != count; ++i)
 			{
 				if (i == 0)
@@ -455,7 +609,7 @@ namespace my_stl
 		{
 			allocat = alloc;
 			node = get_node();
-			link_type p = nullptr, q;
+			link_type p = node, q;
 			for (InputIt iter = first; iter != last; ++iter)
 			{
 				if (iter == first)
@@ -476,7 +630,42 @@ namespace my_stl
 			node->prev = p;
 		}
 
+		void __assign_n(size_type count, const T& value)
+		{
+			iterator p; 
+			size_type q;
+			for (p = begin(), q = 0; p != end() && q != count; ++p, ++q)
+			{
+				*p = value;
+			}
+			//size()大于other.size()
+			if (p != end())
+			{
+				p.node->prev->next = node;
+				node->prev = p.node->prev;
+				//销毁list内的元素，释放空间
+				for (auto iter = p; iter != end(); ++iter)
+					destroy_node(iter);
+			}
+			else if (q != count)
+			{
+				//size()小于other.size()
+				for (auto iter = q; iter != count; ++iter)
+					insert(end(), value);
+			}
+		}
 
+		link_type __create_move_node(T &&value, __true_type)
+		{
+			link_type p = get_node();
+			memmove(&(p->data), &value, sizeof(T) / sizeof(unsigned char));
+			return p;
+		}
+		link_type __create_move_node(T &&value, __false_type)
+		{
+			return create_node(value);
+		}
+		
 	};
 }
 #endif
