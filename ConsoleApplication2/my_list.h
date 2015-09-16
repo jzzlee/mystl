@@ -701,6 +701,83 @@ namespace my_stl
 			merge(other, comp);
 		}
 
+		//Transfers all elements from other into *this.
+		//The elements are inserted before the element pointed to by pos. 
+		void splice(const_iterator pos, list& other)
+		{
+			pos.node->prev->next = other.begin().node;
+			other.begin().node->prev = pos.node->prev;
+			pos.node->prev = other.node->prev;
+			other.node->prev->next = pos.node;
+			other.node->prev = other.node;
+			other.node->next = other.node;
+		}
+
+		void splice(const_iterator pos, list&& other)
+		{
+			splice(pos, other);
+		}
+
+		//Transfers the element pointed to by it from other into *this. 
+		//The element is inserted before the element pointed to by pos.
+		void splice(const_iterator pos, list& other, const_iterator it)
+		{
+			//先改变list other的结构
+			it.node->prev->next = it.node->next;
+			it.node->next->prev = it.node->prev;
+			//it节点插入到*this
+			pos.node->prev->next = it.node;
+			it.node->prev = pos.node->prev;
+			it.node->next = pos.node;
+			pos.node->prev = it.node;
+		}
+		void splice(const_iterator pos, list&& other, const_iterator it)
+		{
+			splice(pos, other, it);
+		}
+
+		//Transfers the elements in the range [first, last) from other into *this.
+		//The elements are inserted before the element pointed to by pos. 
+		void splice(const_iterator pos, list& other,
+			const_iterator first, const_iterator last)
+		{
+			//先改变list other的结构
+			iterator pre_last = last.node->prev;
+			first.node->prev->next = last.node;
+			last.node->prev = first.node->prev;
+			//[first, pre_last]节点插入到*this
+			pos.node->prev->next = first.node;
+			first.node->prev = pos.node->prev;
+			pre_last.node->next = pos.node;
+			pos.node->prev = pre_last.node;
+		}
+		void splice(const_iterator pos, list&& other,
+			const_iterator first, const_iterator last)
+		{
+			splice(pos, other, first, last);
+		}
+
+		//Removes all elements that are equal to value,
+		void remove(const T& value)
+		{
+			for (iterator iter = begin(); iter != end();)
+				if (*iter == value)
+					iter = erase(iter);
+				else
+					++iter;
+		}
+
+		//Removes all elements for which predicate p returns true.
+		template< class UnaryPredicate >
+		void remove_if(UnaryPredicate pred)
+		{
+			for (iterator iter = begin(); iter != end();)
+				if (pred(*iter))
+					iter = erase(iter);
+				else
+					++iter;
+		}
+
 	private:
 		Allocator allocat;
 		allocator<node_type> alloc_node;

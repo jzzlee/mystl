@@ -1,5 +1,7 @@
 ﻿更新说明
 	
+	v1.1.6
+	实现list的splice, remove, remove_if.
 	v1.1.5
 	实现list的push_back, pop_back, push_front, pop_front, emplace_front, resize, swap, merge.
 

@@ -31,6 +31,13 @@ bool comp(std::string s1, std::string s2)
 {
 	return s1.size() < s2.size();
 }
+std::ostream& operator<<(std::ostream& ostr, const list<int>& list)
+{
+	for (auto &i : list) {
+		ostr << " " << i;
+	}
+	return ostr;
+}
 int main()
 {
 	// c++11 initializer list syntax:
@@ -147,5 +154,35 @@ int main()
 	lst1.swap(lst2);
 	print(lst1);
 	print(lst2);
+	list<int> list1 = { 1, 2, 3, 4, 5 };
+	list<int> list2 = { 10, 20, 30, 40, 50 };
+
+	auto it = list1.begin();
+	advance(it, 2);
+
+	list1.splice(it, list2);
+
+	std::cout << "list1: " << list1 << "\n";
+	std::cout << "list2: " << list2 << "\n";
+
+	list2.splice(list2.begin(), list1, it, list1.end());
+
+	std::cout << "list1: " << list1 << "\n";
+	std::cout << "list2: " << list2 << "\n";
+
+	list2.splice(list2.begin(), list1, list1.begin());
+
+	std::cout << "list1: " << list1 << "\n";
+	std::cout << "list2: " << list2 << "\n";
+	cout << "**************" << endl;
+	list<int> l = { 1, 100, 2, 3, 10, 1, 11, -1, 12 };
+
+	l.remove(1); // remove both elements equal to 1
+	l.remove_if([](int n){ return n > 10; }); // remove all elements greater than 10
+
+	for (int n : l) {
+		std::cout << n << ' ';
+	}
+	std::cout << '\n';
 	return 0;
 }
