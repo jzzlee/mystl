@@ -489,6 +489,19 @@ namespace my_stl
 			return insert(pos, ilist.begin(), ilist.end());
 		}
 
+		//Inserts a new element to the beginning of the container
+		template< class... Args >
+		void emplace_front(Args&&... args)
+		{
+			//创建插入节点
+			link_type p = get_node();
+			allocat.construct(&(p->data), std::forward<Args>(args)...);
+			//插入
+			p->prev = node;
+			p->next = begin().node;
+			begin().node->prev = p;
+			node->next = p;
+		}
 		//Appends a new element to the end of the container. 
 		template< class... Args >
 		void emplace_back(Args&&... args)
@@ -543,7 +556,151 @@ namespace my_stl
 			}
 			return tmp;
 		}
-		
+
+		//Appends the given element value to the end of the container. 
+		void push_back(const T& value)
+		{
+			insert(cend(), value);
+		}
+
+		void push_back(T&& value)
+		{
+			insert(cend(), std::move(value));
+		}
+
+		void pop_back()
+		{
+			link_type p = node->prev;
+			p->prev->next = node;
+			node->prev = p->prev;
+			destroy_node(p);
+		}
+
+		void push_front(const T& value)
+		{
+			insert(cbegin(), value);
+		}
+		void push_front(T&& value)
+		{
+			insert(cbegin(), std::move(value));
+		}
+		void pop_front()
+		{
+			link_type p = begin().node;
+			node->next = p->next;
+			p->next->prev = node;
+			destroy_node(p);
+		}
+
+		//Resizes the container to contain count elements. 
+		void resize(size_type count)
+		{
+			resize(count, T());
+		}
+		void resize(size_type count, const value_type& value)
+		{
+			size_type n = 0;
+			iterator iter = begin();
+			while (n < count && iter != end())
+			{
+				++n;
+				++iter;
+			}
+			if (n < count)//size() < count
+			{
+				insert(iter, count - n, value);
+			}
+			else if (iter != end()) //size() > count
+			{
+				erase(iter, end());
+			}
+		}
+
+		//Exchanges the contents of the container with those of other
+		void swap(list& other)
+		{
+			std::swap(allocat, other.allocat);
+			std::swap(alloc_node, other.alloc_node);
+			std::swap(node, other.node);
+		}
+
+		//Merges two sorted lists into one. The lists should be sorted into ascending order. 
+		void merge(list& other)
+		{
+			if (this == &other)
+				return;
+			iterator p = begin();
+			iterator q = other.begin();
+			while (p != end() && q != other.end())
+			{
+				if (*q < *p)//插入到比*q大的第一个元素之前
+				{
+					++q;
+					p.node->prev->next = q.node->prev;
+					q.node->prev->prev = p.node->prev;
+					p.node->prev = q.node->prev;
+					q.node->prev->next = p.node;
+				}
+				else
+				{
+					p++;
+				}
+			}
+			if (q != other.end())//	other还有元素未插入
+			{
+				node->prev->next = q.node;
+				q.node->prev = node->prev;
+				other.node->prev->next = node;
+				node->prev = other.node->prev;
+			}
+			//other.node前后指针指向自身
+			other.node->prev = other.node;
+			other.node->next = other.node;
+		}
+		void merge(list&& other)
+		{
+			merge(other);
+		}
+
+		template <class Compare>
+		void merge(list& other, Compare comp)
+		{
+			if (this == &other)
+				return;
+			iterator p = begin();
+			iterator q = other.begin();
+			while (p != end() && q != other.end())
+			{
+				if (comp(*q, *p))//插入到比*q大的第一个元素之前
+				{
+					++q;
+					p.node->prev->next = q.node->prev;
+					q.node->prev->prev = p.node->prev;
+					p.node->prev = q.node->prev;
+					q.node->prev->next = p.node;
+				}
+				else
+				{
+					p++;
+				}
+			}
+			if (q != other.end())//	other还有元素未插入
+			{
+				node->prev->next = q.node;
+				q.node->prev = node->prev;
+				other.node->prev->next = node;
+				node->prev = other.node->prev;
+			}
+			//other.node前后指针指向自身
+			other.node->prev = other.node;
+			other.node->next = other.node;
+		}
+		template <class Compare>
+		void merge(list&& other, Compare comp)
+		{
+			merge(other, comp);
+		}
+
 	private:
 		Allocator allocat;
 		allocator<node_type> alloc_node;
@@ -629,6 +786,7 @@ namespace my_stl
 			p->next = node;
 			node->prev = p;
 		}
+
 
 		void __assign_n(size_type count, const T& value)
 		{

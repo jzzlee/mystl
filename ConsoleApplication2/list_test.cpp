@@ -27,7 +27,10 @@ void print_reverse(list<T> lst)
 		cout << *iter << " ";
 	cout << endl;
 }
-
+bool comp(std::string s1, std::string s2)
+{
+	return s1.size() < s2.size();
+}
 int main()
 {
 	// c++11 initializer list syntax:
@@ -107,6 +110,42 @@ int main()
 	p = lst6.erase(lst6.begin(), p);
 	print<int>(lst6);
 	cout << *p << endl;
+	cout << "*************" << endl;
+	list<std::string> str1{ "1", "22", "333", "4444" };
+	list<std::string> str2{ "3", "33", "433", "5444" };
 
+	print(lst1);
+	for (int i = 0; i != 9; ++i)
+	{
+		lst1.push_front(i);
+	}
+	print(lst1);
+	/*for (int i = 0; i != 9; ++i)
+	{
+		lst1.pop_front();
+		print(lst1);
+
+	}
+	for (int i = 0; i != 9; ++i)
+	{
+		lst1.push_back(i);
+	}
+	print(lst1);
+	for (int i = 0; i != 9; ++i)
+	{
+		lst1.pop_back();
+		print(lst1);
+	}*/
+//	print(str2);
+	lst1.resize(9);
+	print(lst1);
+	lst1.resize(3);
+	print(lst1);
+	lst1.resize(9);
+	print(lst1);
+	print(lst2);
+	lst1.swap(lst2);
+	print(lst1);
+	print(lst2);
 	return 0;
 }
