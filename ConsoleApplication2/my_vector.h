@@ -855,11 +855,11 @@ namespace my_stl
 		return (lhs > rhs) || (lhs == rhs);
 	}
 
-
-
-
-
-
-
+	template< class T, class Alloc >
+	void swap(vector<T, Alloc>& lhs,
+		vector<T, Alloc>& rhs)
+	{
+		std::swap(lhs, rhs);
+	}
 }
 #endif

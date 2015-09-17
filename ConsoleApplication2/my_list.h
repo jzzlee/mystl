@@ -627,35 +627,7 @@ namespace my_stl
 		//Merges two sorted lists into one. The lists should be sorted into ascending order. 
 		void merge(list& other)
 		{
-			if (this == &other)
-				return;
-			iterator p = begin();
-			iterator q = other.begin();
-			while (p != end() && q != other.end())
-			{
-				if (*q < *p)//插入到比*q大的第一个元素之前
-				{
-					++q;
-					p.node->prev->next = q.node->prev;
-					q.node->prev->prev = p.node->prev;
-					p.node->prev = q.node->prev;
-					q.node->prev->next = p.node;
-				}
-				else
-				{
-					p++;
-				}
-			}
-			if (q != other.end())//	other还有元素未插入
-			{
-				node->prev->next = q.node;
-				q.node->prev = node->prev;
-				other.node->prev->next = node;
-				node->prev = other.node->prev;
-			}
-			//other.node前后指针指向自身
-			other.node->prev = other.node;
-			other.node->next = other.node;
+			merge(other, std::less<>());
 		}
 		void merge(list&& other)
 		{
@@ -778,6 +750,98 @@ namespace my_stl
 					++iter;
 		}
 
+		//Reverses the order of the elements in the container. 
+		void reverse()
+		{
+			iterator p = end();
+			std::cout << *p << std::endl;
+			do
+			{
+				p.node->prev = p.node->next;
+				++p;
+			} while (p != end());
+
+			do
+			{
+				p.node->prev->next = p.node;
+				--p;
+			} while (p != end());
+		}
+
+		//Removes all consecutive duplicate elements from the container.
+		//Uses operator== to compare the elements,
+		void unique()
+		{
+			unique(std::equal_to<>())
+		}
+		//Uses the given binary predicate pred.
+		template< class BinaryPredicate >
+		void unique(BinaryPredicate pred)
+		{
+			for (iterator p = begin(), q = p.node->next; p != end();)
+			{
+				if (pred(*p, *q))
+				{
+					++q;
+					while (pred(*p, *q))
+						++q;
+					erase(p.node->next, q);
+					p = q;
+				}
+				else
+				{
+					++p;
+					++q;
+				}
+			}
+		}
+
+		void transfer(iterator pos, iterator first, iterator last)
+		{
+			if (pos != last)
+			{
+				last.node->prev->next = pos.node;
+				first.node->prev->next = last.node;
+				pos.node->prev->next = first.node;
+				link_type tmp = pos.node->prev;
+				pos.node->prev = last.node->prev;
+				last.node->prev = first.node->prev;
+				first.node->prev = tmp;
+			}
+		}
+		//Sorts the elements in ascending order.
+		//Uses operator< to compare the elements, 
+		void sort()
+		{
+			sort(std::less<>());
+		}
+
+		template< class Compare >
+		void sort(Compare comp)
+		{
+			if (node != node->next && node != node->next->next)
+			{
+				Myt carry;
+				Myt counter[64];
+				int fill = 0;
+				while (!empty())
+				{
+					carry.splice(carry.begin(), *this, begin());
+					int i = 0;
+					while (i < fill && !counter[i].empty())
+					{
+						counter[i].merge(carry);
+						carry.swap(counter[i++]);
+					}
+					carry.swap(counter[i]);
+					if (i == fill)
+						++fill;
+				}
+				for (int i = 1; i < fill; ++i)
+					counter[i].merge(counter[i - 1]);
+				swap(counter[fill - 1]);
+			}
+		}
 	private:
 		Allocator allocat;
 		allocator<node_type> alloc_node;
@@ -902,5 +966,64 @@ namespace my_stl
 		}
 		
 	};
+
+	template< class T, class Alloc >
+	bool operator==(const list<T, Alloc>& lhs,
+		const list<T, Alloc>& rhs)
+	{
+		for (list<T, Alloc>::iterator p = lhs.begin() q = rhs.begin(); p != lhs.end() && q != rhs.end(); ++p, ++q)
+		{
+			if (*p != *q)
+			{
+				return false;
+			}
+		}
+		if (p != lhs.end() || q != rhs.end())
+			return false;
+		return true;
+	}
+
+	template< class T, class Alloc >
+	bool operator!=(const list<T, Alloc>& lhs,
+		const list<T, Alloc>& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template< class T, class Alloc >
+	bool operator<(const list<T, Alloc>& lhs,
+		const list<T, Alloc>& rhs)
+	{
+		return (lexicographical_compare(lhs.begin(), lhs.end(),
+			rhs.begin(), rhs.end()));
+	}
+
+	template< class T, class Alloc >
+	bool operator<=(const list<T, Alloc>& lhs,
+		const list<T, Alloc>& rhs)
+	{
+		return (lhs < rhs) || (lhs == rhs);
+	}
+
+	template< class T, class Alloc >
+	bool operator>(const list<T, Alloc>& lhs,
+		const list<T, Alloc>& rhs)
+	{
+		return (rhs < lhs);
+	}
+
+	template< class T, class Alloc >
+	bool operator>=(const list<T, Alloc>& lhs,
+		const list<T, Alloc>& rhs)
+	{
+		return (lhs > rhs) || (lhs == rhs);
+	}
+
+	template< class T, class Alloc >
+	void swap(list<T, Alloc>& lhs,
+		list<T, Alloc>& rhs)
+	{
+		std::swap(lhs, rhs);
+	}
 }
 #endif

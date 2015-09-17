@@ -31,6 +31,10 @@ bool comp(std::string s1, std::string s2)
 {
 	return s1.size() < s2.size();
 }
+bool equal_len(std::string s1, std::string s2)
+{
+	return s1.size() == s2.size();
+}
 std::ostream& operator<<(std::ostream& ostr, const list<int>& list)
 {
 	for (auto &i : list) {
@@ -157,6 +161,10 @@ int main()
 	list<int> list1 = { 1, 2, 3, 4, 5 };
 	list<int> list2 = { 10, 20, 30, 40, 50 };
 
+	list1.reverse();
+	list2.reverse();
+	print(list1);
+	print(list2);
 	auto it = list1.begin();
 	advance(it, 2);
 
@@ -172,17 +180,37 @@ int main()
 
 	list2.splice(list2.begin(), list1, list1.begin());
 
-	std::cout << "list1: " << list1 << "\n";
-	std::cout << "list2: " << list2 << "\n";
-	cout << "**************" << endl;
-	list<int> l = { 1, 100, 2, 3, 10, 1, 11, -1, 12 };
+	//std::cout << "list1: " << list1 << "\n";
+	//std::cout << "list2: " << list2 << "\n";
+	//cout << "**************" << endl;
+	//list<int> l = { 1, 100, 2, 3, 10, 1, 11, -1, 12 };
 
-	l.remove(1); // remove both elements equal to 1
-	l.remove_if([](int n){ return n > 10; }); // remove all elements greater than 10
+	//l.remove(1); // remove both elements equal to 1
+	//l.remove_if([](int n){ return n > 10; }); // remove all elements greater than 10
 
-	for (int n : l) {
-		std::cout << n << ' ';
-	}
+	//for (int n : l) {
+	//	std::cout << n << ' ';
+	//}
+	//std::cout << '\n';
+	list<int> x = { 1,5, 2,9,8,7,6};
+	print(x);
+	x.sort();
+	print(x);
+	list<int> mylist;
+	// allocate an array of 5 elements using mylist's allocator:
+	int * pp = mylist.get_allocator().allocate(5);
+
+	// assign some values to array
+	for (int i = 0; i<5; ++i) pp[i] = i;
+
+	std::cout << "The allocated array contains:";
+	for (int i = 0; i<5; ++i) std::cout << ' ' << pp[i];
 	std::cout << '\n';
+
+	mylist.get_allocator().deallocate(pp, 5);
+
+	cout << (lst1 < lst2) << endl;
+	swap(lst1, lst2);
+	cout << (lst1 < lst2) << endl;
 	return 0;
 }
