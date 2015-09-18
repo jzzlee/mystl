@@ -79,7 +79,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="my_alloc.h" />
-    <ClInclude Include="my_deque.h" />
     <ClInclude Include="my_iterator.h" />
     <ClInclude Include="my_list.h" />
     <ClInclude Include="my_memory.h" />
@@ -87,13 +86,14 @@
     <ClInclude Include="my_uninitialized.h" />
     <ClInclude Include="my_vector.h" />
     <ClInclude Include="my_xutility.h" />
+    <ClInclude Include="my_deque.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Readme.txt" />
     <Text Include="更新历史.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="list_test.cpp" />
+    <ClCompile Include="deque_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

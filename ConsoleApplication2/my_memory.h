@@ -29,7 +29,13 @@ namespace my_stl
 		typedef typename size_t		size_type;
 		typedef typename ptrdiff_t	difference_type;
 
-
+		template<typename other_T, typename other_Alloc = alloc>
+		bool operator==(const allocator<other_T, other_Alloc> &other_alloc)
+		{
+			//这里需要检查T和Other_T是不是一个类型，已经Alloc和other_Alloc是不是相等来判断allocator对象是不是相等。
+			//暂时保留。
+			return true;
+		}
 		//四个函数只是简单的转调用，调用传递给配置器（可能是一级或二级配置器）的成员函数。
 		T * allocate(size_t n)
 		{

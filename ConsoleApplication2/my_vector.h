@@ -560,7 +560,7 @@ namespace my_stl
 		template<typename ForwardIterator>
 		void copy_initialize(ForwardIterator first, ForwardIterator last)
 		{
-			size_type n = last - first;
+			size_type n = my_stl::distance(first, last);
 			start = alloc.allocate(n);
 			my_stl::uninitialized_copy(first, last, start);
 			end_of_storage = finish = start + n;

@@ -1,5 +1,8 @@
 ﻿更新说明
 	
+	v1.2.1
+	实现deque的iterator, reverse_iterator，constructor, destructor, begin, end.
+
 	v1.1.7
 	实现完整的list.
 

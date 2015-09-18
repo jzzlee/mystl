@@ -25,7 +25,7 @@ namespace my_stl
 	template< class InputIt, class ForwardIt >
 	ForwardIt __uninitialized_copy_aux(InputIt first, InputIt last, ForwardIt d_first, __true_type)
 	{
-		return std::copy(first, last, d_first);
+		return my_stl::copy(first, last, d_first);
 	}
 
 	//真正的copy,如果元素不是POD类型
@@ -61,7 +61,7 @@ namespace my_stl
 	template<class InputIt, class Size, class ForwardIt>
 	ForwardIt __uninitialized_copy_n_aux(InputIt first, Size count, ForwardIt d_first, __true_type)
 	{
-		return std::copy_n(first, count, d_first);
+		return my_stl::copy_n(first, count, d_first);
 	}
 
 	//真正的copy n函数，如果不是POD类型，必须一个一个元素构造
@@ -98,7 +98,7 @@ namespace my_stl
 	void __uninitialized_fill__aux(ForwardIt first, ForwardIt last, const T& value, __true_type)
 	{
 		typedef typename iterator_traits<ForwardIt>::value_type Value;
-		std::fill(first, last, Value(value));
+		my_stl::fill(first, last, Value(value));
 	}
 
 	//底层fill函数, 如果不是POD类型，则需要一个一个元素构造填充
@@ -134,7 +134,7 @@ namespace my_stl
 	ForwardIt __uninitialized_fill_n_aux(ForwardIt first, Size count, const T& value, __true_type)
 	{
 		typedef typename iterator_traits<ForwardIt>::value_type Value;
-		return std::fill_n(first, count, Value(value));
+		return my_stl::fill_n(first, count, Value(value));
 	}
 
 	//底层的fill_n函数，如果不是POD类型，则必须一个一个元素的构造填充
