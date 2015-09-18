@@ -79,6 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="my_alloc.h" />
+    <ClInclude Include="my_deque.h" />
     <ClInclude Include="my_iterator.h" />
     <ClInclude Include="my_list.h" />
     <ClInclude Include="my_memory.h" />

@@ -39,6 +39,9 @@
     <ClInclude Include="my_list.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="my_deque.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Readme.txt">
