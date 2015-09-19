@@ -213,7 +213,7 @@ namespace my_stl
 		}
 		const_reference at(size_type pos) const
 		{
-			if (pos >= size())
+			if (pos < 0 || pos >= size())
 				throw std::out_of_range("out of the range of the vector\n");
 			return *(begin() + pos);
 		}

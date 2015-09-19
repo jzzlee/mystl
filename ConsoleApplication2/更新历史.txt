@@ -1,5 +1,9 @@
 ﻿更新说明
 	
+	v1.2.3
+	实现operator=, assign, get_allocator, at, [], front, back, empty, size, max_size, shrink_to_fit, clear.
+	由于预置的数据结构不合适，删除deque中的reverse_iterator操作。
+
 	v1.2.1
 	实现deque的iterator, reverse_iterator，constructor, destructor, begin, end.
 
