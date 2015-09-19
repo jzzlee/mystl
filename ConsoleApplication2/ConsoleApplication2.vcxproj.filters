@@ -51,9 +51,4 @@
       <Filter>资源文件</Filter>
     </Text>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="deque_test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-  </ItemGroup>
 </Project>

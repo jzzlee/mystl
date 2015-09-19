@@ -435,6 +435,17 @@ namespace my_stl
 			__destroy_and_destruct();
 		}
 
+		deque& operator=(const deque& other)
+		{
+			if (map_size < other.map_size)
+			{
+				;
+			}
+			return *this;
+		}
+
+		allocator_type get_allocator() { return alloc; }
+
 		iterator begin() { return start; }
 		iterator end() { return finish; }
 		const_iterator begin() const { return start; }
@@ -447,17 +458,25 @@ namespace my_stl
 		const_reverse_iterator rend() const { return rfinish; }
 		const_reverse_iterator crbegin() const { return ((const Myt*)this)->rbegin(); }
 		const_reverse_iterator crend() const { return ((const Myt*)this)->rend(); }
-
-		reference operator[](size_type n)
+		reference operator[](size_type n){ return start[difference_type(n)]; }
+		const_reference operator[](size_type n) const { return start[difference_type(n)]; }
+		reference front(){ return *start; }
+		const_reference front() const { return *start; }
+		reference back()
 		{
-			return start[difference_type(n)];
+			iterator tmp = finish;
+			--tmp;
+			return *tmp;
 		}
-		const_reference operator[](size_type n) const
+		const_reference back() const
 		{
-			return start[difference_type(n)];
+			const_iterator tmp = finish;
+			--tmp;
+			return *tmp;
 		}
-
-		allocator_type get_allocator() { return alloc; }
+		size_type size() const { return (start == finish ? 0 : finish - start); }
+		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
+		bool empty() { return start == finish; }
 
 	private:
 		iterator start, finish; // Ê×¡¢Î²µü´úÆ÷
