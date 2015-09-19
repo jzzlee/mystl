@@ -31,7 +31,7 @@ namespace my_stl
 
 		//Default constructor
 		explicit vector(const Allocator &alloc = Allocator()) : start(nullptr), finish(nullptr), end_of_storage(nullptr){}
-		
+
 		//Create a vector with n nodes
 		vector(size_type num, const T &node, const Allocator &alloc = Allocator()) { fill_initialize(num, node); }
 		//这两个为了避免与范围初始化重载冲突
@@ -47,13 +47,15 @@ namespace my_stl
 		vector(const vector &vec){ copy_initialize(vec.begin(), vec.end()); }
 		//Move constructor
 		vector(vector &&vec) : start(vec.start), finish(vec.finish), end_of_storage(vec.end_of_storage)
-		{ vec.start = vec.finish = vec.end_of_storage = nullptr; }
+		{
+			vec.start = vec.finish = vec.end_of_storage = nullptr;
+		}
 
 		//List constructor
 		vector(std::initializer_list<T> lst) { copy_initialize(lst.begin(), lst.end()); }
 		//Destructor
 		~vector(){ destroy_and_destruct(); }
-		
+
 		//Assign operator
 		vector & operator=(const vector &vec)
 		{
@@ -94,7 +96,7 @@ namespace my_stl
 			}
 			return *this;
 		}
-		
+
 		//List operator =
 		vector & operator=(std::initializer_list<T> lst)
 		{
@@ -172,7 +174,7 @@ namespace my_stl
 			{
 				std::copy(first, first + size(), start);
 				uninitialized_copy(first + size(), last, finish);
-				finish = start +count;
+				finish = start + count;
 			}
 		}
 
@@ -213,15 +215,15 @@ namespace my_stl
 		}
 		const_reference at(size_type pos) const
 		{
-			if (pos >= size())
+			if (pos < 0 || pos >= size())
 				throw std::out_of_range("out of the range of the vector\n");
 			return *(begin() + pos);
 		}
-		
+
 		//Returns a reference to the element at specified location pos. No bounds checking is performed. 
-		reference operator[](size_type i) {	return *(begin() + i); }
+		reference operator[](size_type i) { return *(begin() + i); }
 		const_reference operator[](size_type i) const { return *(begin() + i); }
-		
+
 		//Returns a reference to the first element in the container.
 		reference front(){ return *begin(); }
 		const_reference front() const { return *begin(); }
@@ -237,10 +239,10 @@ namespace my_stl
 		iterator begin() { return start; }
 		const_iterator begin() const { return start; }
 		const_iterator cbegin() const { return (((const Myt *)this)->begin()); }
-		iterator end() { return finish;  }
+		iterator end() { return finish; }
 		const_iterator end() const { return finish; }
 		const_iterator cend() const { return (((const Myt *)this)->end()); }
-	
+
 		bool empty() const { return begin() == end(); }
 		size_type size() const { return size_type(end() - begin()); }
 		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
@@ -786,7 +788,7 @@ namespace my_stl
 				new_finish = my_stl::uninitialized_copy(start, finish, new_start);
 				while (n--)
 					alloc.construct(new_finish++, value);
-					//::new (new_finish++) T(value);
+				//::new (new_finish++) T(value);
 			}
 			catch (...)
 			{
