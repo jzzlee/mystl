@@ -1,5 +1,9 @@
 ﻿更新说明
 	
+	v1.2.4
+	修正map中控器的结构，使其支持快速双端操作。
+	修改到assign部分。
+		
 	v1.2.3
 	实现operator=, assign, get_allocator, at, [], front, back, empty, size, max_size, shrink_to_fit, clear.
 	由于预置的数据结构不合适，删除deque中的reverse_iterator操作。

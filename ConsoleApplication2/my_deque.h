@@ -269,28 +269,28 @@ namespace my_stl
 	class deque
 	{
 	public:
-		typedef deque<T, Allocator>												Myt;
-		typedef T																value_type;
-		typedef Allocator														allocator_type;
-		typedef ptrdiff_t														difference_type;
-		typedef value_type&														reference;
-		typedef const value_type&												const_reference;
-		typedef typename Allocator::pointer										pointer;
-		typedef typename Allocator::const_pointer								const_pointer;
-		typedef __deque_iterator<value_type, reference, pointer>				iterator;
+		typedef deque<T, Allocator>		Myt;
+		typedef T		value_type;
+		typedef Allocator		allocator_type;
+		typedef ptrdiff_t		difference_type;
+		typedef value_type&		reference;
+		typedef const value_type&		const_reference;
+		typedef typename Allocator::pointer			pointer;
+		typedef typename Allocator::const_pointer	const_pointer;
+		typedef __deque_iterator<value_type, reference, pointer>	iterator;
 		typedef __deque_iterator<value_type, const_reference, const_pointer>	const_iterator;
 		typedef __deque_reverse_iterator<value_type, reference, pointer>		reverse_iterator;
 		typedef __deque_reverse_iterator<value_type, const_reference, const_pointer>	const_reverse_iterator;
-		typedef std::size_t														size_type;
-		typedef pointer*														map_pointer;
-		typedef typename __type_traits<T>::is_POD_type							is_POD;
+		typedef std::size_t		size_type;
+		typedef pointer*		map_pointer;
+		typedef typename __type_traits<T>::is_POD_type		is_POD;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Member functions
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		//Constructor
-		explicit deque(const Allocator& alloc = Allocator()) : alloc(alloc), map(0), map_size(0), start(), finish() {}
+		explicit deque(const Allocator& alloc = Allocator()) : alloc(alloc), map(0), end_map(0), map_size(0), start(), finish() {}
 
 		deque(size_type count, const T& value, const Allocator& alloc = Allocator())
 			:alloc(alloc)
@@ -361,7 +361,8 @@ namespace my_stl
 			if (alloc == other.get_allocator())
 			{
 				start = other.start; finish = other.finish;
-				map = other.map; map_size = other.map_size;
+				map = other.map; end_map = other.end_map;
+				map_size = other.map_size;
 			}
 			else
 			{
@@ -373,13 +374,16 @@ namespace my_stl
 				}
 				else
 				{
-					map = map_pointer(); map_size = 0;
+					map = map_pointer();
+					end_map = map_pointer();
+					map_size = 0;
 					start = finish = iterator();
 				}
 				other.__destroy_and_destruct();
 			}
 			other.start = other.finish = iterator();
-			other.map = map_pointer(0); other.map_size = 0;
+			other.map = other.end_map = map_pointer(0);
+			other.map_size = 0;
 		}
 
 		deque(deque&& other, const Allocator& allc)
@@ -407,7 +411,8 @@ namespace my_stl
 				other.__destroy_and_destruct();
 			}
 			other.start = other.finish = nullptr;
-			other.map = nullptr; other.map_size = 0;
+			other.map = other.end_map = map_pointer(0);
+			other.map_size = 0;
 		}
 
 		deque(std::initializer_list<T> init,
@@ -422,7 +427,8 @@ namespace my_stl
 			}
 			else
 			{
-				map = map_pointer(); map_size = 0;
+				map = end_map = map_pointer();
+				map_size = 0;
 				start = finish = iterator();
 			}
 		}
@@ -439,7 +445,10 @@ namespace my_stl
 			{
 				size_type other_size = other.size();
 				size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-				size_type capacity = map_size * space_size; // 当前deque的最大容量
+				size_type capacity = (end_map - start.node) * space_size; // 当前deque的容量
+				size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //map向下扩展的总容量
+				size_type up_capacity = (start.node - map) * space_size + capacity; //map向上扩展的总容量
+				size_type all_capacity = map_size * space_size; //不申请新map的最大容量
 				if (size() >= other_size)
 				{
 					my_stl::copy(other.begin(), other.end(), start);
@@ -455,12 +464,34 @@ namespace my_stl
 					my_stl::uninitialized_copy(other.begin() + size(), other.end(), finish);
 					finish = start + other_size;
 				}
-				else if (capacity <= other_size)
+				else if (down_capacity > other_size) //如果向下拓展空间足够
+				{
+					copy(other.begin(), other.begin() + size(), start);
+					__alloc_new_space(other_size - capacity);  //申请新缓冲区
+					finish = my_stl::uninitialized_copy(other.begin() + size(), other.end(), finish);
+				}
+				else if (up_capacity > other_size) //如果向上拓展空间足够
+				{
+					map_pointer map_start = __alloc_new_space_forward(other_size - capacity);  //申请新缓冲区
+					start.set_node(map_start);
+					start.cur = start.first;
+					finish = my_stl::copy(other.begin(), other.end(), start);
+				}
+				else if (all_capacity > other_size) //全部拓展空间足够
+				{
+					map_pointer map_start = __alloc_new_space_forward(other_size - capacity);  //向上申请新缓冲区
+					start.set_node(map_start);
+					start.cur = start.first;
+					copy(other.begin(), other.begin() + size(), start);
+					__alloc_new_space(other_size - up_capacity);  //申请新缓冲区
+					finish = my_stl::uninitialized_copy(other.begin() + size(), other.end(), finish);
+				}
+				else
 				{
 					//如果不足以存放other的所有元素，则需要重新申请map
+					//申请新空间
 					__alloc_new_map(other_size);
-					my_stl::uninitialized_copy(other.begin(), other.end(), start);
-					finish = start + other_size;
+					finish = my_stl::uninitialized_copy(other.begin(), other.end(), start);
 				}
 			}
 			return *this;
@@ -473,7 +504,8 @@ namespace my_stl
 				if (alloc == other.get_allocator())//allocator类型一致，直接复制控制信息
 				{
 					start = other.start; finish = other.finish;
-					map = other.map; map_size = other.map_size;
+					map = other.map; end_map = other.end_map;
+					map_size = other.map_size;
 				}
 				else
 				{
@@ -482,7 +514,8 @@ namespace my_stl
 					other.__destroy_and_destruct();
 				}
 				other.start = other.finish = iterator();
-				other.map = map_pointer(0); other.map_size = 0;
+				other.map = other.end_map = map_pointer(0);
+				other.map_size = 0;
 			}
 			return *this;
 		}
@@ -491,7 +524,10 @@ namespace my_stl
 		{
 			size_type ilist_size = ilist.size();
 			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-			size_type capacity = map_size * space_size; // 当前deque的最大容量
+			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //map向下扩展的总容量
+			size_type up_capacity = (start.node - map) * space_size + capacity; //map向上扩展的总容量
+			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
 			if (size() >= ilist_size)
 			{
 				my_stl::copy(ilist.begin(), ilist.end(), start);
@@ -507,12 +543,34 @@ namespace my_stl
 				my_stl::uninitialized_copy(ilist.begin() + size(), ilist.end(), finish);
 				finish = start + ilist_size;
 			}
-			else if (capacity <= ilist_size)
+			else if (down_capacity > ilist_size) //如果向下拓展空间足够
 			{
-				//如果不足以存放ilist的所有元素，则需要重新申请map
+				copy(ilist.begin(), ilist.begin() + size(), start);
+				__alloc_new_space(ilist_size - capacity);  //申请新缓冲区
+				finish = my_stl::uninitialized_copy(ilist.begin() + size(), ilist.end(), finish);
+			}
+			else if (up_capacity > ilist_size) //如果向上拓展空间足够
+			{
+				map_pointer map_start = __alloc_new_space_forward(ilist_size - capacity);  //申请新缓冲区
+				start.set_node(map_start);
+				start.cur = start.first;
+				finish = my_stl::copy(ilist.begin(), ilist.end(), start);
+			}
+			else if (all_capacity > ilist_size) //全部拓展空间足够
+			{
+				map_pointer map_start = __alloc_new_space_forward(ilist_size - capacity);  //向上申请新缓冲区
+				start.set_node(map_start);
+				start.cur = start.first;
+				copy(ilist.begin(), ilist.begin() + size(), start);
+				__alloc_new_space(ilist_size - up_capacity);  //申请新缓冲区
+				finish = my_stl::uninitialized_copy(ilist.begin() + size(), ilist.end(), finish);
+			}
+			else
+			{
+				//如果不足以存放other的所有元素，则需要重新申请map
+				//申请新空间
 				__alloc_new_map(ilist_size);
-				my_stl::uninitialized_copy(ilist.begin(), ilist.end(), start);
-				finish = start + ilist_size;
+				finish = my_stl::uninitialized_copy(ilist.begin(), ilist.end(), start);
 			}
 			return *this;
 		}
@@ -520,7 +578,8 @@ namespace my_stl
 		void assign(size_type count, const T& value)
 		{
 			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-			size_type capacity = map_size * space_size; // 当前deque的最大容量
+			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
 			if (size() >= count)
 			{
 				iterator new_finish = my_stl::fill_n(start, count, value);
@@ -534,9 +593,16 @@ namespace my_stl
 				my_stl::fill_n(start, size(), value);
 				finish = my_stl::uninitialized_fill_n(finish, count - size(), value);
 			}
-			else if (capacity <= count)
+			else if (all_capacity > count)
+			{
+				my_stl::fill_n(start, size(), value);
+				__alloc_new_space(count - capacity);  //申请新缓冲区
+				finish = my_stl::uninitialized_fill_n(finish, count - size(), value);
+			}
+			else
 			{
 				//如果不足以存放count个元素，则需要重新申请map
+				//申请新空间
 				__alloc_new_map(count);
 				finish = my_stl::uninitialized_fill_n(start, count, value);
 			}
@@ -550,7 +616,8 @@ namespace my_stl
 		{
 			size_type count = my_stl::distance(first, last); //元素总数量
 			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-			size_type capacity = map_size * space_size; // 当前deque的最大容量
+			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
 			if (size() >= count)
 			{
 				iterator new_finish = my_stl::copy(first, last, start);
@@ -564,9 +631,16 @@ namespace my_stl
 				my_stl::copy(first, first + size(), start);
 				finish = my_stl::uninitialized_copy(first + size(), last, finish);
 			}
-			else if (capacity <= count)
+			else if (all_capacity > count)
+			{
+				my_stl::copy(first, first + size(), start);
+				__alloc_new_space(count - capacity);  //申请新缓冲区
+				finish = my_stl::uninitialized_copy(first + size(), last, finish);
+			}
+			else
 			{
 				//如果不足以存放count个元素，则需要重新申请map
+				//申请新空间
 				__alloc_new_map(count);
 				finish = my_stl::uninitialized_copy(first, last, start);
 			}
@@ -613,22 +687,7 @@ namespace my_stl
 		const_iterator end() const { return finish; }
 		const_iterator cbegin() const { return ((const Myt *)this)->begin(); }
 		const_iterator cend() const { return ((const Myt*)this)->end(); }
-		//reverse_iterator rbegin() { return reverse_iterator(finish - 1); }
-		//const_reverse_iterator rbegin() const { return const_reverse_iterator(finish - 1); }
-		//const_reverse_iterator crbegin() const { return ((const Myt*)this)->rbegin(); }
-		/*reverse_iterator rend()
-		{
-		reverse_iterator tmp(start);
-		--tmp.cur;
-		return tmp;
-		}
-		const_reverse_iterator rend() const
-		{
-		reverse_iterator tmp(start);
-		--tmp.cur;
-		return tmp;
-		}
-		const_reverse_iterator crend() const { return ((const Myt*)this)->rend(); }*/
+
 		bool empty() { return start == finish; }
 		size_type size() const { return (start == finish ? 0 : finish - start); }
 		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
@@ -639,11 +698,12 @@ namespace my_stl
 			{
 				size_type space_size = iterator::buffer_size();
 				//释放那些在finish.node之后的中控节点指向的空缓冲区
-				for (map_pointer p = finish.node + 1; p && *p && p != map + map_size; ++p)
+				for (map_pointer p = finish.node + 1; p != end_map; ++p)
 				{
 					alloc.deallocate(*p, space_size);
-					*p = pointer();
+					//					*p = pointer();
 				}
+				end_map = finish.node + 1;
 			}
 		}
 
@@ -657,17 +717,105 @@ namespace my_stl
 
 		iterator insert(const_iterator pos, const T& value)
 		{
-
+			iterator tmp_pos(pos);
+			size_type n = size() + 1; //全部元素数量
+			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
+			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
+			if (all_capacity > n)  //不需要重新申请map
+			{
+				if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
+					__alloc_new_space(n - capacity);  //申请新缓冲区
+			}
+			else  //需要重新申请map
+			{
+				__alloc_new_map(n);
+			}
+			iterator old_finish = finish;
+			if (tmp_pos != finish)
+			{
+				finish = my_stl::uninitialized_copy(finish - 1, finish, finish);  //finish-1 复制到finish的位置去
+				//[pos, old_finish)的元素后移count个单位
+				for (iterator p = old_finish; p != tmp_pos; --p)
+					*(p + 1) = *p;
+				alloc.construct(pos.cur, value); //在原来pos的位置填充value
+			}
+			else
+			{
+				alloc.construct(pos.cur, value); //在原来pos的位置填充value
+				++finish;
+			}
+			return tmp_pos;
 		}
 
 		iterator insert(const_iterator pos, T&& value)
 		{
-
+			iterator tmp_pos(pos);
+			size_type n = size() + 1; //全部元素数量
+			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
+			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
+			if (all_capacity > n)  //不需要重新申请map
+			{
+				if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
+					__alloc_new_space(n - capacity);  //申请新缓冲区
+			}
+			else  //需要重新申请map
+			{
+				__alloc_new_map(n);
+			}
+			iterator old_finish = finish;
+			if (tmp_pos != finish)
+			{
+				finish = my_stl::uninitialized_copy(finish - 1, finish, finish);  //finish-1 复制到finish的位置去
+				//[pos, old_finish)的元素后移count个单位
+				for (iterator p = old_finish; p != tmp_pos; --p)
+					*(p + 1) = *p;
+				my_stl::fill_n(tmp_pos, 1, value); //在原来pos的位置填充count个value
+			}
+			else
+			{
+				__move_insert(pos, std::move(value), is_POD()); //在原来pos的位置填充value
+				++finish;
+			}
+			return tmp_pos;
 		}
 
 		iterator insert(const_iterator pos, size_type count, const T& value)
 		{
-
+			iterator tmp_pos(pos);
+			if (count != 0)
+			{
+				size_type n = size() + count; //全部元素数量
+				size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
+				size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+				size_type all_capacity = map_size * space_size; //不申请新map的最大容量
+				if (all_capacity > n)  //不需要重新申请map
+				{
+					if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
+						__alloc_new_space(n - capacity);  //申请新缓冲区
+				}
+				else  //需要重新申请map
+				{
+					__alloc_new_map(n);
+				}
+				iterator old_finish = finish;
+				if (size_type(finish - tmp_pos) >= count)
+				{
+					finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count个元素复制到finish开始的位置去
+					//[pos, old_finish)的元素后移count个单位
+					for (iterator p = old_finish; p != tmp_pos; --p)
+						*(p + count) = *p;
+					my_stl::fill_n(tmp_pos, count, value); //在原来pos的位置填充count个value
+				}
+				else
+				{
+					finish = my_stl::uninitialized_copy(pos, const_iterator(finish), tmp_pos + count);  //[pos, finish)后移count个单位
+					my_stl::uninitialized_fill(iterator(old_finish), tmp_pos + count, value);  //[old_finish, pos + count) 填充value
+					my_stl::fill(tmp_pos, iterator(old_finish), value); //[pos, old)finish) 填充value
+				}
+			}
+			return tmp_pos;
 		}
 		iterator insert(const_iterator pos, int count, const T& value){ return insert(pos, size_type(count), value); }
 		iterator insert(const_iterator pos, long count, const T& value) { return insert(pos, size_type(count), value); }
@@ -675,21 +823,108 @@ namespace my_stl
 		template< class InputIt >
 		iterator insert(const_iterator pos, InputIt first, InputIt last)
 		{
-
+			iterator tmp_pos(pos);
+			if (first != last)
+			{
+				size_type count = my_stl::distance(first, last);
+				size_type n = size() + count; //全部元素数量
+				size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
+				size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+				size_type all_capacity = map_size * space_size; //不申请新map的最大容量
+				if (all_capacity > n)  //不需要重新申请map
+				{
+					if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
+						__alloc_new_space(n - capacity);  //申请新缓冲区
+				}
+				else  //需要重新申请map
+				{
+					__alloc_new_map(n);
+				}
+				iterator old_finish = finish;
+				if (size_type(finish - tmp_pos) >= count)
+				{
+					finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count个元素复制到finish开始的位置去
+					//[pos, old_finish)的元素后移count个单位
+					for (iterator p = old_finish; p != tmp_pos; --p)
+						*(p + count) = *p;
+					my_stl::copy(first, last, tmp_pos); //在原来pos的位置填充count个value
+				}
+				else
+				{
+					finish = my_stl::uninitialized_copy(tmp_pos, finish, tmp_pos + count);  //[pos, finish)后移count个单位
+					my_stl::copy_n(first, size_type(old_finish - pos), tmp_pos); // 前部分复制到[pos, old_finish)
+					my_stl::uninitialized_copy(first + (old_finish - pos), last, old_finish);  //后部分复制到old_finish开始的位置
+				}
+			}
+			return tmp_pos;
 		}
 
 		iterator insert(const_iterator pos, std::initializer_list<T> ilist)
 		{
+			return insert(pos, ilist.begin(), ilist.end());
+		}
 
+		template< class... Args >
+		iterator emplace(const_iterator pos, Args&&... args)
+		{
+			return insert(pos, std::forward<Args>(args)...);
+		}
+
+		iterator erase(iterator pos)
+		{
+			my_stl::copy(pos + 1, finish, pos);
+			alloc.destroy(--finish.cur);
+			return pos;
+		}
+
+		iterator erase(const_iterator pos)
+		{
+			return iterator(iterator(pos));
+		}
+
+		iterator erase(iterator first, iterator last)
+		{
+			if (first != last)
+			{
+				iterator tmp_finish = finish - (last - first);
+				my_stl::copy(last, finish, first);
+				while (finish != tmp_finish)
+					alloc.destroy(--finish.cur);
+			}
+			return first;
+		}
+
+		iterator erase(const_iterator first, const_iterator last)
+		{
+			return erase(iterator(first), iterator(last));
 		}
 
 
+		void push_back(const T& value){ insert(finish, value); }
+		void push_back(T&& value) { insert(finish, std::move(value)); }
+		void pop_back() { alloc.destroy(--finish.cur); }
+
+		template< class... Args >
+		void emplace_back(Args&&... args)
+		{
+			insert(finish, std::forward<Args>(args)...);
+		}
+
+
+		void push_front(const T& value) { insert(start, value); }
+		void push_front(T&& value) { insert(start, std::move(value)); }
+		template< class... Args >
+		void emplace_front(Args&&... args)
+		{
+			insert(start, std::forward<Args>(args)...);
+		}
 
 
 	private:
 		iterator start, finish; // 首、尾迭代器
 		//		reverse_iterator rstart, rfinish; //首尾反向迭代器
 		map_pointer map;	//指向中控单元
+		map_pointer end_map; //指向当前可用中控单元的尾后
 		size_type map_size; //map的大小
 		allocator_type alloc;    //内存配置器
 		allocator<T*> alloc_map;
@@ -711,7 +946,7 @@ namespace my_stl
 			//设置finish迭代器的值
 			finish.set_node(map + map_size - 1);
 			finish.cur = finish.first + offset;
-
+			end_map = map + map_size;
 		}
 
 		void __fill_initialize(size_type n, const value_type &value)
@@ -753,7 +988,7 @@ namespace my_stl
 			}
 
 			if (map)
-				alloc_map.deallocate(map, map_size);
+				alloc_map.deallocate(map, end_map - map);
 		}
 
 		void __alloc_new_map(size_type n)
@@ -761,32 +996,59 @@ namespace my_stl
 			//计算需要几个缓冲区
 			size_type space_size = iterator::buffer_size();
 			size_type need_map_size = n / space_size + 1;
-			size_type new_map_size = std::max(need_map_size + 2, 2 * map_size);
-			//释放原有空间
-			__destroy_and_destruct();
+			size_type new_map_size = std::max(need_map_size + 2, map_size);
 			//申请中控器空间
-			map = alloc_map.allocate(new_map_size);
-			map_size = new_map_size;
+			map_pointer new_map = alloc_map.allocate(new_map_size);
+			size_type offset = (new_map_size - need_map_size) / 2;
+			//复制原中控信息
+			std::memcpy(new_map + offset, map, sizeof(map) / sizeof(char));
+
 			//申请缓存区空间、构造中控器各元素
-			for (int i = 0; i != need_map_size; ++i)
-				alloc_map.construct(&(map[i]), alloc.allocate(space_size));
-			//多余中控区构造为空指针
-			for (int i = need_map_size; i != map_size; ++i)
-				alloc_map.construct(&(map[i]), pointer());
+			for (int i = map_size; i != need_map_size; ++i)
+				alloc_map.construct(&(new_map[i + offset]), alloc.allocate(space_size));
+			map_pointer new_end_map = new_map + offset + need_map_size;
+			for (map_pointer p = map; p != end_map; ++p)
+				alloc_map.destroy(p);
+			if (map)
+				alloc_map.deallocate(map, end_map - map);
+			map = new_map;
+			map_size = new_map_size;
+			end_map = new_end_map;
 			//设置start迭代器的值
-			start.set_node(map);
+			start.set_node(map + offset);
 			start.cur = start.first;
 
-
-			difference_type offset = n % space_size;
-			//设置finish迭代器的值
-			finish.set_node(map + need_map_size - 1);
-			finish.cur = finish.first + offset;
-
+			finish.node = end_map;
+		}
+		void __alloc_new_space(size_type n)
+		{
+			//计算需要几个缓冲区
+			size_type space_size = iterator::buffer_size();
+			size_type need_map_size = n / space_size + 1;
+			//申请缓存区空间、从end_map位置构造中控单元
+			for (int i = 0; i != need_map_size; ++i)
+				alloc_map.construct(end_map++, alloc.allocate(space_size));
+		}
+		map_pointer __alloc_new_space_forward(size_type n)
+		{
+			//计算需要几个缓冲区
+			size_type space_size = iterator::buffer_size();
+			size_type need_map_size = n / space_size + 1;
+			//申请缓存区空间、从end_map位置构造中控单元
+			map_pointer tmp = start.node;
+			for (int i = 0; i != need_map_size; ++i)
+				alloc_map.construct(--tmp, alloc.allocate(space_size));
+			return tmp;
 		}
 
-
-
+		void __move_insert(const_iterator pos, T&& value, __true_type)
+		{
+			memmove(pos.cur, &value, sizeof(T) / sizeof(unsigned char));
+		}
+		void __move_insert(const_iterator pos, T&& value, __false_type)
+		{
+			alloc.construct(pos.cur, value);
+		}
 	};
 }
 #endif
