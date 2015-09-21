@@ -524,7 +524,7 @@ namespace my_stl
 		{
 			size_type ilist_size = ilist.size();
 			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type capacity = (end_map - start.node) * space_size; // 当前deque的容量
 			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //map向下扩展的总容量
 			size_type up_capacity = (start.node - map) * space_size + capacity; //map向上扩展的总容量
 			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
@@ -578,7 +578,9 @@ namespace my_stl
 		void assign(size_type count, const T& value)
 		{
 			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type capacity = (end_map - start.node) * space_size; // 当前deque的容量
+			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //map向下扩展的总容量
+			size_type up_capacity = (start.node - map) * space_size + capacity; //map向上扩展的总容量
 			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
 			if (size() >= count)
 			{
@@ -593,15 +595,32 @@ namespace my_stl
 				my_stl::fill_n(start, size(), value);
 				finish = my_stl::uninitialized_fill_n(finish, count - size(), value);
 			}
-			else if (all_capacity > count)
+			else if (down_capacity > count) //如果向下拓展空间足够
 			{
 				my_stl::fill_n(start, size(), value);
 				__alloc_new_space(count - capacity);  //申请新缓冲区
 				finish = my_stl::uninitialized_fill_n(finish, count - size(), value);
 			}
+			else if (up_capacity > count) //如果向上拓展空间足够
+			{
+				map_pointer map_start = __alloc_new_space_forward(count - capacity);  //申请新缓冲区
+				my_stl::fill_n(start, size(), value);
+				start -= count - size();
+				my_stl::uninitialized_fill_n(start, count - size(), value);
+			}
+			else if (all_capacity > count) //全部拓展空间足够
+			{
+				my_stl::fill_n(start, size(), value);
+				difference_type offset = (count - capacity) / 2;
+				__alloc_new_space_forward(count - capacity - offset);  //向上申请新缓冲区
+				__alloc_new_space(count - capacity - offset);  //向下申请新缓冲区
+				start -= offset;
+				my_stl::uninitialized_fill_n(start, size_type(offset), value);
+				finish = my_stl::uninitialized_fill_n(finish, size_type(count - size()), value);
+			}
 			else
 			{
-				//如果不足以存放count个元素，则需要重新申请map
+				//如果不足以存放other的所有元素，则需要重新申请map
 				//申请新空间
 				__alloc_new_map(count);
 				finish = my_stl::uninitialized_fill_n(start, count, value);
@@ -614,9 +633,11 @@ namespace my_stl
 		template< class InputIt >
 		void assign(InputIt first, InputIt last)
 		{
-			size_type count = my_stl::distance(first, last); //元素总数量
+			size_type count = my_stl::distance(first, last);
 			size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-			size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+			size_type capacity = (end_map - start.node) * space_size; // 当前deque的容量
+			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //map向下扩展的总容量
+			size_type up_capacity = (start.node - map) * space_size + capacity; //map向上扩展的总容量
 			size_type all_capacity = map_size * space_size; //不申请新map的最大容量
 			if (size() >= count)
 			{
@@ -631,10 +652,28 @@ namespace my_stl
 				my_stl::copy(first, first + size(), start);
 				finish = my_stl::uninitialized_copy(first + size(), last, finish);
 			}
-			else if (all_capacity > count)
+			else if (down_capacity > count) //如果向下拓展空间足够
 			{
 				my_stl::copy(first, first + size(), start);
 				__alloc_new_space(count - capacity);  //申请新缓冲区
+				finish = my_stl::uninitialized_copy(first + size(), last, finish);
+			}
+			else if (up_capacity > count) //如果向上拓展空间足够
+			{
+				__alloc_new_space_forward(count - capacity);  //申请新缓冲区
+				size_type old_size = size();
+				my_stl::copy(last - old_size, last, start);
+				start -= count - size();
+				my_stl::uninitialized_copy(first, last - old_size, start);
+			}
+			else if (all_capacity > count) //全部拓展空间足够
+			{
+				difference_type offset = (count - capacity) / 2;
+				my_stl::copy(first + offset, first + offset + size(), start);
+				__alloc_new_space_forward(count - capacity - offset);  //向上申请新缓冲区
+				__alloc_new_space(count - capacity - offset);  //向下申请新缓冲区
+				start -= offset;
+				my_stl::uninitialized_copy(first, first + offset, start);
 				finish = my_stl::uninitialized_copy(first + size(), last, finish);
 			}
 			else
@@ -996,15 +1035,17 @@ namespace my_stl
 			//计算需要几个缓冲区
 			size_type space_size = iterator::buffer_size();
 			size_type need_map_size = n / space_size + 1;
-			size_type new_map_size = std::max(need_map_size + 2, map_size);
+			size_type new_map_size = std::max(need_map_size + 2, 2 * map_size);
 			//申请中控器空间
 			map_pointer new_map = alloc_map.allocate(new_map_size);
 			size_type offset = (new_map_size - need_map_size) / 2;
 			//复制原中控信息
-			std::memcpy(new_map + offset, map, sizeof(map) / sizeof(char));
+			size_type ind = 0;
+			for (map_pointer p = start.node; p != end_map; ++p, ++ind)
+				new_map[offset + ind] = *p;
 
 			//申请缓存区空间、构造中控器各元素
-			for (int i = map_size; i != need_map_size; ++i)
+			for (int i = ind; i != need_map_size; ++i)
 				alloc_map.construct(&(new_map[i + offset]), alloc.allocate(space_size));
 			map_pointer new_end_map = new_map + offset + need_map_size;
 			for (map_pointer p = map; p != end_map; ++p)
