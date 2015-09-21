@@ -61,6 +61,8 @@ int main()
 	print(dq6);	
 	dq6.assign(dq7.begin(), dq7.end());
 	print(dq6);
+	dq6.clear();
+	print(dq6);
 	dq6.assign({ 1, 2, 3, 4, 5 });
 	print(dq6);
 	cout << dq6.at(1) << " " << dq6[2] << " " << dq6.front() << " " << dq6.back() << endl;
@@ -75,8 +77,27 @@ int main()
 	dq7.shrink_to_fit();
 	print(dq6);
 	cout << "************" << endl;
-	//	dq6.insert(dq6.begin(), 10);
-	////	print(dq6);
+	dq6.push_back(1);
+	print(dq6);
+	int a = 2;
+	dq6.push_back(std::move(a));
+	print(dq6);
+	dq6.pop_front();
+	print(dq6);
+
+	dq6.pop_front();
+	dq6.push_front(12);
+	print(dq6);
+	int b = 3;
+	dq6.pop_front();
+	dq6.push_front(b);
+	print(dq6);
+	dq6.pop_front();
+	b = 4;
+	dq6.push_front(std::move(b));
+	print(dq6);
+//	dq6.insert(dq6.begin(), 10);
+//	print(dq6);
 	////	dq6.insert(dq6.end(), dq7.begin(), dq7.end());
 	////	print(dq6);
 	////	dq6.insert(dq6.begin() + 1, 128, 2);
@@ -85,16 +106,12 @@ int main()
 	////	print(dq6);
 	//	auto iter = dq6.emplace(dq6.begin() + 3, 12);
 	//	cout << *iter << endl;
-	//	dq6.push_back(1);
-	//	print(dq6);
-	//	int a = 2;
-	//	dq6.push_back(std::move(a));
-	//	print(dq6);
-	//	iter = dq6.erase(iter);
-	//	cout << *iter << endl;
-	//	iter = dq6.erase(dq6.cbegin() + 3, dq6.cend() - 1);
-	//	cout << *iter << endl;
-	//	dq6.push_front(12);
-	//	print(dq6);
+
+	auto iter = dq6.erase(dq6.begin() + 3);
+	cout << *iter << endl;
+	iter = dq6.erase(dq6.cbegin() + 3, dq6.cend() - 1);
+	cout << *iter << endl;
+	print(dq6);
+
 	return 0;
 }
