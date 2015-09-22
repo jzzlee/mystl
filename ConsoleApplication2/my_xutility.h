@@ -71,5 +71,20 @@ namespace my_stl
 		return current;
 	}
 	
+	//真正的copy
+	template< class InputIt, class ForwardIt >
+	ForwardIt copy_backward(InputIt first, InputIt last, ForwardIt d_first)
+	{
+		typedef typename iterator_traits<ForwardIt>::value_type Value;
+		ptrdiff_t offset = my_stl::distance(first, last);
+		my_stl::advance(d_first, offset);
+		ForwardIt current = d_first;
+		--first;
+		for (--last; last != first; --last, --current) {
+			::new (static_cast<void*>(my_stl::addressof(*current))) Value(*last); //use placement new to initialize the object
+		}
+		return current;
+	}
+
 }
 #endif

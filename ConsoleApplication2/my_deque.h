@@ -754,188 +754,39 @@ namespace my_stl
 				alloc.destroy((--finish).cur);
 		}
 
-		//iterator insert(const_iterator pos, const T& value)
-		//{
-		//	iterator tmp_pos(pos);
-		//	size_type count = size() + 1; //全部元素数量
-		//	size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-		//	size_type capacity = (end_map - start.node) * space_size; // 当前deque的容量
-		//	size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //map向下扩展的总容量
-		//	size_type up_capacity = (start.node - map) * space_size + capacity; //map向上扩展的总容量
-		//	size_type all_capacity = map_size * space_size; //不申请新map的最大容量
-		//	
-		//	difference_type offset = tmp_pos - start; //距离开始的距离
-		//	if (capacity > count)  //不需要重新申请缓冲区
-		//	{
-		//		if (offset > size() / 2) //插入点靠前
-		//		{
-		//			if (start.cur != start.first)//向前有空
-		//			{
-		//				my_stl::copy(start, tmp_pos, start - 1);
-		//				--start;
-		//				*pos = value;
-		//			}
-		//			else  //if (finish.node != end_map - 1 || finish.cur != finish.last - 1)//向后有空
-		//			{
-		//				alloc.construt(finish.cur, *(finish - 1);
-		//				for (iterator p = finish - 1; p != tmp_pos; --p)
-		//					*p = *(p - 1);
-		//				++finish;
-		//				*pos = value;
-		//			}
-		//		}
-		//		else   //插入点靠后
-		//		{
-		//			if (finish.node != end_map - 1 || finish.cur != finish.last - 1)//向后有空
-		//			{
-		//				alloc.construt(finish.cur, *(finish - 1);
-		//				for (iterator p = finish - 1; p != tmp_pos; --p)
-		//					*p = *(p - 1);
-		//				++finish;
-		//				*pos = value;
-		//			}
-		//			else   //向前有空
-		//			{
-		//				my_stl::copy(start, tmp_pos, start - 1);
-		//				--start;
-		//				*pos = value;
-		//			}
-		//		}
-		//	}
-		//	else if (down_capacity > count) //如果向下拓展空间足够
-		//	{
-		//		__alloc_new_space(count - capacity);  //申请新缓冲区
-		//		alloc.construt(finish.cur, *(finish - 1);
-		//		for (iterator p = finish - 1; p != tmp_pos; --p)
-		//			*p = *(p - 1);
-		//		++finish;
-		//		*pos = value;
-		//	}
-		//	else if (up_capacity > count) //如果向上拓展空间足够
-		//	{
-		//		__alloc_new_space_forward(count - capacity);  //申请新缓冲区
-		//		my_stl::copy(start, tmp_pos, start - 1);
-		//		--start;
-		//		*pos = value;
-		//	}
-		//	else
-		//	{
-		//		//如果不足以存放count个元素，则需要重新申请map
-		//		//申请新空间
-		//		__alloc_new_map(count);
-		//		if (offset > size() / 2) //插入点靠前
-		//		{
-		//			if (start.cur != start.first)//向前有空
-		//			{
-		//				my_stl::copy(start, tmp_pos, start - 1);
-		//				--start;
-		//				*pos = value;
-		//			}
-		//			else  //if (finish.node != end_map - 1 || finish.cur != finish.last - 1)//向后有空
-		//			{
-		//				alloc.construt(finish.cur, *(finish - 1);
-		//				for (iterator p = finish - 1; p != tmp_pos; --p)
-		//					*p = *(p - 1);
-		//				++finish;
-		//				*pos = value;
-		//			}
-		//		}
-		//		else   //插入点靠后
-		//		{
-		//			if (finish.node != end_map - 1 || finish.cur != finish.last - 1)//向后有空
-		//			{
-		//				alloc.construt(finish.cur, *(finish - 1);
-		//				for (iterator p = finish - 1; p != tmp_pos; --p)
-		//					*p = *(p - 1);
-		//				++finish;
-		//				*pos = value;
-		//			}
-		//			else   //向前有空
-		//			{
-		//				my_stl::copy(start, tmp_pos, start - 1);
-		//				--start;
-		//				*pos = value;
-		//			}
-		//		}
-		//	}
-		//	return tmp_pos;
-		//}
+		iterator insert(const_iterator pos, const T& value)
+		{
+			if (pos.cur == start.cur)
+			{
+				push_front(value);
+				return start;
+			}
+			else if (pos.cur == finish.cur)
+			{
+				push_back(value);
+				return finish - 1;
+			}
+			else
+				return __insert_aux(pos, value);
+		}
 
-		//iterator insert(const_iterator pos, T&& value)
-		//{
-		//	iterator tmp_pos(pos);
-		//	size_type count = size() + 1; //全部元素数量
-		//	size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-		//	size_type capacity = (end_map - start.node) * space_size; // 当前deque的容量
-		//	size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //map向下扩展的总容量
-		//	size_type up_capacity = (start.node - map) * space_size + capacity; //map向上扩展的总容量
-		//	size_type all_capacity = map_size * space_size; //不申请新map的最大容量
-
-		//	difference_type offset = tmp_pos - start; //距离开始的距离
-		//	if (capacity > count)  //不需要重新申请缓冲区
-		//	{
-		//		if (offset > size() / 2) //插入点靠前
-		//		{
-		//			if (start.cur != start.first)//向前有空
-		//			{
-		//				my_stl::copy(start, tmp_pos, start - 1);
-		//				--start;
-		//				__move_insert(pos, std::move(value), is_POD());
-		//			}
-		//			else  //if (finish.node != end_map - 1 || finish.cur != finish.last - 1)//向后有空
-		//			{
-		//				alloc.construt(finish.cur, *(finish - 1);
-		//				for (iterator p = finish - 1; p != tmp_pos; --p)
-		//					*p = *(p - 1);
-		//				++finish;
-		//				__move_insert(pos, std::move(value), is_POD());
-		//			}
-		//		}
-		//		else   //插入点靠后
-		//		{
-		//			if (finish.node != end_map - 1 || finish.cur != finish.last - 1)//向后有空
-		//			{
-		//				alloc.construt(finish.cur, *(finish - 1);
-		//				for (iterator p = finish - 1; p != tmp_pos; --p)
-		//					*p = *(p - 1);
-		//				++finish;
-		//				__move_insert(pos, std::move(value), is_POD());
-		//			}
-		//			else   //向前有空
-		//			{
-		//				my_stl::copy(start, tmp_pos, start - 1);
-		//				--start;
-		//				__move_insert(pos, std::move(value), is_POD());
-		//			}
-		//		}
-		//	}
-		//	else if (down_capacity > count) //如果向下拓展空间足够
-		//	{
-		//		__alloc_new_space(count - capacity);  //申请新缓冲区
-		//		alloc.construt(finish.cur, *(finish - 1);
-		//		for (iterator p = finish - 1; p != tmp_pos; --p)
-		//			*p = *(p - 1);
-		//		++finish;
-		//		__move_insert(pos, std::move(value), is_POD());
-		//	}
-		//	else if (up_capacity > count) //如果向上拓展空间足够
-		//	{
-		//		__alloc_new_space_forward(count - capacity);  //申请新缓冲区
-		//		my_stl::copy(start, tmp_pos, start - 1);
-		//		--start;
-		//		__move_insert(pos, std::move(value), is_POD());
-		//	}
-		//	else
-		//	{
-		//		//如果不足以存放count个元素，则需要重新申请map
-		//		//申请新空间
-		//		__alloc_new_map(count);
-		//		finish = my_stl::uninitialized_copy(first, pos, start);
-		//		tmp_pos = start + offset;
-		//	}
-		//	return tmp_pos;
-		//}
-
+		iterator insert(const_iterator pos, T&& value)
+		{
+			if (pos.cur == start.cur)
+			{
+				push_front(value);
+				return start;
+			}
+			else if (pos.cur == finish.cur)
+			{
+				push_back(value);
+				return finish - 1;
+			}
+			else
+				return __move_insert_aux(pos, std::move(value));
+		}
+		
+		//
 		iterator insert(const_iterator pos, size_type count, const T& value)
 		{
 			iterator tmp_pos(pos);
@@ -1247,15 +1098,6 @@ namespace my_stl
 			return tmp;
 		}
 
-		void __move_insert(const_iterator pos, T&& value, __true_type)
-		{
-			memmove(pos.cur, &value, sizeof(T) / sizeof(unsigned char));
-		}
-		void __move_insert(const_iterator pos, T&& value, __false_type)
-		{
-			alloc.construct(pos.cur, value);
-		}
-
 		void __alloc_new_front(size_type n)
 		{
 			//计算需要几个缓冲区
@@ -1284,7 +1126,48 @@ namespace my_stl
 			start.node = map + offset;
 			finish.node = map + offset + need_map_size - 1;
 		}
+		iterator __insert_aux(iterator pos, const T& value)
+		{
+			difference_type offset = pos - start;
+			if ((size_type)offset < size() / 2)//插入点靠前
+			{
+				push_front(front()); //插入第一个元素
+				my_stl::copy(start + 2, pos, start + 1); //元素移动
+			}
+			else //插入点靠后
+			{
+				push_back(back()); //插入最后一个元素
+				my_stl::copy_backward(pos, finish - 2, finish - 1); //元素往后移动
+			}
+			*pos = value;
+			return pos;
+		}
 
+		void __move_insert(const_iterator pos, const T&& value, __true_type)
+		{
+			memmove(pos.cur, &value, sizeof(T) / sizeof(unsigned char));
+		}
+		void __move_insert(const_iterator pos, const T&& value, __false_type)
+		{
+			*pos = value;
+		}
+
+		iterator __move_insert_aux(iterator pos, const T&& value)
+		{
+			difference_type offset = pos - start;
+			if ((size_type)offset < size() / 2)//插入点靠前
+			{
+				push_front(front()); //插入第一个元素
+				my_stl::copy(start + 2, pos, start + 1); //元素移动
+			}
+			else //插入点靠后
+			{
+				push_back(back()); //插入最后一个元素
+				my_stl::copy_backward(pos, finish - 2, finish - 1); //元素往后移动
+			}
+			__move_insert(pos, std::move(value), is_POD());
+			return pos;
+		}
 	};
 }
 #endif
