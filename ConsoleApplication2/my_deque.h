@@ -785,96 +785,102 @@ namespace my_stl
 			else
 				return __move_insert_aux(pos, std::move(value));
 		}
-		
-		//
+
 		iterator insert(const_iterator pos, size_type count, const T& value)
 		{
-			iterator tmp_pos(pos);
-			if (count != 0)
-			{
-				size_type n = size() + count; //全部元素数量
-				size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-				size_type capacity = (end_map - map) * space_size; // 当前deque的容量
-				size_type all_capacity = map_size * space_size; //不申请新map的最大容量
-				if (all_capacity > n)  //不需要重新申请map
-				{
-					if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
-						__alloc_new_space(n - capacity);  //申请新缓冲区
-				}
-				else  //需要重新申请map
-				{
-					__alloc_new_map(n);
-				}
-				iterator old_finish = finish;
-				if (size_type(finish - tmp_pos) >= count)
-				{
-					finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count个元素复制到finish开始的位置去
-					//[pos, old_finish)的元素后移count个单位
-					for (iterator p = old_finish; p != tmp_pos; --p)
-						*(p + count) = *p;
-					my_stl::fill_n(tmp_pos, count, value); //在原来pos的位置填充count个value
-				}
-				else
-				{
-					finish = my_stl::uninitialized_copy(pos, const_iterator(finish), tmp_pos + count);  //[pos, finish)后移count个单位
-					my_stl::uninitialized_fill(iterator(old_finish), tmp_pos + count, value);  //[old_finish, pos + count) 填充value
-					my_stl::fill(tmp_pos, iterator(old_finish), value); //[pos, old)finish) 填充value
-				}
-			}
-			return tmp_pos;
-		}
-		iterator insert(const_iterator pos, int count, const T& value){ return insert(pos, size_type(count), value); }
-		iterator insert(const_iterator pos, long count, const T& value) { return insert(pos, size_type(count), value); }
-
-		template< class InputIt >
-		iterator insert(const_iterator pos, InputIt first, InputIt last)
-		{
-			iterator tmp_pos(pos);
-			if (first != last)
-			{
-				size_type count = my_stl::distance(first, last);
-				size_type n = size() + count; //全部元素数量
-				size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
-				size_type capacity = (end_map - map) * space_size; // 当前deque的容量
-				size_type all_capacity = map_size * space_size; //不申请新map的最大容量
-				if (all_capacity > n)  //不需要重新申请map
-				{
-					if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
-						__alloc_new_space(n - capacity);  //申请新缓冲区
-				}
-				else  //需要重新申请map
-				{
-					__alloc_new_map(n);
-				}
-				iterator old_finish = finish;
-				if (size_type(finish - tmp_pos) >= count)
-				{
-					finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count个元素复制到finish开始的位置去
-					//[pos, old_finish)的元素后移count个单位
-					for (iterator p = old_finish; p != tmp_pos; --p)
-						*(p + count) = *p;
-					my_stl::copy(first, last, tmp_pos); //在原来pos的位置填充count个value
-				}
-				else
-				{
-					finish = my_stl::uninitialized_copy(tmp_pos, finish, tmp_pos + count);  //[pos, finish)后移count个单位
-					my_stl::copy_n(first, size_type(old_finish - pos), tmp_pos); // 前部分复制到[pos, old_finish)
-					my_stl::uninitialized_copy(first + (old_finish - pos), last, old_finish);  //后部分复制到old_finish开始的位置
-				}
-			}
-			return tmp_pos;
+			return __fill_insert(pos, count, value);
 		}
 
-		iterator insert(const_iterator pos, std::initializer_list<T> ilist)
-		{
-			return insert(pos, ilist.begin(), ilist.end());
-		}
 
-		template< class... Args >
-		iterator emplace(const_iterator pos, Args&&... args)
-		{
-			return insert(pos, std::forward<Args>(args)...);
-		}
+		//
+		//iterator insert(const_iterator pos, size_type count, const T& value)
+		//{
+		//	iterator tmp_pos(pos);
+		//	if (count != 0)
+		//	{
+		//		size_type n = size() + count; //全部元素数量
+		//		size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
+		//		size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+		//		size_type all_capacity = map_size * space_size; //不申请新map的最大容量
+		//		if (all_capacity > n)  //不需要重新申请map
+		//		{
+		//			if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
+		//				__alloc_new_space(n - capacity);  //申请新缓冲区
+		//		}
+		//		else  //需要重新申请map
+		//		{
+		//			__alloc_new_map(n);
+		//		}
+		//		iterator old_finish = finish;
+		//		if (size_type(finish - tmp_pos) >= count)
+		//		{
+		//			finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count个元素复制到finish开始的位置去
+		//			//[pos, old_finish)的元素后移count个单位
+		//			for (iterator p = old_finish; p != tmp_pos; --p)
+		//				*(p + count) = *p;
+		//			my_stl::fill_n(tmp_pos, count, value); //在原来pos的位置填充count个value
+		//		}
+		//		else
+		//		{
+		//			finish = my_stl::uninitialized_copy(pos, const_iterator(finish), tmp_pos + count);  //[pos, finish)后移count个单位
+		//			my_stl::uninitialized_fill(iterator(old_finish), tmp_pos + count, value);  //[old_finish, pos + count) 填充value
+		//			my_stl::fill(tmp_pos, iterator(old_finish), value); //[pos, old)finish) 填充value
+		//		}
+		//	}
+		//	return tmp_pos;
+		//}
+		//iterator insert(const_iterator pos, int count, const T& value){ return insert(pos, size_type(count), value); }
+		//iterator insert(const_iterator pos, long count, const T& value) { return insert(pos, size_type(count), value); }
+
+		//template< class InputIt >
+		//iterator insert(const_iterator pos, InputIt first, InputIt last)
+		//{
+		//	iterator tmp_pos(pos);
+		//	if (first != last)
+		//	{
+		//		size_type count = my_stl::distance(first, last);
+		//		size_type n = size() + count; //全部元素数量
+		//		size_type space_size = iterator::buffer_size(); //一个缓冲区的容量
+		//		size_type capacity = (end_map - map) * space_size; // 当前deque的容量
+		//		size_type all_capacity = map_size * space_size; //不申请新map的最大容量
+		//		if (all_capacity > n)  //不需要重新申请map
+		//		{
+		//			if (capacity <= n) //当前缓冲区空余位置不足以放下count新元素
+		//				__alloc_new_space(n - capacity);  //申请新缓冲区
+		//		}
+		//		else  //需要重新申请map
+		//		{
+		//			__alloc_new_map(n);
+		//		}
+		//		iterator old_finish = finish;
+		//		if (size_type(finish - tmp_pos) >= count)
+		//		{
+		//			finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count个元素复制到finish开始的位置去
+		//			//[pos, old_finish)的元素后移count个单位
+		//			for (iterator p = old_finish; p != tmp_pos; --p)
+		//				*(p + count) = *p;
+		//			my_stl::copy(first, last, tmp_pos); //在原来pos的位置填充count个value
+		//		}
+		//		else
+		//		{
+		//			finish = my_stl::uninitialized_copy(tmp_pos, finish, tmp_pos + count);  //[pos, finish)后移count个单位
+		//			my_stl::copy_n(first, size_type(old_finish - pos), tmp_pos); // 前部分复制到[pos, old_finish)
+		//			my_stl::uninitialized_copy(first + (old_finish - pos), last, old_finish);  //后部分复制到old_finish开始的位置
+		//		}
+		//	}
+		//	return tmp_pos;
+		//}
+
+		//iterator insert(const_iterator pos, std::initializer_list<T> ilist)
+		//{
+		//	return insert(pos, ilist.begin(), ilist.end());
+		//}
+
+		//template< class... Args >
+		//iterator emplace(const_iterator pos, Args&&... args)
+		//{
+		//	return insert(pos, std::forward<Args>(args)...);
+		//}
 
 		iterator erase(iterator pos)
 		{
@@ -944,7 +950,7 @@ namespace my_stl
 
 
 		void push_front(const T& value)
-		{ 
+		{
 			if (start.cur != start.first)
 			{
 				alloc.construct(--start.cur, value);
@@ -972,7 +978,7 @@ namespace my_stl
 		{
 			push_front(std::forward<Args>(args)...);
 		}
-		void pop_front() { alloc.destroy(start.cur); ++start;  }
+		void pop_front() { alloc.destroy(start.cur); ++start; }
 
 
 	private:
@@ -1073,7 +1079,7 @@ namespace my_stl
 			end_map = new_end_map;
 			//设置start迭代器的值
 			start.set_node(map + offset);
-//			start.cur = start.first;
+			//			start.cur = start.first;
 
 			finish.node = end_map;
 		}
@@ -1166,6 +1172,31 @@ namespace my_stl
 				my_stl::copy_backward(pos, finish - 2, finish - 1); //元素往后移动
 			}
 			__move_insert(pos, std::move(value), is_POD());
+			return pos;
+		}
+
+		iterator __fill_insert(iterator pos, size_type count, const T& value)
+		{
+			if (pos.cur == start.cur)
+			{
+				//__alloc_new_space_forward(count);
+				my_stl::uninitialized_fill_n(start - count, count, value);
+				start -= count;
+				std::cout << '1' << std::endl;
+				return pos;
+			}
+			else if (pos.cur == finish.cur)
+			{
+				__alloc_new_space(count);
+				finish = my_stl::uninitialized_fill_n(finish, count, value);
+				return pos;
+			}
+			else
+				return __fill_insert_aux(pos, count, value);
+		}
+
+		iterator __fill_insert_aux(iterator pos, size_type count, const T& value)
+		{
 			return pos;
 		}
 	};

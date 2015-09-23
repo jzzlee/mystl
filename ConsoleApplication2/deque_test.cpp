@@ -103,6 +103,13 @@ int main()
 	print(dq6);
 	dq6.insert(dq6.end() - 1, 10);
 	print(dq6);
+	dq6.insert(dq6.end(), 3, 2);
+	print(dq6);
+	while (dq6.begin() != dq6.end())
+		dq6.pop_front();
+	print(dq6);
+	dq6.insert(dq6.begin(), 9, 1);
+	print(dq6);
 	////	dq6.insert(dq6.end(), dq7.begin(), dq7.end());
 	////	print(dq6);
 	////	dq6.insert(dq6.begin() + 1, 128, 2);

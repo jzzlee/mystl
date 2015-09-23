@@ -82,6 +82,8 @@
     <ClInclude Include="my_iterator.h" />
     <ClInclude Include="my_list.h" />
     <ClInclude Include="my_memory.h" />
+    <ClInclude Include="my_queue.h" />
+    <ClInclude Include="my_stack.h" />
     <ClInclude Include="my_type_traits.h" />
     <ClInclude Include="my_uninitialized.h" />
     <ClInclude Include="my_vector.h" />
@@ -93,7 +95,7 @@
     <Text Include="更新历史.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="deque_test.cpp" />
+    <ClCompile Include="queue_stack_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
