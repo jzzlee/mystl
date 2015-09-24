@@ -1,8 +1,8 @@
-#ifndef __MY_HEAP_H_
+﻿#ifndef __MY_HEAP_H_
 #define __MY_HEAP_H_
 
 #include "my_iterator.h"
-
+#include  <functional>
 namespace my_stl
 {
 	template< class RandomIt, typename T, typename Distance, class Compare >
@@ -128,6 +128,88 @@ namespace my_stl
 			--holeIndex;
 		}
 	}
+
+	template< class RandomIt, class Distance,  class Compare >
+	std::size_t __check_heap(RandomIt first, Distance len, Compare comp)
+	{
+		typedef std::size_t size_type;
+		size_type parent = 0;
+		size_type endIndex = (len - 2) / 2;
+		size_type child = parent * 2 + 2;
+		while (parent < endIndex)
+		{
+			if (comp(*(first + parent), *(first + (child - 1))))
+				return child - 1;
+			else if (comp(*(first + parent), *(first + child)))
+				return child;
+			else
+			{
+				++parent;
+				child = parent * 2 + 2;
+			}
+		}
+		if (parent == endIndex)
+		{
+			if (comp(*(first + parent), *(first + (child - 1))))
+			{
+				return child - 1;
+			}
+			else
+			{
+				if (child == len)
+					return len;
+				else if (comp(*(first + parent), *(first + (child - 1))))
+					return child;
+				else
+					return len;
+			}
+		}
+		return len;
+	}
+
+	template< class RandomIt, class Compare >
+	bool is_heap(RandomIt first, RandomIt last, Compare comp)
+	{
+		typedef typename iterator_traits<RandomIt>::size_type size_type;
+		size_type len = last - first;
+		if (__check_heap(first, len, comp) == len)
+			return true;
+		else
+			return false;
+	}
+
+	template< class RandomIt >
+	bool is_heap(RandomIt first, RandomIt last)
+	{
+		typedef typename iterator_traits<RandomIt>::size_type size_type;
+		size_type len = last - first;
+		if (__check_heap(first, len, std::less<>()) == len)
+			return true;
+		else
+			return false;
+	}
+
+	template< class RandomIt, class Compare >
+	RandomIt is_heap_until(RandomIt first, RandomIt last, Compare comp)
+	{
+		typedef typename iterator_traits<RandomIt>::size_type size_type;
+		size_type len = last - first;
+		return first + __check_heap(first, len, comp);
+	}
+
+	template< class RandomIt >
+	RandomIt is_heap_until(RandomIt first, RandomIt last)
+	{
+		typedef typename iterator_traits<RandomIt>::size_type size_type;
+		size_type len = last - first;
+		return first + __check_heap(first, len, std::less<>());
+	}
+
+
+
+
+
+
 }
 
 #endif

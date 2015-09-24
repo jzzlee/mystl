@@ -1,5 +1,8 @@
 ﻿更新说明
 	
+	v1.4.2
+	完成heap的is_heap, is_heap_until.
+
 	v1.4.1
 	完成heap.
 
