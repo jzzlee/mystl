@@ -1,5 +1,8 @@
 ﻿更新说明
 	
+	v1.4.1
+	完成heap.
+
 	v1.3.1
 	使用vector实现stack,使用list实现queue.
 
