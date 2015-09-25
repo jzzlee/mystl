@@ -1,7 +1,10 @@
 ﻿更新说明
 	
+	v1.5.1
+	完成priority_queue.
+
 	v1.4.2
-	完成heap的is_heap, is_heap_until.
+	完成heap.
 
 	v1.4.1
 	完成heap.

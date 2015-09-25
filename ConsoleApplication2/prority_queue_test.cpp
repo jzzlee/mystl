@@ -1,10 +1,18 @@
 #include <iostream>
-#include "my_algorithm.h"
-#include "my_vector.h"
+#include <functional>
+#include "my_queue.h"
 
 using namespace my_stl;
 using std::cout;
 using std::endl;
+
+template<typename T> void print_queue(T& q) {
+	while (!q.empty()) {
+		std::cout << q.top() << " ";
+		q.pop();
+	}
+	std::cout << '\n';
+}
 
 int main()
 {
@@ -41,7 +49,7 @@ int main()
 
 	vector<int> v{ 3, 1, 4, 1, 5, 9 };
 
-	make_heap(v.begin(), v.end());
+	my_stl::make_heap(v.begin(), v.end());
 
 	// probably mess up the heap
 	v.push_back(2);
@@ -56,6 +64,21 @@ int main()
 	std::cout << "only heap: ";
 	for (auto i = v.begin(); i != heap_end; ++i) std::cout << *i << ' ';
 	std::cout << '\n';
+
+
+	priority_queue<int> q;
+
+	for (int n : {1, 8, 5, 6, 3, 4, 0, 9, 3, 2})
+		q.push(n);
+
+	print_queue(q);
+
+	priority_queue<int, vector<int>, std::greater<int> > q2;
+
+	for (int n : {1, 8, 5, 6, 3, 4, 0, 9, 3, 2})
+		q2.push(n);
+
+	print_queue(q2);
 
 	return 0;
 }
