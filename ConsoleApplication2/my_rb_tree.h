@@ -238,6 +238,138 @@ namespace my_stl
 		root->color = __rb_tree_black; //根节点为黑色
 	}
 
+	//用v为根节点的子树替代以u为根节点的子树
+	inline void transplant(__rb_tree_node_base *u, __rb_tree_node_base *v, __rb_tree_node_base *&root)
+	{
+		//先跟双亲节点脱离
+		if (v == v->parent->left)
+			v->parent->left = 0;
+		else
+			v->parent->right = 0;
+
+		//替代u的位置
+		if (u == root) //u是树根
+			root->parent->parent = v;
+		else if (u == u->parent->left) //u是父节点的左孩子
+			u->parent->left = v;
+		else
+			u->parent->right = v;
+
+		//改变parent
+		v->parent = u->parent;
+	}
+
+	//删除节点的树调整
+	inline void rb_delete_fixup(__rb_tree_node_base *x, __rb_tree_node_base *&root)
+	{
+		__rb_tree_node_base *w;
+		while (x != root && x->color == __rb_tree_black)
+		{
+			if (x == x->parent->left) //x是父节点的左孩子
+			{
+				w = x->parent->right; //w是x的兄弟节点
+				if (w->color == __rb_tree_red) //case1,w节点是红色，改变颜色后左旋到case2~4
+				{
+					w->color = __rb_tree_black;
+					x->parent->color = __rb_tree_red;
+					__rb_tree_rotate_left(x->parent, root);
+					w = x->parent->right;
+				}
+				if (w->left->color == __rb_tree_black &&w->right->color == __rb_tree_black) //case2, w颜色是黑色，w左右孩子均为黑色
+				{
+					w->color = __rb_tree_red;
+					x = x->parent;
+				}
+				else if (w->right->color == __rb_tree_black) //case3, w颜色是黑色，w孩子左红右黑
+				{
+					w->left->color = __rb_tree_black;
+					w->color = __rb_tree_red;
+					__rb_tree_rotate_right(w, root);
+					w = x->parent->right;
+				}
+				else										//case4, w颜色是黑色，w右孩子是红色
+				{
+					w->color = x->parent->color;
+					x->parent->color = __rb_tree_black;
+					w->right->color = __rb_tree_black;
+					__rb_tree_rotate_left(x->parent, root);
+					x = root;
+				}
+			}
+			else                            //如果x是父节点的右孩子，与以上对称处理
+			{
+				w = x->parent->left; //w是x的兄弟节点
+				if (w->color == __rb_tree_red) //case1,w节点是红色，改变颜色后左旋到case2~4
+				{
+					w->color = __rb_tree_black;
+					x->parent->color = __rb_tree_red;
+					__rb_tree_rotate_right(x->parent, root);
+					w = x->parent->left;
+				}
+				if (w->left->color == __rb_tree_black &&w->right->color == __rb_tree_black) //case2, w颜色是黑色，w左右孩子均为黑色
+				{
+					w->color = __rb_tree_red;
+					x = x->parent;
+				}
+				else if (w->left->color == __rb_tree_black) //case3, w颜色是黑色，w孩子左黑右红
+				{
+					w->right->color = __rb_tree_black;
+					w->color = __rb_tree_red;
+					__rb_tree_rotate_left(w, root);
+					w = x->parent->left;
+				}
+				else										//case4, w颜色是黑色，w左孩子是红色
+				{
+					w->color = x->parent->color;
+					x->parent->color = __rb_tree_black;
+					w->left->color = __rb_tree_black;
+					__rb_tree_rotate_right(x->parent, root);
+					x = root;
+				}
+			}
+		}
+	}
+
+
+	//删除z为根节点的树的z节点
+	inline void rb_erase(__rb_tree_node_base *z, __rb_tree_node_base *&root)
+	{
+		__rb_tree_node_base *y = z;
+		__rb_tree_node_base *x;
+		__rb_tree_color_type y_color = y->color; //保存z节点原本的颜色
+		if (z->left == 0)//没有左孩子
+		{
+			x = z->right;
+			transplant(z, z->right, root);
+		}
+		else if (z->right == 0) //没有右孩子
+		{
+			x = z->left;
+			transplant(z, z->left, root);
+		}
+		else
+		{
+			y = __rb_tree_node_base::minimum(z->right); //要把这个节点移到z的位置
+			y_color = y->color; //记录该节点原本颜色
+			x = y->right;
+			//if (y->parent == z) //y是z的孩子，直接移上去
+			//	x->parent = y; // ??????????????
+			if (y->parent != z) //y不是z的孩子
+			{
+				transplant(y, y->right, root); //y是最小的，所以没有左孩子，直接让右孩子取代y
+				//y替代z
+				y->right = z->right;
+				y->right->parent = y;
+			}
+			transplant(z, y, root);
+			y->left = z->left;
+			y->left->parent = y;
+			y->color = z->color;
+		}
+		if (y_color == __rb_tree_black) //如果原来颜色是黑色，需要调整树
+			rb_delete_fixup(x, root);
+	}
+
 
 	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator = allocator<Value> >
 	class rb_tree
@@ -330,23 +462,60 @@ namespace my_stl
 			leftmost() = header; //header左孩子为自己
 			rightmost() = header; //header右孩子为自己
 		}
-		//void  clear()
-		//{
-		//	link_type x = root();
-		//	if (node_count != 0) {
-		//		leftmost() = header;
-		//		root() = 0;
-		//		rightmost() = header;
-		//		node_count = 0;
-		//	}
-		//}
+
+
+		//递归删除x为根节点的子树
+		void erase_for_clear(link_type x)
+		{
+			while (x)
+			{
+				erase_for_clear((link_type)x->right);
+				link_type y = (link_type)x->left;
+				destroy_node(x);
+				x = y;
+			}
+		}
+
+		//清除树的所有节点
+		void  clear()
+		{
+			if (node_count != 0) {
+				erase_for_clear(root());
+				leftmost() = header;
+				root() = 0;
+				rightmost() = header;
+				node_count = 0;
+			}
+		}
+
+		void copy(link_type x, link_type p)
+		{
+			link_type top = clone_node(x);
+			top->parent = p;
+			p->parent = top;
+			if (x->right)
+				top->right = copy(right(x), top);
+			p = top;
+			x = left(x);
+
+			while (x)
+			{
+				link_type y = clone_node(x);
+				p->left = y;
+				y->parent = p;
+				if (x->right)
+					y->right = copy(right(x), y);
+				p = y;
+				x = left(x);
+			}
+		}
 
 	public:
 
 		rb_tree(const Compare &comp = Compare()) : node_count(0), key_compare(comp){ init(); }
 		~rb_tree()
 		{
-			//clear();
+			clear();
 			put_node(header);
 		}
 
@@ -355,14 +524,34 @@ namespace my_stl
 
 		Compare key_comp() const { return key_compare; }
 		iterator begin() { return leftmost(); }
+		const_iterator begin() const { return leftmost(); }
 		iterator end() { return header; }
+		const_iterator end() const { return header; }
 		bool empty() const { return node_count == 0; }
 		size_type size() const { return node_count; }
 		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
 
+		void swap(rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &t)
+		{
+			std::swap(header, t.header);
+			std::swap(node_count, t.node_count);
+			std::swap(key_compare, t.key_compare);
+			std::swap(alloc, t.alloc);
+			std::swap(alloc_node, t.alloc_node);
+		}
+
 		std::pair<iterator, bool> insert_unique(const value_type &x);
 		iterator insert_equal(const value_type &x);
+
+		iterator insert_equal(const_iterator hint, const value_type &x);
+		iterator insert_unique(const_iterator hint, const value_type &x);
+
 		iterator find(const key_type &key);
+
+		void erase(iterator x);
+		size_type erase(const key_type& __x);
+		void erase(iterator __first, iterator __last);
+		void erase(const key_type* __first, const key_type* __last);
 
 		void inprint()
 		{
@@ -394,6 +583,35 @@ namespace my_stl
 			}
 		}
 	};
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator >
+	rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::operator=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &x)
+	{
+		if (this != &x)
+		{
+			clear();
+			node_count = 0;
+			key_compare = x.key_compare;
+			alloc = x.alloc;
+			alloc_node = x.alloc_node;
+
+			if (x.root() == 0)
+			{
+				root() = 0;
+				leftmost() = 0;
+				rightmost() = 0;
+			}
+			else
+			{
+				root() = copy(x.root(), header);
+				leftmost() = minimum(root());
+				rightmost() = maximum(root());
+				node_count = x.node_count;
+			}
+		}
+		return *this;
+	}
 
 	//允许重复插入
 	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator >
@@ -472,6 +690,75 @@ namespace my_stl
 		return iterator(z);
 	}
 
+	//带位置提示的equal insert
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::insert_equal(const_iterator hint, const value_type &v)
+	{
+		if (hint.node == header->left) //最小值
+		{
+			if (node_count > 0 && !key_compare(key(hint.node), KeyOfValue()(v)))
+				return __insert(hint.node, hint.node, v);
+			else
+				return insert_equal(v);
+		}
+		else if (hint.node == header) //end()
+		{
+			if (!key_compare(KeyOfValue()(v), key(rightmost())))
+				return __insert(0, rightmost(), v);
+			else
+				return insert_equal(v);
+		}
+		else
+		{
+			iterator before = hint;
+			--before;
+			if (!key_compare(KeyOfValue()(v), key(before.node)) && !key_compare(key(hint.node), KeyOfValue()(v)))
+				if (right(before.node) == 0)
+					return __insert(0, before.node, v);
+				else
+					return __insert(hint.node, hint.node, v);
+			else
+				return insert_equal(v);
+		}
+
+	}
+
+	//带位置提示的unique insert
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator >
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::insert_unique(const_iterator hint, const Value &v)
+	{
+		if (hint.node == header->left) // begin()
+		{
+			if (size() > 0 && key_compare(KeyOfValue()(v), key(hint.node)))
+				return __insert(hint.node, hint.node, v);
+			else
+				return insert_unique(v).first;
+		}
+		else if (hint.node == header) // end()
+		{
+			if (key_compare(key(rightmost()), KeyOfValue()(v)))
+				return __insert(0, rightmost(), v);
+			else
+				return insert_unique(v).first;
+		}
+		else
+		{
+			iterator before = hint;
+			--before;
+			if (key_compare(key(before.node), KeyOfValue()(v)) && key_compare(KeyOfValue()(v), key(hint.node)))
+			{
+				if (right(before.node) == 0)
+					return __insert(0, before.node, v);
+				else
+					return __insert(hint.node, hint.node, v);
+			}
+			else
+				return insert_unique(v).first;
+		}
+	}
+
 	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
 	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
 		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::find(const Key &k)
@@ -492,7 +779,11 @@ namespace my_stl
 		return (j == end() || key_compare(k, key(j.node))) ? end() : j;
 	}
 
-
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	void rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::erase(iterator x)
+	{
+		rb_erase(x.node, header->parent);
+	}
 
 }
 
