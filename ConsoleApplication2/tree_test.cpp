@@ -16,6 +16,13 @@ using std::endl;
 
 int main() {
 
+	int cx = 3;
+	const auto &ax = cx;
+	int mx = 4;
+	//	auto &bx = std::move(mx);
+
+	cout << ax << endl;
+
 	rb_tree<int, int, std::identity<int>, std::less<int> > itree;
 	cout << itree.size() << endl;
 
@@ -68,8 +75,19 @@ int main() {
 
 	itree.inprint();
 	cout << endl;
-	auto iter = itree.find(6);
+	auto iter = itree.find(10);
 	cout << *iter << endl;
+	itree.erase(iter);
+
+	iter1 = itree.begin();
+
+
+	for (; iter1 != iter2; ++iter1)
+	{
+		rbtite = __rb_tree_iterator_base(iter1);
+		cout << *iter1 << "(" << rbtite.node->color << ")  ";
+	}
+	cout << endl;
 	return 0;
 
 }
