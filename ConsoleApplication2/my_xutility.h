@@ -24,7 +24,7 @@ namespace my_stl
 
 	//底层fill函数
 	template<class ForwardIt, class T>
-	void fill(ForwardIt first, ForwardIt last, const T& value)
+	ForwardIt fill(ForwardIt first, ForwardIt last, const T& value)
 	{
 		typedef typename iterator_traits<ForwardIt>::value_type Value;
 		ForwardIt current = first;
@@ -61,7 +61,7 @@ namespace my_stl
 
 	//真正的copy_n函数
 	template<class InputIt, class Size, class ForwardIt>
-	ForwardIt copy_n_(InputIt first, Size count, ForwardIt d_first)
+	ForwardIt copy_n(InputIt first, Size count, ForwardIt d_first)
 	{
 		typedef typename iterator_traits<ForwardIt>::value_type Value;
 		ForwardIt current = d_first;
@@ -84,6 +84,30 @@ namespace my_stl
 			::new (static_cast<void*>(my_stl::addressof(*current))) Value(*last); //use placement new to initialize the object
 		}
 		return current;
+	}
+
+	//检查[first, last)区间的元素是否与d_first开始的对应元素相等
+	template<typename InputIt, typename ForwardIt>
+	bool equal(InputIt first, InputIt last, ForwardIt d_first)
+	{
+		for (; first != last; ++first, ++d_first)
+		{
+			if (*first != *d_first)
+				return false;
+		}
+		return true;
+	}
+
+	//在[first, last)范围内查找value，若找到，返回所在位置；否则，返回last
+	template<typename InputIt, typename T>
+	InputIt find(InputIt first, InputIt last, const T &value)
+	{
+		for (; first != last; ++first)
+		{
+			if (*first == value)
+				return first;
+		}
+		return last;
 	}
 
 }
