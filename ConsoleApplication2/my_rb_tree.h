@@ -6,6 +6,8 @@
 #include "my_iterator.h"
 #include "my_xutility.h"
 #include <utility>
+#include <initializer_list>
+
 
 namespace my_stl
 {
@@ -114,6 +116,7 @@ namespace my_stl
 		__rb_tree_iterator() {}
 		__rb_tree_iterator(link_type x) { node = x; }
 		__rb_tree_iterator(const iterator &it) { node = it.node; }
+		__rb_tree_iterator(const const_iterator &it) { node = it.node; }
 
 		reference operator*() const { return link_type(node)->value; }
 		//		pointer opterator->() const { return &(operator*()); }
@@ -132,6 +135,11 @@ namespace my_stl
 			decrement();
 			return tmp;
 		}
+
+		//inline bidirectional_iterator_tag
+		//	iterator_category(const __rb_tree_iterator_base&) {
+		//	return bidirectional_iterator_tag();
+		//}
 	};
 
 	inline bool operator==(const __rb_tree_iterator_base &x, const __rb_tree_iterator_base &y) {
@@ -241,6 +249,8 @@ namespace my_stl
 	//用v为根节点的子树替代以u为根节点的子树
 	inline void transplant(__rb_tree_node_base *u, __rb_tree_node_base *v, __rb_tree_node_base *&root)
 	{
+		if (!v)
+			return;
 		//先跟双亲节点脱离
 		if (v == v->parent->left)
 			v->parent->left = 0;
@@ -331,44 +341,7 @@ namespace my_stl
 	}
 
 
-	//删除z为根节点的树的z节点
-	inline void rb_erase(__rb_tree_node_base *z, __rb_tree_node_base *&root)
-	{
-		__rb_tree_node_base *y = z;
-		__rb_tree_node_base *x;
-		__rb_tree_color_type y_color = y->color; //保存z节点原本的颜色
-		if (z->left == 0)//没有左孩子
-		{
-			x = z->right;
-			transplant(z, z->right, root);
-		}
-		else if (z->right == 0) //没有右孩子
-		{
-			x = z->left;
-			transplant(z, z->left, root);
-		}
-		else
-		{
-			y = __rb_tree_node_base::minimum(z->right); //要把这个节点移到z的位置
-			y_color = y->color; //记录该节点原本颜色
-			x = y->right;
-			//if (y->parent == z) //y是z的孩子，直接移上去
-			//	x->parent = y; // ??????????????
-			if (y->parent != z) //y不是z的孩子
-			{
-				transplant(y, y->right, root); //y是最小的，所以没有左孩子，直接让右孩子取代y
-				//y替代z
-				y->right = z->right;
-				y->right->parent = y;
-			}
-			transplant(z, y, root);
-			y->left = z->left;
-			y->left->parent = y;
-			y->color = z->color;
-		}
-		if (y_color == __rb_tree_black) //如果原来颜色是黑色，需要调整树
-			rb_delete_fixup(x, root);
-	}
+
 
 
 	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator = allocator<Value> >
@@ -381,6 +354,7 @@ namespace my_stl
 		typedef __rb_tree_color_type color_type;
 
 	public:
+		typedef rb_tree<Key, Value, KeyOfValue, Compare, Allocator> Myt;
 		typedef Key key_type;
 		typedef Value value_type;
 		typedef Value* pointer;
@@ -452,6 +426,7 @@ namespace my_stl
 
 	private:
 		iterator __insert(base_ptr x, base_ptr y, const value_type &v);
+		void rb_erase(__rb_tree_node_base *z, __rb_tree_node_base *&root);
 		link_type __copy(link_type x, link_type p);
 		void __erase(link_type x);
 		void init()
@@ -488,11 +463,11 @@ namespace my_stl
 			}
 		}
 
-		void copy(link_type x, link_type p)
+		//复制以p为header，x为根节点的一棵树，返回新树的根节点
+		link_type copy(link_type x, link_type p)
 		{
 			link_type top = clone_node(x);
 			top->parent = p;
-			p->parent = top;
 			if (x->right)
 				top->right = copy(right(x), top);
 			p = top;
@@ -508,11 +483,44 @@ namespace my_stl
 				p = y;
 				x = left(x);
 			}
+			return top;
 		}
 
 	public:
+		rb_tree() : node_count(0), key_compare() { init(); }
+		rb_tree(const Compare &comp) : node_count(0), key_compare(comp) { init(); }
+		rb_tree(const Compare &comp, const allocator_type &a) : node_count(0), key_compare(comp), alloc(a) { init(); }
+		rb_tree(const allocator_type &a) : node_count(0), key_compare(), alloc(a){ init(); }
+		rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &t)
+			: node_count(t.node_count), key_compare(t.key_compare), alloc(t.alloc), alloc_node(t.alloc_node)
+		{
+			if (t.root() == 0)
+				init();
+			else
+			{
+				header = get_node(); //创建header节点
+				color(header) = __rb_tree_red;
+				root() = copy(t.root(), header);
+				leftmost() = minimum(root());
+				rightmost() = maximum(root());
+			}
+		}
 
-		rb_tree(const Compare &comp = Compare()) : node_count(0), key_compare(comp){ init(); }
+		rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &t, const allocator_type &a)
+			: node_count(t.node_count), key_compare(t.key_compare), alloc(a), alloc_node(t.alloc_node)
+		{
+			if (t.root() == 0)
+				init();
+			else
+			{
+				header = get_node(); //创建header节点
+				color(header) = __rb_tree_red;
+				root() = copy(t.root(), header);
+				leftmost() = minimum(root());
+				rightmost() = maximum(root());
+			}
+		}
+
 		~rb_tree()
 		{
 			clear();
@@ -521,12 +529,20 @@ namespace my_stl
 
 		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
 			operator=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &x);
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
+			operator=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&x);
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
+			operator=(std::initializer_list<value_type> ilist);
 
 		Compare key_comp() const { return key_compare; }
 		iterator begin() { return leftmost(); }
 		const_iterator begin() const { return leftmost(); }
+		const_iterator cbegin() const { return ((const Myt*)this)->begin(); }
+
 		iterator end() { return header; }
 		const_iterator end() const { return header; }
+		const_iterator cend() const { return ((const Myt*)this)->end(); }
+
 		bool empty() const { return node_count == 0; }
 		size_type size() const { return node_count; }
 		size_type max_size() const { return std::numeric_limits<size_type>::max(); }
@@ -546,22 +562,41 @@ namespace my_stl
 		iterator insert_equal(const_iterator hint, const value_type &x);
 		iterator insert_unique(const_iterator hint, const value_type &x);
 
-		iterator find(const key_type &key);
+		template<typename ForwardIt>
+		void insert_equal(ForwardIt first, ForwardIt last);
 
-		void erase(iterator x);
-		size_type erase(const key_type& __x);
-		void erase(iterator __first, iterator __last);
-		void erase(const key_type* __first, const key_type* __last);
+		template<typename ForwardIt>
+		void insert_unique(ForwardIt first, ForwardIt last);
 
-		void inprint()
+		iterator find(const key_type &k);
+		const_iterator find(const key_type& k) const;
+
+		iterator erase(iterator x);
+		iterator erase(const_iterator x);
+
+		size_type erase(const key_type&  key);
+		iterator erase(const_iterator first, const_iterator last);
+
+		iterator lower_bound(const key_type& k);
+		const_iterator lower_bound(const key_type& k) const;
+		iterator upper_bound(const key_type& k);
+		const_iterator upper_bound(const key_type& k) const;
+
+		size_type count(const key_type& k) const;
+
+		std::pair<iterator, iterator> equal_range(const key_type& k);
+		std::pair<const_iterator, const_iterator> equal_range(const key_type& k) const;
+
+		void inprint() const
 		{
 			base_ptr x = header->parent;
 			print(x);
 		}
-		void print(base_ptr z)
+		void print(base_ptr z) const
 		{
 			if (!z->left && !z->right)
 			{
+				cout << "leftandright" << endl;
 				cout << ((link_type)(z))->value << endl;
 				return;
 			}
@@ -572,6 +607,7 @@ namespace my_stl
 			}
 			else if (!z->left)
 			{
+				cout << "left" << endl;
 				cout << ((link_type)(z))->value << endl;
 				print(z->right);
 			}
@@ -610,6 +646,41 @@ namespace my_stl
 				node_count = x.node_count;
 			}
 		}
+		return *this;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator >
+	rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::operator=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&x)
+	{
+		if (this != &x)
+		{
+			if (alloc == x.alloc) //一样就直接指向x的内容
+			{
+				clear();
+				node_count = x.node_count;
+				header = x.header;
+				key_compare = x.key_compare;
+				alloc_node = x.alloc_node;
+				x.node_count = 0;
+				x.header->parent = x.header->left = x.header->right = 0;
+			}
+			else
+			{
+				*this = x;
+			}
+		}
+		return *this;
+	}
+
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator >
+	rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::operator=(std::initializer_list<value_type> ilist)
+	{
+		clear();
+		node_count = 0;
+		insert_unique(ilist.begin(), ilist.end());
 		return *this;
 	}
 
@@ -759,6 +830,24 @@ namespace my_stl
 		}
 	}
 
+	//范围equal插入
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator >
+	template<typename ForwardIt>
+	void rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::insert_equal(ForwardIt first, ForwardIt last)
+	{
+		for (; first != last; ++first)
+			insert_equal(*first);
+	}
+
+	//范围unique插入
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	template<typename ForwardIt>
+	void rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::insert_unique(ForwardIt first, ForwardIt last)
+	{
+		for (; first != last; ++first)
+			insert_unique(*first);
+	}
+
 	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
 	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
 		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::find(const Key &k)
@@ -779,11 +868,255 @@ namespace my_stl
 		return (j == end() || key_compare(k, key(j.node))) ? end() : j;
 	}
 
+
+	//删除root为根节点的树的z节点
 	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
-	void rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::erase(iterator x)
+	void rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::rb_erase(__rb_tree_node_base *z, __rb_tree_node_base *&root)
 	{
-		rb_erase(x.node, header->parent);
+		__rb_tree_node_base *y = z;
+		__rb_tree_node_base *x;
+		__rb_tree_color_type y_color = y->color; //保存z节点原本的颜色
+		if (z->left == 0)//没有左孩子
+		{
+			x = z->right;
+			transplant(z, z->right, root);
+		}
+		else if (z->right == 0) //没有右孩子
+		{
+			x = z->left;
+			transplant(z, z->left, root);
+		}
+		else
+		{
+			y = __rb_tree_node_base::minimum(z->right); //要把这个节点移到z的位置
+			y_color = y->color; //记录该节点原本颜色
+			x = y->right;
+			if (y->parent == z) //y是z的孩子，直接移上去
+				x->parent = y; // ??????????????
+			if (y->parent != z) //y不是z的孩子
+			{
+				transplant(y, y->right, root); //y是最小的，所以没有左孩子，直接让右孩子取代y
+				//y替代z
+				y->right = z->right;
+				y->right->parent = y;
+			}
+			transplant(z, y, root);
+			y->left = z->left;
+			y->left->parent = y;
+			y->color = z->color;
+		}
+		if (y_color == __rb_tree_black) //如果原来颜色是黑色，需要调整树
+			rb_delete_fixup(x, root);
+		--node_count;
 	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::erase(iterator x)
+	{
+		iterator y = x;
+		++y;
+		rb_erase(x.node, header->parent);
+		destroy_node((link_type)x.node);
+		return y;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::erase(const_iterator x)
+	{
+		iterator y = x;
+		++y;
+		rb_erase(x.node, header->parent);
+		destroy_node((link_type)x.node);
+		return y;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::erase(const_iterator first, const_iterator last)
+	{
+		for (; first != last;)
+		{
+			first = erase(first);
+			//			destroy_node((link_type)first.node);
+		}
+		return (iterator)last;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::size_type
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::erase(const key_type&  k)
+	{
+		std::pair<iterator, iterator> p = equal_range(k);
+		size_type n = my_stl::distance(p.first, p.second);
+		erase(p.first, p.second);
+		return n;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::lower_bound(const Key &k)
+	{
+		link_type y = header;
+		link_type x = root();
+		while (x)
+		{
+			if (!key_compare(key(x), k))
+			{
+				y = x;
+				x = left(x);
+			}
+			else
+				x = right(x);
+		}
+		return iterator(y);
+		//iterator j = iterator(y);
+		//return (j == end() || key_compare(k, key(j.node))) ? end() : j;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::const_iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::lower_bound(const key_type& k) const
+	{
+		link_type y = header;
+		link_type x = root();
+		while (x)
+		{
+			if (!key_compare(key(x), k))
+			{
+				y = x;
+				x = left(x);
+			}
+			else
+				x = right(x);
+		}
+		return const_iterator(y);
+		//const_iterator j = iterator(y);
+		//return (j == cend() || key_compare(k, key(j.node))) ? cend() : j;
+	}
+
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::upper_bound(const key_type& k)
+	{
+		link_type y = header;
+		link_type x = root();
+		while (x)
+		{
+			if (key_compare(k, key(x)))
+			{
+				y = x;
+				x = left(x);
+			}
+			else
+			{
+				x = right(x);
+			}
+		}
+		return iterator(y);
+		//iterator j = iterator(y);
+		//return (j == end() || key_compare(k, key(j.node))) ? end() : j;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::const_iterator
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::upper_bound(const key_type& k) const
+	{
+		link_type y = header;
+		link_type x = root();
+		while (x)
+		{
+			if (key_compare(k, key(x)))
+			{
+				y = x;
+				x = left(x);
+			}
+			else
+			{
+				x = right(x);
+			}
+		}
+		return const_iterator(y);
+
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::size_type
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::count(const key_type &k) const
+	{
+		std::pair<const_iterator, const_iterator> p = equal_range(k);
+		return (size_type)my_stl::distance(p.first, p.second);
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator,
+		typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::iterator>
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::equal_range(const key_type &k)
+	{
+		iterator upp = upper_bound(k);
+		return std::pair<iterator, iterator>(lower_bound(k), upp);
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	std::pair<typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::const_iterator,
+		typename rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::const_iterator>
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::equal_range(const key_type &k) const
+	{
+		return std::pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	inline bool	operator==(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& lhs,
+		const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& rhs)
+	{
+		return (lhs.size() == rhs.size() && my_stl::equal(lhs.begin(), lhs.end(), rhs.begin()));
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	inline bool	operator!=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& lhs,
+		const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	inline bool	operator<(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& lhs,
+		const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& rhs)
+	{
+		return (lexicographical_compare(lhs.begin(), lhs.end(),
+			rhs.begin(), rhs.end()));
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	inline bool	operator>(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& lhs,
+		const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& rhs)
+	{
+		return rhs < lhs;
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	inline bool	operator<=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& lhs,
+		const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& rhs)
+	{
+		return !(rhs < lhs);
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	inline bool	operator>=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& lhs,
+		const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& rhs)
+	{
+		return !(lhs < rhs);
+	}
+
+	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator>
+	inline void swap(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& lhs,
+		const rb_tree<Key, Value, KeyOfValue, Compare, Allocator>& rhs)
+	{
+		lhs.swap(rhs);
+	}
+
 
 }
 
