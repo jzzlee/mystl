@@ -200,8 +200,7 @@ namespace my_stl
 	template< class RandomIt >
 	RandomIt is_heap_until(RandomIt first, RandomIt last)
 	{
-		typedef typename iterator_traits<RandomIt>::size_type size_type;
-		size_type len = last - first;
+		std::size_t len = last - first;
 		return first + __check_heap(first, len, std::less<>());
 	}
 
