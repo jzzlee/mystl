@@ -38,7 +38,6 @@ namespace my_stl
 		typedef typename I::difference_type difference_type;
 		typedef typename I::pointer pointer;
 		typedef typename I::reference reference;
-		typedef typename I::size_type size_type;
 
 	};
 
@@ -51,7 +50,6 @@ namespace my_stl
 		typedef ptrdiff_t difference_type;
 		typedef T* pointer;
 		typedef T& reference;
-		typedef std::size_t size_type;
 
 	};
 
@@ -64,8 +62,6 @@ namespace my_stl
 		typedef ptrdiff_t difference_type;
 		typedef const T* pointer;
 		typedef const T& reference;
-		typedef std::size_t size_type;
-
 
 	};
 
