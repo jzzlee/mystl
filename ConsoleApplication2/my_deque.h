@@ -914,7 +914,7 @@ namespace my_stl
 
 		void push_back(const T& value)
 		{
-			if (finish.cur != finish.last - 1)
+			if (finish.cur != finish.last && finish.cur != finish.last - 1)
 			{
 				alloc.construct(finish.cur, value);
 				++finish.cur;
@@ -1149,16 +1149,16 @@ namespace my_stl
 			return pos;
 		}
 
-		void __move_insert(const_iterator pos, const T&& value, __true_type)
+		void __move_insert(const_iterator pos, T&& value, __true_type)
 		{
 			memmove(pos.cur, &value, sizeof(T) / sizeof(unsigned char));
 		}
-		void __move_insert(const_iterator pos, const T&& value, __false_type)
+		void __move_insert(const_iterator pos, T&& value, __false_type)
 		{
 			*pos = value;
 		}
 
-		iterator __move_insert_aux(iterator pos, const T&& value)
+		iterator __move_insert_aux(iterator pos, T&& value)
 		{
 			difference_type offset = pos - start;
 			if ((size_type)offset < size() / 2)//²åÈëµã¿¿Ç°

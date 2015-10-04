@@ -775,7 +775,7 @@ namespace my_stl
 		void __push_back(T &&value, __false_type)
 		{
 			//如果T不是POD类型，调用push_back(const T&)
-			push_back(T(value));
+			push_back(value);
 		}
 
 		void __allocate_new_space(size_type n, const T &value)

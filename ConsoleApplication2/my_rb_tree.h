@@ -44,7 +44,7 @@ namespace my_stl
 	struct __rb_tree_node : public __rb_tree_node_base
 	{
 		typedef __rb_tree_node<T>* link_type;
-		T value;
+		T _value;
 	};
 
 
@@ -118,8 +118,8 @@ namespace my_stl
 		__rb_tree_iterator(const iterator &it) { node = it.node; }
 		__rb_tree_iterator(const const_iterator &it) { node = it.node; }
 
-		reference operator*() const { return link_type(node)->value; }
-		//		pointer opterator->() const { return &(operator*()); }
+		reference operator*() const { return link_type(node)->_value; }
+		pointer operator->() const { return &(operator*()); }
 
 		self &operator++() { increment(); return *this; }
 		self operator++(int)
@@ -382,13 +382,13 @@ namespace my_stl
 		link_type create_node(const value_type &x)
 		{
 			link_type tmp = get_node();
-			alloc.construct(&tmp->value, x);
+			alloc.construct(&tmp->_value, x);
 			return tmp;
 		}
 
 		link_type clone_node(link_type x)
 		{
-			link_type tmp = create_node(x->value);
+			link_type tmp = create_node(x->_value);
 			tmp->color = x->color;
 			tmp->left = 0;
 			tmp->right = 0;
@@ -397,7 +397,7 @@ namespace my_stl
 
 		void destroy_node(link_type p)
 		{
-			alloc.destroy(&p->value);
+			alloc.destroy(&p->_value);
 			put_node(p);
 		}
 
@@ -409,15 +409,16 @@ namespace my_stl
 		static link_type &left(link_type x) { return (link_type&)(x->left); }
 		static link_type &right(link_type x) { return (link_type&)(x->right); }
 		static link_type &parent(link_type x) { return (link_type&)(x->parent); }
-		static reference value(link_type x) { return x->value; }
-		static const Key &key(link_type x) { return KeyOfValue()(value(x)); }
+		static reference value(link_type x) { return x->_value; }
+		static const Key key(link_type x){ return KeyOfValue()(value(x)); }
+//		static const Key &key(link_type x) { return KeyOfValue()(value(x)); }
 		static color_type &color(link_type x) { return (color_type&)(x->color); }
 
 		static link_type &left(base_ptr x) { return (link_type&)(x->left); }
 		static link_type &right(base_ptr x) { return (link_type&)(x->right); }
 		static link_type &parent(base_ptr x) { return (link_type&)(x->parent); }
-		static reference value(base_ptr x) { return ((link_type)x)->value; }
-		static const Key &key(base_ptr x) { return KeyOfValue()(value(link_type(x))); }
+		static reference value(base_ptr x) { return ((link_type)x)->_value; }
+		static const Key key(base_ptr x) { return KeyOfValue()(value(link_type(x))); }
 		static color_type &color(base_ptr x) { return (color_type&)(link_type(x)->color); }
 
 		//求极小极大值，使用node_base的方法
@@ -491,6 +492,7 @@ namespace my_stl
 		rb_tree(const Compare &comp) : node_count(0), key_compare(comp) { init(); }
 		rb_tree(const Compare &comp, const allocator_type &a) : node_count(0), key_compare(comp), alloc(a) { init(); }
 		rb_tree(const allocator_type &a) : node_count(0), key_compare(), alloc(a){ init(); }
+		
 		rb_tree(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &t)
 			: node_count(t.node_count), key_compare(t.key_compare), alloc(t.alloc), alloc_node(t.alloc_node)
 		{
@@ -521,6 +523,25 @@ namespace my_stl
 			}
 		}
 
+		//move constructor
+		rb_tree(rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&t)
+			: node_count(t.node_count), key_compare(t.key_compare), alloc(t.alloc), alloc_node(t.alloc_node)
+		{
+			header = t.header;
+			t.node_count = 0;
+			t.header->parent = t.header->left = t.header->right = 0;
+		}
+
+		rb_tree(rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&t, const allocator_type &a)
+			: node_count(t.node_count), key_compare(t.key_compare), alloc(a), alloc_node(t.alloc_node)
+		{
+			header = t.header;
+			t.node_count = 0;
+			t.header->parent = t.header->left = t.header->right = 0;
+		}
+
+
+
 		~rb_tree()
 		{
 			clear();
@@ -530,7 +551,7 @@ namespace my_stl
 		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
 			operator=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &x);
 		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
-			operator=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&x);
+			operator=(rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&x);
 		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
 			operator=(std::initializer_list<value_type> ilist);
 
@@ -597,23 +618,23 @@ namespace my_stl
 			if (!z->left && !z->right)
 			{
 				cout << "leftandright" << endl;
-				cout << ((link_type)(z))->value << endl;
+				cout << ((link_type)(z))->_value << endl;
 				return;
 			}
 			else if (!z->right)
 			{
-				cout << ((link_type)(z))->value << endl;
+				cout << ((link_type)(z))->_value << endl;
 				print(z->left);
 			}
 			else if (!z->left)
 			{
 				cout << "left" << endl;
-				cout << ((link_type)(z))->value << endl;
+				cout << ((link_type)(z))->_value << endl;
 				print(z->right);
 			}
 			else
 			{
-				cout << ((link_type)(z))->value << endl;
+				cout << ((link_type)(z))->_value << endl;
 				print(z->left);
 				print(z->right);
 			}
@@ -651,7 +672,7 @@ namespace my_stl
 
 	template<typename Key, typename Value, typename KeyOfValue, typename Compare, typename Allocator >
 	rb_tree<Key, Value, KeyOfValue, Compare, Allocator>&
-		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::operator=(const rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&x)
+		rb_tree<Key, Value, KeyOfValue, Compare, Allocator>::operator=(rb_tree<Key, Value, KeyOfValue, Compare, Allocator> &&x)
 	{
 		if (this != &x)
 		{
