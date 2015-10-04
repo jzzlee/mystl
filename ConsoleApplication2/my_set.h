@@ -1,4 +1,4 @@
-#ifndef __MY_SET_H_
+ï»¿#ifndef __MY_SET_H_
 #define __MY_SET_H_
 
 //#include <functional>
@@ -88,7 +88,7 @@ namespace my_stl
 
 		std::pair<iterator, bool> insert(value_type&& value)
 		{
-			//ÓÉÓÚrbtreeÃ»ÓĞÊµÏÖ move insert, ËùÒÔ´Ë´¦ÒÔcopy insert´úÌæ
+			//ç”±äºrbtreeæ²¡æœ‰å®ç° move insert, æ‰€ä»¥æ­¤å¤„ä»¥copy insertä»£æ›¿
 			return t.insert_unique(value);
 		}
 
@@ -160,7 +160,7 @@ namespace my_stl
 		//returns the function that compares keys in objects of type value_type 
 		value_compare value_comp() const { return t.key_comp(); }
 
-		//	private:
+		private:
 		tree_type t;
 
 	};
