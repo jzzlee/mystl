@@ -12,9 +12,9 @@ using std::pair;
 using std::string;
 typedef pair<int, int> PNN;
 
-void display_sizes(const map<int, int> &nums1,
-	const map<int, int> &nums2,
-	const map<int, int> &nums3)
+void display_sizes(const multimap<int, int> &nums1,
+	const multimap<int, int> &nums2,
+	const multimap<int, int> &nums3)
 {
 	std::cout << "nums1: " << nums1.size()
 		<< " nums2: " << nums2.size()
@@ -30,10 +30,10 @@ struct A
 
 int main()
 {
-	map<int, int> nums1{ { 3, 1 }, { 4, 1 }, { 5, 9 },
+	multimap<int, int> nums1{ { 3, 1 }, { 4, 1 }, { 5, 9 },
 	{ 6, 1 }, { 7, 1 }, { 8, 9 } };
-	map<int, int> nums2;
-	map<int, int> nums3;
+	multimap<int, int> nums2;
+	multimap<int, int> nums3;
 
 	std::cout << "Initially:\n";
 	display_sizes(nums1, nums2, nums3);
@@ -54,7 +54,9 @@ int main()
 	cout << "*****************" << endl;
 	map<int, std::string> c = { { 1, "one" }, { 2, "two" }, { 3, "three" },
 	{ 4, "four" }, { 5, "five" }, { 6, "six" } };
+	c.print();
 	// erase all odd numbers from c
+	int counts = 0;
 	for (auto it = c.begin(); it != c.end();)
 	{
 		cout << it->first << endl;
@@ -63,34 +65,40 @@ int main()
 		else
 			++it;
 	}
-
+	for (auto it = c.begin(); it != c.end(); ++it)
+		cout << it->first << endl;
 	for (auto& p : c)
 		std::cout << p.second << ' ';
 	cout << "************************" << endl;
-	map<string, int> smap;
-	smap[string("jjzhou")] = 1;
-	smap[string("jerry")] = 2;
-	smap[string("jason")] = 3;
-	smap[string("jimmy")] = 4;
+	cout << "************************" << endl;
+	multimap<string, int> smultimap;
+	smultimap.insert(std::pair<std::string, int>(string("jjzhou"), 1));
+	smultimap.insert(std::pair<std::string, int>(string("jjzhou"), 2));
+	smultimap.insert(std::pair<std::string, int>(string("jjzhou"), 3));
+	smultimap.insert(std::pair<std::string, int>(string("jjzhou"), 4));
+	smultimap.insert(std::pair<std::string, int>(string("shenzhou"), 5));
+
+
+	auto ps = smultimap.equal_range("jjzhou");
+	cout << ps.first->second << " " << ps.second->second << endl;
 
 	pair<string, int> value(string("david"), 5);
-	smap.insert(value);
-	map<string, int>::iterator siter = smap.begin();
-	for (; siter != smap.end(); ++siter)
+	smultimap.insert(value);
+	multimap<string, int>::iterator siter = smultimap.begin();
+	for (; siter != smultimap.end(); ++siter)
 		cout << siter->first << "  " << siter->second << endl;
-	int number = smap[string("jason")];
-	cout << number << endl;
 
-	siter = smap.find(string("mchen"));
-	if (siter == smap.end())
+
+	siter = smultimap.find(string("mchen"));
+	if (siter == smultimap.end())
 		cout << "mchan not found" << endl;
 
-	siter = smap.find(string("jerry"));
-	if (siter != smap.end())
+	siter = smultimap.find(string("jerry"));
+	if (siter != smultimap.end())
 		cout << "jerry found" << endl;
 
 	siter->second = 9;
-	cout << smap[string("jerry")] << endl;
+
 	return 0;
 }
 //
@@ -103,16 +111,16 @@ int main()
 //		auto p = pair<int, int>(x, x);
 //		vec.push_back(p);
 //	}
-//	map<int, int> map0;
-//	map<int, int> map1(vec.begin(), vec.end());
-//	map<std::string, int> init{
+//	multimap<int, int> multimap0;
+//	multimap<int, int> multimap1(vec.begin(), vec.end());
+//	multimap<std::string, int> init{
 //			{ "this", 100 },
 //			{ "can", 100 },
 //			{ "be", 100 },
 //			{ "const", 100 },
 //	};
-////	map<int, int> map2{ PNN(1, 2), PNN(2, 2), PNN(3, 2), PNN(4, 2), PNN(5, 2) };
-//	map<int, int> map3(std::move(map1));
+////	multimap<int, int> multimap2{ PNN(1, 2), PNN(2, 2), PNN(3, 2), PNN(4, 2), PNN(5, 2) };
+//	multimap<int, int> multimap3(std::move(multimap1));
 //
 //
 //	return 0;
