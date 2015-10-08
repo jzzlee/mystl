@@ -58,7 +58,7 @@ namespace my_stl
 		multiset& operator=(multiset&& other) { t = std::move(other.t); return *this; }
 		multiset& operator=(std::initializer_list<value_type> ilist) { t = ilist; return *this; }
 
-		allocator_type get_allocator() const { return alloc; }
+		allocator_type get_allocator() const { return t.get_allocator(); }
 		iterator begin() { return t.begin(); }
 		const_iterator begin() const { return t.begin(); }
 		const_iterator cbegin() const { return ((const Myt *)this)->begin(); }
