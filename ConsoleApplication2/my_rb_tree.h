@@ -267,6 +267,12 @@ namespace my_stl
 
 		//改变parent
 		v->parent = u->parent;
+
+		//如果u是leftmost或者rightmost，更新为v
+		if (root->parent->left == u)
+			root->parent->left = v;
+		if (root->parent->right == u)
+			root->parent->right = v;
 	}
 
 	//删除节点的树调整
@@ -556,6 +562,7 @@ namespace my_stl
 			operator=(std::initializer_list<value_type> ilist);
 
 		Compare key_comp() const { return key_compare; }
+		allocator_type get_allocator() { return alloc; }
 		iterator begin() { return leftmost(); }
 		const_iterator begin() const { return leftmost(); }
 		const_iterator cbegin() const { return ((const Myt*)this)->begin(); }
@@ -618,23 +625,23 @@ namespace my_stl
 			if (!z->left && !z->right)
 			{
 				cout << "leftandright" << endl;
-				cout << ((link_type)(z))->_value << endl;
+				cout << ((link_type)(z))->_value.first << endl;
 				return;
 			}
 			else if (!z->right)
 			{
-				cout << ((link_type)(z))->_value << endl;
+				cout << ((link_type)(z))->_value.first << endl;
 				print(z->left);
 			}
 			else if (!z->left)
 			{
 				cout << "left" << endl;
-				cout << ((link_type)(z))->_value << endl;
+				cout << ((link_type)(z))->_value.first << endl;
 				print(z->right);
 			}
 			else
 			{
-				cout << ((link_type)(z))->_value << endl;
+				cout << ((link_type)(z))->_value.first << endl;
 				print(z->left);
 				print(z->right);
 			}
