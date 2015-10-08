@@ -67,7 +67,7 @@ namespace my_stl
 		set& operator=(const set&& other) { t = std::move(other.t); return *this; }
 		set& operator=(std::initializer_list<value_type> ilist) { t = ilist; }
 
-		allocator_type get_allocator() const { return alloc; }
+		allocator_type get_allocator() const { return t.get_allocator(); }
 
 		iterator begin() { return t.begin(); }
 		const_iterator begin() const { return t.begin(); }
