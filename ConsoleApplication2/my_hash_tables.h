@@ -1,4 +1,4 @@
-#ifndef _MY_HASH_TABLE_H_
+ï»¿#ifndef _MY_HASH_TABLE_H_
 #define _MY_HASH_TABLE_H_
 
 #include <functional>
@@ -52,7 +52,7 @@ namespace my_stl
 		iterator& operator++()
 		{
 			node = node->next;
-			if (!node) //nodeÎª¿Õ
+			if (!node) //nodeä¸ºç©º
 			{
 				++block;
 				while (!(*block) && block != ht->__end_element())
@@ -72,8 +72,8 @@ namespace my_stl
 		bool operator==(const iterator &it) { return node == it.node; }
 		bool operator!=(const iterator &it) { return node != it.node; }
 
-		hashnode *node; //Ö¸Ïò½Úµã
-		vector_iterator block; //Ö¸ÏònodeËùÔÚµÄÍ°
+		hashnode *node; //æŒ‡å‘èŠ‚ç‚¹
+		vector_iterator block; //æŒ‡å‘nodeæ‰€åœ¨çš„æ¡¶
 		hashtable *ht;
 	};
 
@@ -197,23 +197,23 @@ namespace my_stl
 		pair<iterator, bool> insert_unique(const value_type &v)
 		{
 			size_type index = bkt_num(v);
-			hashnode *nd = buckets[index];//ÕÒµ½vÉ¢ÁĞµÄÎ»ÖÃ
-			if (!nd) //ndÎª¿Õ
+			hashnode *nd = buckets[index];//æ‰¾åˆ°væ•£åˆ—çš„ä½ç½®
+			if (!nd) //ndä¸ºç©º
 			{
 				buckets[index] = get_node(v);
 				return pair<iterator, bool>(iterator(buckets[index], vector_iterator(&buckets + index), this), true);
 			}
-			else //nd·Ç¿Õ
+			else //ndéç©º
 			{
-				if (equals(get_key(nd->value) == get_key(v))) //vµÄkeyÒÑ¾­´æÔÚ
+				if (equals(get_key(nd->value) == get_key(v))) //vçš„keyå·²ç»å­˜åœ¨
 					return pair<iterator, bool>(iterator(nd, vector_iterator(&buckets + index), this), false);
-				while (nd->next) //nd->next·Ç¿Õ
+				while (nd->next) //nd->nextéç©º
 				{
-					if (equals(get_key(nd->next->value) == get_key(v))) //vµÄkeyÒÑ¾­´æÔÚ
+					if (equals(get_key(nd->next->value) == get_key(v))) //vçš„keyå·²ç»å­˜åœ¨
 						return pair<iterator, bool>(iterator(nd->next, vector_iterator(&buckets + index), this), false);
 					nd = nd->next;
 				}
-				//vµÄkey²»´æÔÚ
+				//vçš„keyä¸å­˜åœ¨
 				nd->next = get_node(v);
 				return pair<iterator, bool>(iterator(nd->next, vector_iterator(&buckets + index), this), true);
 			}
@@ -235,18 +235,18 @@ namespace my_stl
 	private:
 		hashnode* get_node(const value_type v)
 		{
-			//ÉêÇëÄÚ´æ
+			//ç”³è¯·å†…å­˜
 			hashnode *nd = alloc_node.allocate(1);
-			//¹¹Ôì½ÚµãÖµ
+			//æ„é€ èŠ‚ç‚¹å€¼
 			alloc.construct(&(nd->value), v);
 			nd->next = nullptr;
 			return nd;
 		}
 		void delete_node(hashnode *nd)
 		{
-			//Îö¹¹½ÚµãÖµ
+			//ææ„èŠ‚ç‚¹å€¼
 			alloc.destroy(&nd->value);
-			//Ïú»Ù½Úµã£¬ÊÍ·ÅÄÚ´æ
+			//é”€æ¯èŠ‚ç‚¹ï¼Œé‡Šæ”¾å†…å­˜
 			alloc_node.deallocate(nd);
 		}
 
@@ -256,7 +256,7 @@ namespace my_stl
 			clear();
 			load_factor = other.load_factor;
 			num_elements = other.num_elements;
-			//µ÷ÕûbucketsµÄ´óĞ¡
+			//è°ƒæ•´bucketsçš„å¤§å°
 			buckets.reserve(other.buckets.size());
 			buckets = other.buckets;
 			hash = other.hash;
@@ -275,7 +275,7 @@ namespace my_stl
 			alloc = other.alloc;
 		}
 
-		//¶¨Î»keyËùÔÚbucketsµÄÎ»ÖÃ
+		//å®šä½keyæ‰€åœ¨bucketsçš„ä½ç½®
 		size_type bkt_num_key(const key_type &k, size_type n) const
 		{
 			return hash(k) % n;
@@ -285,7 +285,7 @@ namespace my_stl
 			return bkt_num_key(k, buckets.size());
 		}
 
-		//¶¨Î»valueËùÔÚbucketsµÄÎ»ÖÃ
+		//å®šä½valueæ‰€åœ¨bucketsçš„ä½ç½®
 		size_type bkt_num(const value_type &v) const
 		{
 			return bkt_num_key(get_key(v));
