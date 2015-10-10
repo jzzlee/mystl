@@ -187,9 +187,28 @@ namespace my_stl
 		}
 
 		allocator_type get_allocator() { return alloc; }
-		iterator begin() { return iterator(buckets[0], buckets.begin(), this); }
-		const_iterator begin() const { return const_iterator(buckets[0], buckets.begin(), this); }
+		
+		//返回第一个非空节点的迭代器
+		iterator begin()
+		{
+			for (vector_iterator it = buckets.begin(); it != buckets.end(); ++it)
+			{
+				if (*it)//桶不为空
+					return iterator(*it, it, this);
+			}
+			return end(); 
+		}
+		const_iterator begin() const 
+		{
+			for (vector_iterator it = buckets.begin(); it != buckets.end(); ++it)
+			{
+				if (*it)//桶不为空
+					return iterator(*it, it, this);
+			}
+			return end(); 
+		}
 		const_iterator cbegin() const { return ((const Myt*)this)->begin(); }
+
 		iterator end() { return iterator(buckets[buckets.size()], buckets.end(), this); }
 		const_iterator end() const { return const_iterator(buckets[buckets.size()], buckets.end(), this); }
 		const_iterator cend() const { return ((const Myt*)this)->end(); }
@@ -416,16 +435,34 @@ namespace my_stl
 		}
 
 		//Removes the element (if one exists) with the key equivalent to key.
-		size_type erase(const key_type& key)
+		size_type erase(const key_type& k)
 		{
-			;
+			pair<iterator, iterator> pair_range = equal_range(k);
+			size_type count = my_stl::distance(pair_range.first, pair_range.second);
+			erase(pair_range.first, pair_range.second);
+			return count;
 		}
 
 		//Returns a range containing all elements with key key in the container. The range is defined by two iterators, 
 		//the first pointing to the first element of the wanted range and the second pointing past the last element of the range. 
-		pair<iterator, iterator> equal_range(const key_type& v)
+		pair<iterator, iterator> equal_range(const key_type& k)
 		{
-
+			size_type index = bkt_num_key(k);
+			hashnode *nd = buckets[index];//找到v散列的桶
+			while (nd)
+			{
+				if (equals(get_key(nd->value), k)) //找到k
+				{
+					iterator first(nd, addressof(buckets[0]) + index, this);//第一个
+					while (nd->next && equals(get_key(nd->next->value), k)) //从下一个开始比较是否相等,nd指向最后一个相等的节点
+						nd = nd->next;
+					iterator before_last(nd, addressof(buckets[0]) + index, this);
+					return pair<iterator, iterator>(first, ++before_last);
+				}
+				nd = nd->next;
+			}
+			//没找到
+			return pair<iterator, iterator>(end(), end());
 		}
 
 		iterator find(const key_type& k)
@@ -436,6 +473,7 @@ namespace my_stl
 			{
 				if (equals(get_key(nd->value), k)) //找到k
 					return iterator(nd, addressof(buckets[0]) + index, this);
+				nd = nd->next;
 			}
 			//没找到
 			return end();
