@@ -1,5 +1,11 @@
 ﻿更新说明
 	
+	v1.9.2
+	添加const_iterator.
+
+	v1.9.1
+	开始hash_table.
+
 	v1.8.2
 	完成multimap.
 
