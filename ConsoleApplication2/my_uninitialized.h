@@ -13,7 +13,7 @@ namespace my_stl
 {
 	//Obtains the actual address of the object or function arg, even in presence of overloaded operator&
 	template< class T >
-	T* addressof(T& arg)
+	T* addressof(const T& arg)
 	{
 		return reinterpret_cast<T*>(
 			&const_cast<char&>(

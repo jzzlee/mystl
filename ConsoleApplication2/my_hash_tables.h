@@ -14,16 +14,6 @@ namespace my_stl
 {
 #define _MY_DEBUG
 
-	template<typename T>
-	class compare_equal
-	{
-	public:
-		bool operator()(const T &lhs, const T &rhs)
-		{
-			return lhs == rhs;
-		}
-	};
-
 	using std::size_t;
 	using std::ptrdiff_t;
 	using std::pair;
@@ -119,6 +109,7 @@ namespace my_stl
 		typedef value_type& reference;
 		typedef const value_type& const_reference;
 		typedef value_type* pointer;
+		typedef const value_type* const_pointer;
 		typedef typename vector<hashnode*>::iterator vector_iterator;
 
 		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
@@ -128,8 +119,9 @@ namespace my_stl
 		__hash_const_iterator(const hashnode *nd, const vector_iterator &bl, const hashtable *h) : node(nd), block(bl), ht(h) {}
 //		__hash_const_iterator(const hashnode * const nd, vector_iterator bl, const hashtable * const h) : node(nd), block(bl), ht(h) {}
 		__hash_const_iterator(const iterator &it) : node(it.node), block(it.block), ht(it.ht) {}
-		reference operator*() const { return node->value; }
-		pointer operator->() const { return &(operator*()); }
+		const_reference operator*() const { return node->value; }
+		const_pointer operator->() const { return &(operator*()); }
+
 		const_iterator& operator++()
 		{
 			node = node->next;
@@ -163,6 +155,22 @@ namespace my_stl
 		const hashtable *ht;
 	};
 
+	enum { __stl_num_primes = 28 };
+
+	static const unsigned long __stl_prime_list[__stl_num_primes] =
+	{
+		53ul, 97ul, 193ul, 389ul, 769ul,
+		1543ul, 3079ul, 6151ul, 12289ul, 24593ul,
+		49157ul, 98317ul, 196613ul, 393241ul, 786433ul,
+		1572869ul, 3145739ul, 6291469ul, 12582917ul, 25165843ul,
+		50331653ul, 100663319ul, 201326611ul, 402653189ul, 805306457ul,
+		1610612741ul, 3221225473ul, 4294967291ul
+	};
+
+	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+	bool operator==(const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& lhs,
+		const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& rhs);
+
 	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator = allocator<Value> >
 	class hash_table
 	{
@@ -184,6 +192,10 @@ namespace my_stl
 		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
 		friend struct __hash_const_iterator;
 
+		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+		friend bool operator==(const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& lhs,
+			const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& rhs);
+
 	private:
 		vector<hashnode*> buckets;
 		allocator<value_type> alloc;
@@ -192,43 +204,42 @@ namespace my_stl
 		key_equal equals;
 		ExtractKey get_key;
 		size_type num_elements;
-		float load_factor = (float)0.7;
-		size_type bucket_size;
+		float current_load_factor = (float)0.7;
 
 	public:
 		explicit hash_table(size_type bucket_count = 11, const HashFcn& hash = HashFcn(), const EqualKey& equal = EqualKey(), const Allocator& alloc = Allocator())
-			: num_elements(), bucket_size(bucket_count), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc) {}
+			: num_elements(), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc) {}
 
 		explicit hash_table(const Allocator& alloc)
-			: num_elements(), bucket_size(11), buckets(11), hash(), equals(), alloc(alloc) {}
+			: num_elements(), buckets(11), hash(), equals(), alloc(alloc) {}
 
 		template< class InputIt >
 		hash_table(InputIt first, InputIt last, size_type bucket_count = 11, const HashFcn& hash = HashFcn(), const EqualKey& equal = EqualKey(),
 			const Allocator& alloc = Allocator())
-			: num_elements(), bucket_size(bucket_count), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc)
+			: num_elements(), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc)
 		{
 			insert(first, last);
 		}
 
 		hash_table(const hash_table &other)
-			: load_factor(other.load_factor), num_elements(other.num_elements), bucket_size(other.bucket_size), buckets(other.buckets),
-			hash(other.hash), equals(other.equals), alloc(other.alloc) {}
+			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(other.buckets.size()),
+			hash(other.hash), equals(other.equals), alloc(other.alloc) { deep_copy_from_buckets(other.buckets); }
 
 		hash_table(const hash_table &other, const Allocator &alloc)
-			: load_factor(other.load_factor), num_elements(other.num_elements), bucket_size(other.bucket_size), buckets(other.buckets),
-			hash(other.hash), equals(other.equals), alloc(alloc) {}
+			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(other.buckets.size()),
+			hash(other.hash), equals(other.equals), alloc(alloc) { deep_copy_from_buckets(other.buckets); }
 
 		hash_table(hash_table &&other)
-			: load_factor(other.load_factor), num_elements(other.num_elements), bucket_size(other.bucket_size), buckets(std::move(other.buckets)),
+			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(std::move(other.buckets)),
 			hash(other.hash), equals(other.equals), alloc(other.alloc) {}
 
 		hash_table(hash_table &&other, const Allocator &alloc)
-			: load_factor(other.load_factor), num_elements(other.num_elements), bucket_size(other.bucket_size), buckets(std::move(other.buckets)),
+			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(std::move(other.buckets)),
 			hash(other.hash), equals(other.equals), alloc(alloc) {}
 
 		hash_table(std::initializer_list<value_type> init, size_type bucket_count = 11, const HashFcn& hash = HashFcn(),
 			const EqualKey& equal = EqualKey(), const Allocator& alloc = Allocator())
-			: num_elements(), bucket_size(bucket_count), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc)
+			: num_elements(), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc)
 		{
 			insert(init.begin(), init.end());
 		}
@@ -271,10 +282,10 @@ namespace my_stl
 		}
 		const_iterator begin() const 
 		{
-			for (vector_iterator it = buckets.begin(); it != buckets.end(); ++it)
+			for (auto it = buckets.begin(); it != buckets.end(); ++it)
 			{
 				if (*it)//桶不为空
-					return const_iterator(*it, it, this);
+					return const_iterator(*it, const_cast<vector_iterator>(it), this);
 			}
 			return end(); 
 		}
@@ -310,11 +321,14 @@ namespace my_stl
 		//否则，在key对应bucket的最后，返回pair(插入位置iterator, true).
 		pair<iterator, bool> insert_unique(const value_type &v)
 		{
+			//检查是否需要rehash.
+			check_num_reshah(num_elements + 1);
 			size_type index = bkt_num(v);
 			hashnode *nd = buckets[index];//找到v散列的位置
 			if (!nd) //nd为空
 			{
 				buckets[index] = get_node(v);
+				++num_elements;
 				return pair<iterator, bool>(iterator(buckets[index], vector_iterator(&(buckets[0]) + index), this), true);
 			}
 			else //nd非空
@@ -329,6 +343,7 @@ namespace my_stl
 				}
 				//v的key不存在
 				nd->next = get_node(v);
+				++num_elements;
 				return pair<iterator, bool>(iterator(nd->next, vector_iterator(&(buckets[0]) + index), this), true);
 			}
 		}
@@ -337,8 +352,11 @@ namespace my_stl
 		//直接插到对应bucket的开始
 		iterator insert_equal(const value_type &v)
 		{
+			//检查是否需要rehash.
+			check_num_reshah(num_elements + 1);
 			size_type index = bkt_num(v);
 			hashnode *nd = buckets[index];//找到v散列的位置
+			++num_elements;
 			if (!nd) //nd为空
 			{
 				buckets[index] = get_node(std::move(v));
@@ -366,11 +384,14 @@ namespace my_stl
 		//否则，在key对应bucket的最后，返回pair(插入位置iterator, true).
 		pair<iterator, bool> insert_unique(value_type&& v)
 		{
+			//检查是否需要rehash.
+			check_num_reshah(num_elements + 1);
 			size_type index = bkt_num(v);
 			hashnode *nd = buckets[index];//找到v散列的位置
 			if (!nd) //nd为空
 			{
 				buckets[index] = get_node(std::move(v));
+				++num_elements;
 				return pair<iterator, bool>(iterator(buckets[index], vector_iterator(&(buckets[0]) + index), this), true);
 			}
 			else //nd非空
@@ -385,6 +406,7 @@ namespace my_stl
 				}
 				//v的key不存在
 				nd->next = get_node(std::move(v));
+				++num_elements;
 				return pair<iterator, bool>(iterator(nd->next, vector_iterator(&(buckets[0]) + index), this), true);
 			}
 		}
@@ -392,8 +414,11 @@ namespace my_stl
 		//直接插到对应bucket的开始
 		iterator insert_equal(value_type &&v)
 		{
+			//检查是否需要rehash.
+			check_num_reshah(num_elements + 1);
 			size_type index = bkt_num(v);
 			hashnode *nd = buckets[index];//找到v散列的位置
+			++num_elements;
 			if (!nd) //nd为空
 			{
 				buckets[index] = get_node(v);
@@ -463,8 +488,10 @@ namespace my_stl
 
 		//Removes the element at pos.
 		//Returns iterator following the last removed element.
-		iterator erase(const_iterator pos)
+		iterator erase(const_iterator cpos)
 		{
+			iterator pos(cpos);
+			--num_elements;
 			iterator tmp = pos;
 			++tmp;
 			hashnode *nd = *(pos.block);//pos所在的桶
@@ -476,7 +503,7 @@ namespace my_stl
 			}
 			else
 			{
-				nd = pos.node->next;
+				*(pos.block) = pos.node->next;
 			}
 			delete_node(pos.node);
 			return tmp;
@@ -486,6 +513,7 @@ namespace my_stl
 		// Removes the elements in the range [first; last), which must be a valid range in *this.
 		iterator erase(const_iterator const_first, const_iterator const_last)
 		{
+			num_elements -= my_stl::distance(const_first, const_last);
 			iterator first(const_first), last(const_last);
 			if (first != last)
 			{
@@ -512,7 +540,25 @@ namespace my_stl
 			pair<iterator, iterator> pair_range = equal_range(k);
 			size_type count = my_stl::distance(pair_range.first, pair_range.second);
 			erase(pair_range.first, pair_range.second);
+			num_elements -= count;
 			return count;
+		}
+
+		//Exchanges the contents of the container with those of other. 
+		void swap(hash_table& other)
+		{
+			std::swap(hash, other.hash);
+			std::swap(equals, other.equals);
+			std::swap(get_key, other.get_key);
+			buckets.swap(other.buckets);
+			std::swap(num_elements, other.num_elements);
+		}
+
+		//Returns the number of elements with key k.
+		size_type count(const Key& k) const
+		{
+			pair<iterator, iterator> p = equal_range(k);
+			return my_stl::distance(p.first, p.second);
 		}
 
 		//Returns a range containing all elements with key key in the container. The range is defined by two iterators, 
@@ -576,10 +622,96 @@ namespace my_stl
 			return end();
 		}
 
+		const_iterator find(const Key& k) const
+		{
+			size_type index = bkt_num_key(k);
+			const hashnode *nd = buckets[index];//找到v散列的桶
+			while (nd)
+			{
+				if (equals(get_key(nd->value), k)) //找到k
+					return const_iterator(nd, addressof(buckets[0]) + index, this);
+				nd = nd->next;
+			}
+			//没找到
+			return end();
+		}
+
+		//Returns the number of buckets in the container. 
+		size_type bucket_count() const
+		{
+			return buckets.size();
+		}
+
+		size_type max_bucket_count() const { return buckets.max_size(); }
+		
+		//Returns the number of elements in the bucket with index n. 
+		size_type bucket_size(size_type n) const
+		{
+			size_type count = 0;
+			for (hashnode *nd = buckets[n]; nd; nd = nd->next)
+				++count;
+			return count;
+		}
+
+		//Returns the index of the bucket for key key. 
+		size_type bucket(const Key& k) const
+		{
+			return bkt_num_key(k);
+		}
+
+		//Returns the average number of elements per bucket. 
+		float load_factor() const
+		{
+			return (float)num_elements / buckets.size();
+		}
+
 		// Returns current maximum load factor. 
-		float max_load_factor() const { return load_factor; }
+		float max_load_factor() const { return current_load_factor; }
+		
 		// Sets the maximum load factor to ml. 
-		void max_load_factor(float ml) { load_factor = ml; }
+		void max_load_factor(float ml) { current_load_factor = ml; }
+
+		//Sets the number of buckets to count and rehashes the container
+		void rehash(size_type count)
+		{
+			if (count * max_load_factor() < size())
+				count = set_size(static_cast<size_type>(std::ceil(size() / max_load_factor())));
+			else
+				count = set_size(count);
+			vector<hashnode*> new_buckets(count);
+			hashnode * nd = nullptr;
+			hashnode * block = nullptr;
+			for (iterator it = begin(); it != end(); ++it)
+			{
+				nd = get_node(*it); //新节点
+				size_type index = bkt_num(*it, count);
+				//block = new_buckets[index]; //新节点所在新hashtable的桶
+				nd->next = new_buckets[index]; //插入到桶起始位置
+				new_buckets[index] = nd;
+			}
+			size_type old_num_elements = num_elements;
+			clear();
+			num_elements = old_num_elements;
+			buckets = std::move(new_buckets);
+		}
+
+		//Rehashes the container so that it has space for at least count elements.
+		void reserve(size_type count)
+		{
+			rehash(std::ceil(count / max_load_factor()));
+		}
+
+		//Returns the function that hashes the keys. 
+		hasher hash_function() const
+		{
+			return hash;
+		}
+
+		//Return the function that compares keys for equality.
+		key_equal key_eq() const
+		{
+			return equals;
+		}
 
 
 	private:
@@ -627,15 +759,37 @@ namespace my_stl
 			alloc_node.deallocate(nd);
 		}
 
+		//从other_buckets中深复制到buckets
+		void deep_copy_from_buckets(const vector<hashnode*> &other_buckets)
+		{
+			hashnode *cur = nullptr;
+			for (size_type n = 0; n != other_buckets.size(); ++n)
+			{
+				for (hashnode *nd = other_buckets[n]; nd; nd = nd->next)
+				{
+					if (!buckets[n]) //桶为空
+					{
+						buckets[n] = get_node(nd->value);
+						cur = buckets[n]; //指向起始节点
+					}
+					else
+					{
+						cur->next = get_node(nd->value);
+						cur = cur->next;
+					}
+				}
+			}
+		}
+
 
 		void copy_from(const hash_table &other)
 		{
 			clear();
-			load_factor = other.load_factor;
+			current_load_factor = other.current_load_factor;
 			num_elements = other.num_elements;
 			//调整buckets的大小
 			buckets.reserve(other.buckets.size());
-			buckets = other.buckets;
+			deep_copy_from_buckets(other.buckets);
 			hash = other.hash;
 			equals = other.equals;
 			alloc = other.alloc;
@@ -644,7 +798,7 @@ namespace my_stl
 		void copy_from(hash_table &&other)
 		{
 			clear();
-			load_factor = other.load_factor;
+			current_load_factor = other.current_load_factor;
 			num_elements = other.num_elements;
 			buckets = std::move(other.buckets);
 			hash = other.hash;
@@ -718,9 +872,50 @@ namespace my_stl
 					nd = nd->next;
 			return nd;
 		}
+
+		//返回由count确定的最佳桶大小（通常为质数）
+		size_type set_size(size_type count)
+		{
+			for (size_type i = 0; i != __stl_num_primes; ++i)
+				if (count < __stl_prime_list[i])
+					return __stl_prime_list[i];
+			return count;
+		}
+
+		//根据节点数量，检查是否需要rehash
+		void check_num_reshah(size_type count)
+		{
+			if (buckets.size() * max_load_factor() < count)
+				rehash(count);
+		}
 	};
 
+	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+	bool operator==(const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& lhs,
+		const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& rhs)
+	{
+		typedef typename hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>::size_type size_type;
+		typedef typename hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>::hashnode hashnode;
+		if (lhs.buckets.size() != rhs.buckets.size())
+			return false;
+		if (lhs.num_elements != rhs.num_elements)
+			return false;
+		return my_stl::equal(lhs.begin(), lhs.end(), rhs.begin());
+	}
+	
+	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+	bool operator!=(const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& lhs,
+		const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& rhs)
+	{
+		return !(lhs == rhs);
+	}
 
+	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+	void swap(const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& lhs,
+		const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& rhs)
+	{
+		lhs.swap(rhs);
+	}
 }
 
 #endif
