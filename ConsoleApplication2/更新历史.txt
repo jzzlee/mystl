@@ -1,5 +1,8 @@
 ﻿更新说明
 	
+	v1.9.3
+	完成hash_table.
+
 	v1.9.2
 	添加const_iterator.
 
