@@ -1,7 +1,7 @@
 ﻿更新说明
 	
 	v1.9.4
-	完成unordered_set.
+	完成unordered_set, unordered_multiset.
 
 	v1.9.3
 	完成hash_table.

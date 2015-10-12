@@ -47,14 +47,14 @@ int main()
 	}
 	cout << "*********************" << endl;
 	cout << "buckets_size: " << hash.bucket_count() << endl;
-//	auto it1 = hash.insert_equal(1);
-//	auto it2 = hash.insert_equal(2);
+	auto it1 = hash.insert_equal(1);
+	auto it2 = hash.insert_equal(2);
 
 	for (auto it = hash.begin(); it != hash.end(); ++it)
 		cout << it.node << " " << *it << endl;
 	cout << endl;
-//	cout << it1.node << " " << it2.node << endl;
-//	hash.erase(it1, it2);
+	cout << it1.node << " " << it2.node << endl;
+	hash.erase(it1, it2);
 	cout << hash.find(5).node << endl;
 	cout << hash.equal_range(1).first.node << endl;
 	cout << hash.equal_range(1).second.node << endl;
@@ -109,8 +109,8 @@ int main()
 	cout << endl;
 
 //	hash_table<int, int, std::hash<int>, std::identity<int>, std::equal_to<int> > hashtable(10);
-	unordered_set<int> set1;
-	unordered_set<int> set2({ 1, 2, 3, 4, 5 });
+	unordered_multiset<int> set1;
+	unordered_multiset<int> set2({ 1, 2, 3, 4, 5 });
 	auto set3(set2);
 	auto set4(std::move(set3));
 	auto p1 = set1.begin();
