@@ -14,6 +14,7 @@ namespace my_stl
 {
 #define _MY_DEBUG
 
+	static const int __bucket_init_count = 11;
 	using std::size_t;
 	using std::ptrdiff_t;
 	using std::pair;
@@ -28,8 +29,8 @@ namespace my_stl
 
 	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
 	class hash_table;
-	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
-	struct __hash_const_iterator;
+	//template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+	//struct __hash_const_iterator;
 
 	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
 	struct __hash_iterator
@@ -37,7 +38,7 @@ namespace my_stl
 		typedef hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> hashtable;
 		typedef __hash_node<Value> hashnode;
 		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> iterator;
-		typedef __hash_const_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> const_iterator;
+		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> const_iterator;
 		typedef forward_iterator_tag iterator_category;
 		typedef Value value_type;
 		typedef Key key_type;
@@ -52,19 +53,22 @@ namespace my_stl
 		friend class hash_table;
 
 		__hash_iterator() {};
-		__hash_iterator(const const_iterator &it) : block(it.block)
-		{
-			node = const_cast<hashnode*>(it.node);
-			ht = const_cast<hashtable*>(it.ht);
-		}
+		//__hash_iterator(const const_iterator &it) : block(it.block)
+		//{
+		//	node = const_cast<hashnode*>(it.node);
+		//	ht = const_cast<hashtable*>(it.ht);
+		//}
+		__hash_iterator(const hashnode *nd, const vector_iterator &bl, const hashtable *h) : node(const_cast<hashnode*>(nd)), block(bl), ht(const_cast<hashtable*>(h)) {}
+		__hash_iterator(const iterator &it) : node(it.node), block(it.block), ht(it.ht) {}
 		__hash_iterator(hashnode *nd, const vector_iterator &bl, hashtable * h) : node(nd), block(bl), ht(h) {}
 		
 		reference operator*() { return node->value; }
 		pointer operator->() { return &(operator*());  }
 		iterator& operator++()
 		{
-			node = node->next;
-			if (!node) //node为空
+			if (node)
+				node = node->next;
+			if(!node) //node为空
 			{
 				++block;
 				while (!(*block) && block != ht->buckets.end())
@@ -94,66 +98,65 @@ namespace my_stl
 		hashtable *ht;
 	};
 
-	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
-	struct __hash_const_iterator
-	{
-		typedef hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> hashtable;
-		typedef __hash_node<Value> hashnode;
-		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> iterator;
-		typedef __hash_const_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> const_iterator;
-		typedef forward_iterator_tag iterator_category;
-		typedef Value value_type;
-		typedef Key key_type;
-		typedef size_t size_type;
-		typedef ptrdiff_t difference_type;
-		typedef value_type& reference;
-		typedef const value_type& const_reference;
-		typedef value_type* pointer;
-		typedef const value_type* const_pointer;
-		typedef typename vector<hashnode*>::iterator vector_iterator;
-
-		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
-		friend class hash_table;
-
-		__hash_const_iterator() {};
-		__hash_const_iterator(const hashnode *nd, const vector_iterator &bl, const hashtable *h) : node(nd), block(bl), ht(h) {}
-//		__hash_const_iterator(const hashnode * const nd, vector_iterator bl, const hashtable * const h) : node(nd), block(bl), ht(h) {}
-		__hash_const_iterator(const iterator &it) : node(it.node), block(it.block), ht(it.ht) {}
-		const_reference operator*() const { return node->value; }
-		const_pointer operator->() const { return &(operator*()); }
-
-		const_iterator& operator++()
-		{
-			node = node->next;
-			if (!node) //node为空
-			{
-				++block;
-				while (!(*block) && block != ht->buckets.end())
-					++block;
-				if (block == ht->buckets.end())
-					node = nullptr;
-				else
-					node = *block;
-			}
-			return *this;
-		}
-
-		const_iterator operator++(int)
-		{
-			iterator tmp = *this;
-			++*this;
-			return tmp;
-		}
-
-		bool operator==(const const_iterator &it) { return node == it.node; }
-		bool operator!=(const const_iterator &it) { return node != it.node; }
-#ifndef _MY_DEBUG
-	private:
-#endif
-		const hashnode *node; //指向节点
-		vector_iterator block; //指向node所在的桶
-		const hashtable *ht;
-	};
+//	template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+//	struct __hash_const_iterator
+//	{
+//		typedef hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> hashtable;
+//		typedef __hash_node<Value> hashnode;
+//		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> iterator;
+//		typedef __hash_const_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> const_iterator;
+//		typedef forward_iterator_tag iterator_category;
+//		typedef Value value_type;
+//		typedef Key key_type;
+//		typedef size_t size_type;
+//		typedef ptrdiff_t difference_type;
+//		typedef value_type& reference;
+//		typedef const value_type& const_reference;
+//		typedef value_type* pointer;
+//		typedef const value_type* const_pointer;
+//		typedef typename vector<hashnode*>::iterator vector_iterator;
+//
+//		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+//		friend class hash_table;
+//
+//		__hash_const_iterator() {};
+//		__hash_const_iterator(const hashnode *nd, const vector_iterator &bl, const hashtable *h) : node(nd), block(bl), ht(h) {}
+//		__hash_const_iterator(const iterator &it) : node(it.node), block(it.block), ht(it.ht) {}
+//		const_reference operator*() const { return node->value; }
+//		const_pointer operator->() const { return &(operator*()); }
+//
+//		const_iterator& operator++()
+//		{
+//			node = node->next;
+//			if (!node) //node为空
+//			{
+//				++block;
+//				while (!(*block) && block != ht->buckets.end())
+//					++block;
+//				if (block == ht->buckets.end())
+//					node = nullptr;
+//				else
+//					node = *block;
+//			}
+//			return *this;
+//		}
+//
+//		const_iterator operator++(int)
+//		{
+//			iterator tmp = *this;
+//			++*this;
+//			return tmp;
+//		}
+//
+//		bool operator==(const const_iterator &it) { return node == it.node; }
+//		bool operator!=(const const_iterator &it) { return node != it.node; }
+//#ifndef _MY_DEBUG
+//	private:
+//#endif
+//		const hashnode *node; //指向节点
+//		vector_iterator block; //指向node所在的桶
+//		const hashtable *ht;
+//	};
 
 	enum { __stl_num_primes = 28 };
 
@@ -184,13 +187,15 @@ namespace my_stl
 		typedef __hash_node<value_type> hashnode;
 		typedef Allocator allocator_type;
 		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> iterator;
-		typedef __hash_const_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> const_iterator;
+		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> const_iterator;
+		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> local_iterator;
+		typedef __hash_iterator<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator> const_local_iterator;
 		typedef typename vector<hashnode*>::iterator vector_iterator;
 
 		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
 		friend struct __hash_iterator;
-		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
-		friend struct __hash_const_iterator;
+		//template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
+		//friend struct __hash_const_iterator;
 
 		template<typename Key, typename Value, typename HashFcn, typename ExtractKey, typename EqualKey, typename Allocator>
 		friend bool operator==(const hash_table<Key, Value, HashFcn, ExtractKey, EqualKey, Allocator>& lhs,
@@ -207,42 +212,36 @@ namespace my_stl
 		float current_load_factor = (float)0.7;
 
 	public:
-		explicit hash_table(size_type bucket_count = 11, const HashFcn& hash = HashFcn(), const EqualKey& equal = EqualKey(), const Allocator& alloc = Allocator())
-			: num_elements(), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc) {}
+		explicit hash_table(size_type bucket_count = __bucket_init_count, const HashFcn& hash = HashFcn(), const ExtractKey& ex = ExtractKey(), const EqualKey& equal = EqualKey(), const Allocator& alloc = Allocator())
+			: num_elements(), buckets(bucket_count), hash(hash), get_key(ex), equals(equal), alloc(alloc) {}
 
 		explicit hash_table(const Allocator& alloc)
-			: num_elements(), buckets(11), hash(), equals(), alloc(alloc) {}
+			: num_elements(), buckets(__bucket_init_count), hash(), get_key(), equals(), alloc(alloc) {}
 
 		template< class InputIt >
-		hash_table(InputIt first, InputIt last, size_type bucket_count = 11, const HashFcn& hash = HashFcn(), const EqualKey& equal = EqualKey(),
+		hash_table(InputIt first, InputIt last, size_type bucket_count = __bucket_init_count, const HashFcn& hash = HashFcn(), const ExtractKey& ex = ExtractKey(), const EqualKey& equal = EqualKey(),
 			const Allocator& alloc = Allocator())
-			: num_elements(), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc)
+			: num_elements(), buckets(bucket_count), hash(hash), get_key(ex), equals(equal), alloc(alloc)
 		{
 			insert(first, last);
 		}
 
 		hash_table(const hash_table &other)
 			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(other.buckets.size()),
-			hash(other.hash), equals(other.equals), alloc(other.alloc) { deep_copy_from_buckets(other.buckets); }
+			hash(other.hash), get_key(other.get_key), equals(other.equals), alloc(other.alloc) { deep_copy_from_buckets(other.buckets); }
 
 		hash_table(const hash_table &other, const Allocator &alloc)
 			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(other.buckets.size()),
-			hash(other.hash), equals(other.equals), alloc(alloc) { deep_copy_from_buckets(other.buckets); }
+			hash(other.hash), get_key(other.get_key), equals(other.equals), alloc(alloc) { deep_copy_from_buckets(other.buckets); }
 
 		hash_table(hash_table &&other)
 			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(std::move(other.buckets)),
-			hash(other.hash), equals(other.equals), alloc(other.alloc) {}
+			hash(other.hash), get_key(other.get_key), equals(other.equals), alloc(other.alloc) {}
 
 		hash_table(hash_table &&other, const Allocator &alloc)
 			: current_load_factor(other.current_load_factor), num_elements(other.num_elements), buckets(std::move(other.buckets)),
-			hash(other.hash), equals(other.equals), alloc(alloc) {}
+			hash(other.hash), get_key(other.get_key), equals(other.equals), alloc(alloc) {}
 
-		hash_table(std::initializer_list<value_type> init, size_type bucket_count = 11, const HashFcn& hash = HashFcn(),
-			const EqualKey& equal = EqualKey(), const Allocator& alloc = Allocator())
-			: num_elements(), buckets(bucket_count), hash(hash), equals(equal), alloc(alloc)
-		{
-			insert(init.begin(), init.end());
-		}
 
 		~hash_table()
 		{
@@ -636,6 +635,47 @@ namespace my_stl
 			return end();
 		}
 
+		//桶的首尾迭代器，尾迭代器是下一个桶的首迭代器
+		local_iterator begin(size_type n)
+		{
+			return local_iterator(buckets[n], addressof(buckets[0]) + n, this);
+		}
+		const_local_iterator begin(size_type n) const
+		{
+			return const_local_iterator(buckets[n], addressof(buckets[0]) + n, this);
+		}
+		const_local_iterator cbegin(size_type n) const
+		{
+			return ((const Myt*)this)->begin(n);
+		}
+
+		local_iterator end(size_type n)
+		{
+			if (!buckets[n]) //当前桶为空，直接返回begin
+				return begin(n);
+			else
+			{
+				if (buckets[n + 1])//下一个桶不为空
+					return begin(n + 1); //返回下一个桶开始的迭代器
+				return ++begin(n + 1); //否则返回下一个首迭代器之后的有效迭代器
+			}
+		}
+		const_local_iterator end(size_type n) const
+		{
+			if (!buckets[n]) //当前桶为空，直接返回begin
+				return begin(n);
+			else
+			{
+				if (buckets[n + 1])//下一个桶不为空
+					return begin(n + 1); //返回下一个桶开始的迭代器
+				return ++begin(n + 1);  //否则返回下一个首迭代器之后的有效迭代器
+			} 
+		}
+		const_local_iterator cend(size_type n) const
+		{
+			return ((const Myt*)this)->end(n);
+		}
+
 		//Returns the number of buckets in the container. 
 		size_type bucket_count() const
 		{
@@ -791,6 +831,7 @@ namespace my_stl
 			buckets.reserve(other.buckets.size());
 			deep_copy_from_buckets(other.buckets);
 			hash = other.hash;
+			get_key = other.get_key;
 			equals = other.equals;
 			alloc = other.alloc;
 		}
@@ -802,6 +843,7 @@ namespace my_stl
 			num_elements = other.num_elements;
 			buckets = std::move(other.buckets);
 			hash = other.hash;
+			get_key = other.get_key;
 			equals = other.equals;
 			alloc = other.alloc;
 		}

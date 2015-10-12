@@ -1,7 +1,6 @@
 ﻿#include "my_vector.h"
 #include "my_hash_tables.h"
-#include <unordered_map>
-
+#include "my_unordered_set.h"
 using namespace my_stl;
 using std::cout;
 using std::endl;
@@ -37,6 +36,16 @@ int main()
 		cout << hash.bucket_size(i) << " ";
 	cout << endl;
 
+	cout << "*********************" << endl;
+
+	for (int i = 0; i != hash.bucket_count(); ++i)
+	{
+		cout << i << " has elements: ";
+		for (auto it = hash.cbegin(i); it != hash.cend(i); ++it)
+			cout << *it << " ";
+		cout << endl;
+	}
+	cout << "*********************" << endl;
 	cout << "buckets_size: " << hash.bucket_count() << endl;
 //	auto it1 = hash.insert_equal(1);
 //	auto it2 = hash.insert_equal(2);
@@ -85,7 +94,7 @@ int main()
 
 	cout << "********************************" << endl;
 
-	hash_table<int, int, std::hash<int>, std::identity<int>, std::equal_to<int> > ht(50, std::hash<int>(), std::equal_to<int>());
+	hash_table<int, int, std::hash<int>, std::identity<int>, std::equal_to<int> > ht(50, std::hash<int>(), std::identity<int>(), std::equal_to<int>());
 	cout << ht.size() << endl;
 	cout << ht.bucket_count() << endl;
 	cout << ht.max_bucket_count() << endl;
@@ -99,5 +108,25 @@ int main()
 	
 	cout << endl;
 
+//	hash_table<int, int, std::hash<int>, std::identity<int>, std::equal_to<int> > hashtable(10);
+	unordered_set<int> set1;
+	unordered_set<int> set2({ 1, 2, 3, 4, 5 });
+	auto set3(set2);
+	auto set4(std::move(set3));
+	auto p1 = set1.begin();
+	for (auto x : { 1, 2, 3, 4,  5, 1, 2, 3, 4, 5,6,7,8,9 })
+	{
+		p1 = set1.insert(p1, x);
+		cout << p1.node->value << endl;
+	}
+	cout << endl;
+	for (auto it = set1.begin(); it != set1.end(); ++it)
+		cout << *it << " ";
+	cout << endl;
+	set1.erase(set1.begin());
+	cout << set1.erase(9) << endl;;
+	for (auto it = set1.begin(); it != set1.end(); ++it)
+		cout << *it << " ";
+	cout << endl;
 	return 0;
 }
