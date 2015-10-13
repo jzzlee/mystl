@@ -1,5 +1,8 @@
 ﻿更新说明
 	
+	v.19.5
+	完成unordered_map, unordered_multimap.
+
 	v1.9.4
 	完成unordered_set, unordered_multiset.
 

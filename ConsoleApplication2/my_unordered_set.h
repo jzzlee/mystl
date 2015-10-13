@@ -1,12 +1,6 @@
 ﻿#ifndef __MY_UNOREDERED_SET_H_
 #define __MY_UNOREDERED_SET_H_
-#include <functional>
-#include "my_memory.h"
-#include "my_iterator.h"
-#include "my_xutility.h"
-#include <initializer_list>
-#include <cstdio>
-#include <iostream>
+#include "my_hash_tables.h"
 
 namespace my_stl
 {
@@ -333,7 +327,7 @@ namespace my_stl
 	}
 
 	///////////////////////////////////////////////////////////////////////
-	//以下是multiset.
+	//以下是unordered_multiset.
 	///////////////////////////////////////////////////////////////////////
 
 	template<typename Key, typename Hash, typename KeyEqual, typename Allocator>
