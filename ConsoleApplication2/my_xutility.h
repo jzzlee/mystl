@@ -88,11 +88,24 @@ namespace my_stl
 
 	//检查[first, last)区间的元素是否与d_first开始的对应元素相等
 	template<typename InputIt, typename ForwardIt>
-	bool equal(InputIt first, InputIt last, ForwardIt d_first)
+	bool equal(InputIt first1, InputIt last1, ForwardIt first2)
 	{
-		for (; first != last; ++first, ++d_first)
+		for (; first1 != last1; ++first1, ++first2)
 		{
-			if (*first != *d_first)
+			if (!(*first1 == *first2))
+				return false;
+		}
+		return true;
+	}
+
+	//检查[first1, last1)区间的元素是否与first2开始的对应元素满足p(value1, value2)恒为真
+	template< class InputIt1, class InputIt2, class BinaryPredicate >
+	bool equal(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, BinaryPredicate p)
+	{
+		for (; first1 != last1; ++first1, ++first2)
+		{
+			if (!p(*first1, *first2))
 				return false;
 		}
 		return true;
@@ -110,5 +123,30 @@ namespace my_stl
 		return last;
 	}
 
+	//在[first, last)范围内查找满足p的value，若找到，返回所在位置；否则，返回last
+	template< class InputIt, class UnaryPredicate >
+	InputIt find_if(InputIt first, InputIt last,
+		UnaryPredicate p)
+	{
+		for (; first != last; ++first)
+		{
+			if (p(*first))
+				return first;
+		}
+		return last;
+	}
+
+	//在[first, last)范围内查找不满足p的value，若找到，返回所在位置；否则，返回last
+	template< class InputIt, class UnaryPredicate >
+	InputIt find_if_not(InputIt first, InputIt last,
+		UnaryPredicate q)
+	{
+		for (; first != last; ++first)
+		{
+			if (!q(*first))
+				return first;
+		}
+		return last;
+	}
 }
 #endif

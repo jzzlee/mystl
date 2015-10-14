@@ -1,6 +1,9 @@
 ﻿更新说明
 	
-	v.19.5
+	v2.0.0
+	开始algorithm.
+
+	v.1.9.5
 	完成unordered_map, unordered_multimap.
 
 	v1.9.4
