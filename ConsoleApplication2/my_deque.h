@@ -1,4 +1,4 @@
-#ifndef __MY_DEQUE_H_
+ï»¿#ifndef __MY_DEQUE_H_
 #define __MY_DEQUE_H_
 
 #include "my_memory.h"
@@ -9,7 +9,7 @@
 #include <iostream>
 namespace my_stl
 {
-	//dequeµÄµü´úÆ÷
+	//dequeçš„è¿­ä»£å™¨
 	template<typename T, typename Ref, typename Ptr>
 	struct __deque_iterator
 	{
@@ -26,10 +26,10 @@ namespace my_stl
 
 		static std::size_t buffer_size(){ return __deque_buf_size(sizeof(T)); }
 
-		T *cur;	//µü´úÆ÷ËùÖ¸»º³åÇøÄÚÖ¸ÏòµÄÔªËØ
-		T *first;//µü´úÆ÷ËùÖ¸»º³åÇøµÄÍ·
-		T *last;//µü´úÆ÷ËùÖ¸»º³åÇøµÄÎ²ºóÔªËØ
-		map_pointer node;//Ö¸ÏòÖĞ¿ØÆ÷
+		T *cur;	//è¿­ä»£å™¨æ‰€æŒ‡ç¼“å†²åŒºå†…æŒ‡å‘çš„å…ƒç´ 
+		T *first;//è¿­ä»£å™¨æ‰€æŒ‡ç¼“å†²åŒºçš„å¤´
+		T *last;//è¿­ä»£å™¨æ‰€æŒ‡ç¼“å†²åŒºçš„å°¾åå…ƒç´ 
+		map_pointer node;//æŒ‡å‘ä¸­æ§å™¨
 
 		static inline size_type __deque_buf_size(size_type sz)
 		{
@@ -64,7 +64,7 @@ namespace my_stl
 		self operator++()
 		{
 			++cur;
-			if (cur == last) //curÖ¸Ïòµ±Ç°»º³åÇøÄ©Î²ÔªËØ£¬ĞèÒªµ÷Õûµ½ÏÂÒ»¸ö»º³åÇø
+			if (cur == last) //curæŒ‡å‘å½“å‰ç¼“å†²åŒºæœ«å°¾å…ƒç´ ï¼Œéœ€è¦è°ƒæ•´åˆ°ä¸‹ä¸€ä¸ªç¼“å†²åŒº
 			{
 				set_node(node + 1);
 				cur = first;
@@ -79,7 +79,7 @@ namespace my_stl
 		}
 		self operator--()
 		{
-			if (cur == first) //curÖ¸Ïòµ±Ç°»º³åÇøÆğÊ¼Î»ÖÃ£¬ĞèÒªµ÷Õûµ½ÉÏÒ»¸ö»º³åÇø
+			if (cur == first) //curæŒ‡å‘å½“å‰ç¼“å†²åŒºèµ·å§‹ä½ç½®ï¼Œéœ€è¦è°ƒæ•´åˆ°ä¸Šä¸€ä¸ªç¼“å†²åŒº
 			{
 				set_node(node - 1);
 				cur = last;
@@ -135,7 +135,7 @@ namespace my_stl
 
 	};
 
-	//dequeµÄ·´Ïòµü´úÆ÷
+	//dequeçš„åå‘è¿­ä»£å™¨
 	template<typename T, typename Ref, typename Ptr>
 	struct __deque_reverse_iterator
 	{
@@ -155,10 +155,10 @@ namespace my_stl
 
 		static std::size_t buffer_size(){ return __deque_buf_size(sizeof(T)); }
 
-		T *cur;	//µü´úÆ÷ËùÖ¸»º³åÇøÄÚÖ¸ÏòµÄÔªËØ
-		T *rfirst;//µü´úÆ÷ËùÖ¸»º³åÇøµÄÎ²
-		T *rlast;//µü´úÆ÷ËùÖ¸»º³åÇøµÄÊ×Ç°ÔªËØ
-		map_pointer node;//Ö¸ÏòÖĞ¿ØÆ÷
+		T *cur;	//è¿­ä»£å™¨æ‰€æŒ‡ç¼“å†²åŒºå†…æŒ‡å‘çš„å…ƒç´ 
+		T *rfirst;//è¿­ä»£å™¨æ‰€æŒ‡ç¼“å†²åŒºçš„å°¾
+		T *rlast;//è¿­ä»£å™¨æ‰€æŒ‡ç¼“å†²åŒºçš„é¦–å‰å…ƒç´ 
+		map_pointer node;//æŒ‡å‘ä¸­æ§å™¨
 
 		static inline size_type __deque_buf_size(size_type sz)
 		{
@@ -194,7 +194,7 @@ namespace my_stl
 		self operator++()
 		{
 			--cur;
-			if (cur == rlast) //curÖ¸Ïòµ±Ç°»º³åÇøÊ×Ç°Î»ÖÃ£¬ĞèÒªµ÷Õûµ½ÉÏÒ»¸ö»º³åÇø
+			if (cur == rlast) //curæŒ‡å‘å½“å‰ç¼“å†²åŒºé¦–å‰ä½ç½®ï¼Œéœ€è¦è°ƒæ•´åˆ°ä¸Šä¸€ä¸ªç¼“å†²åŒº
 			{
 				set_node(node - 1);
 				cur = rfirst;
@@ -209,7 +209,7 @@ namespace my_stl
 		}
 		self operator--()
 		{
-			if (cur == rfirst) //curÖ¸Ïòµ±Ç°»º³åÇøÆğÊ¼Î»ÖÃ£¬ĞèÒªµ÷Õûµ½ÉÏÒ»¸ö»º³åÇø
+			if (cur == rfirst) //curæŒ‡å‘å½“å‰ç¼“å†²åŒºèµ·å§‹ä½ç½®ï¼Œéœ€è¦è°ƒæ•´åˆ°ä¸Šä¸€ä¸ªç¼“å†²åŒº
 			{
 				set_node(node + 1);
 				cur = rlast;
@@ -366,7 +366,7 @@ namespace my_stl
 			}
 			else
 			{
-				//allocatorÀàĞÍ²»Ò»ÖÂ£¬ĞèÒªÖğ¸öÔªËØ¸´ÖÆ
+				//allocatorç±»å‹ä¸ä¸€è‡´ï¼Œéœ€è¦é€ä¸ªå…ƒç´ å¤åˆ¶
 				if (other.map_size != 0)
 				{
 					__map_initialize(my_stl::distance(other.begin(), other.end()));
@@ -397,7 +397,7 @@ namespace my_stl
 			else
 			{
 
-				//allocatorÀàĞÍ²»Ò»ÖÂ£¬ĞèÒªÖğ¸öÔªËØ¸´ÖÆ
+				//allocatorç±»å‹ä¸ä¸€è‡´ï¼Œéœ€è¦é€ä¸ªå…ƒç´ å¤åˆ¶
 				if (other.map_size != 0)
 				{
 					__map_initialize(my_stl::distance(other.begin(), other.end()));
@@ -419,7 +419,7 @@ namespace my_stl
 			const Allocator& alloc = Allocator())
 			:alloc(alloc)
 		{
-			//allocatorÀàĞÍ²»Ò»ÖÂ£¬ĞèÒªÖğ¸öÔªËØ¸´ÖÆ
+			//allocatorç±»å‹ä¸ä¸€è‡´ï¼Œéœ€è¦é€ä¸ªå…ƒç´ å¤åˆ¶
 			if (init.size() != 0)
 			{
 				__map_initialize(my_stl::distance(init.begin(), init.end()));
@@ -444,16 +444,16 @@ namespace my_stl
 			if (this != &other)
 			{
 				size_type other_size = other.size();
-				size_type space_size = iterator::buffer_size(); //Ò»¸ö»º³åÇøµÄÈİÁ¿
-				size_type capacity = (end_map - start.node) * space_size; // µ±Ç°dequeµÄÈİÁ¿
-				size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapÏòÏÂÀ©Õ¹µÄ×ÜÈİÁ¿
-				size_type up_capacity = (start.node - map) * space_size + capacity; //mapÏòÉÏÀ©Õ¹µÄ×ÜÈİÁ¿
-				size_type all_capacity = map_size * space_size; //²»ÉêÇëĞÂmapµÄ×î´óÈİÁ¿
+				size_type space_size = iterator::buffer_size(); //ä¸€ä¸ªç¼“å†²åŒºçš„å®¹é‡
+				size_type capacity = (end_map - start.node) * space_size; // å½“å‰dequeçš„å®¹é‡
+				size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapå‘ä¸‹æ‰©å±•çš„æ€»å®¹é‡
+				size_type up_capacity = (start.node - map) * space_size + capacity; //mapå‘ä¸Šæ‰©å±•çš„æ€»å®¹é‡
+				size_type all_capacity = map_size * space_size; //ä¸ç”³è¯·æ–°mapçš„æœ€å¤§å®¹é‡
 				if (size() >= other_size)
 				{
 					my_stl::copy(other.begin(), other.end(), start);
 					iterator new_finish = start + other_size;
-					//É¾³ı¶àÓàÔªËØ
+					//åˆ é™¤å¤šä½™å…ƒç´ 
 					while (finish != new_finish)
 						alloc.destroy((--finish).cur);
 					finish = new_finish;
@@ -464,32 +464,32 @@ namespace my_stl
 					my_stl::uninitialized_copy(other.begin() + size(), other.end(), finish);
 					finish = start + other_size;
 				}
-				else if (down_capacity > other_size) //Èç¹ûÏòÏÂÍØÕ¹¿Õ¼ä×ã¹»
+				else if (down_capacity > other_size) //å¦‚æœå‘ä¸‹æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 				{
 					copy(other.begin(), other.begin() + size(), start);
-					__alloc_new_space(other_size - capacity);  //ÉêÇëĞÂ»º³åÇø
+					__alloc_new_space(other_size - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 					finish = my_stl::uninitialized_copy(other.begin() + size(), other.end(), finish);
 				}
-				else if (up_capacity > other_size) //Èç¹ûÏòÉÏÍØÕ¹¿Õ¼ä×ã¹»
+				else if (up_capacity > other_size) //å¦‚æœå‘ä¸Šæ‹“å±•ç©ºé—´è¶³å¤Ÿ
 				{
-					map_pointer map_start = __alloc_new_space_forward(other_size - capacity);  //ÉêÇëĞÂ»º³åÇø
+					map_pointer map_start = __alloc_new_space_forward(other_size - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 					start.set_node(map_start);
 					start.cur = start.first;
 					finish = my_stl::copy(other.begin(), other.end(), start);
 				}
-				else if (all_capacity > other_size) //È«²¿ÍØÕ¹¿Õ¼ä×ã¹»
+				else if (all_capacity > other_size) //å…¨éƒ¨æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 				{
-					map_pointer map_start = __alloc_new_space_forward(other_size - capacity);  //ÏòÉÏÉêÇëĞÂ»º³åÇø
+					map_pointer map_start = __alloc_new_space_forward(other_size - capacity);  //å‘ä¸Šç”³è¯·æ–°ç¼“å†²åŒº
 					start.set_node(map_start);
 					start.cur = start.first;
 					copy(other.begin(), other.begin() + size(), start);
-					__alloc_new_space(other_size - up_capacity);  //ÉêÇëĞÂ»º³åÇø
+					__alloc_new_space(other_size - up_capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 					finish = my_stl::uninitialized_copy(other.begin() + size(), other.end(), finish);
 				}
 				else
 				{
-					//Èç¹û²»×ãÒÔ´æ·ÅotherµÄËùÓĞÔªËØ£¬ÔòĞèÒªÖØĞÂÉêÇëmap
-					//ÉêÇëĞÂ¿Õ¼ä
+					//å¦‚æœä¸è¶³ä»¥å­˜æ”¾otherçš„æ‰€æœ‰å…ƒç´ ï¼Œåˆ™éœ€è¦é‡æ–°ç”³è¯·map
+					//ç”³è¯·æ–°ç©ºé—´
 					__alloc_new_map(other_size);
 					finish = my_stl::uninitialized_copy(other.begin(), other.end(), start);
 				}
@@ -501,7 +501,7 @@ namespace my_stl
 		{
 			if (this != &other)
 			{
-				if (alloc == other.get_allocator())//allocatorÀàĞÍÒ»ÖÂ£¬Ö±½Ó¸´ÖÆ¿ØÖÆĞÅÏ¢
+				if (alloc == other.get_allocator())//allocatorç±»å‹ä¸€è‡´ï¼Œç›´æ¥å¤åˆ¶æ§åˆ¶ä¿¡æ¯
 				{
 					start = other.start; finish = other.finish;
 					map = other.map; end_map = other.end_map;
@@ -509,7 +509,7 @@ namespace my_stl
 				}
 				else
 				{
-					//allocatorÀàĞÍ²»Ò»ÖÂ£¬ĞèÒªÖğ¸öÔªËØ¸´ÖÆ
+					//allocatorç±»å‹ä¸ä¸€è‡´ï¼Œéœ€è¦é€ä¸ªå…ƒç´ å¤åˆ¶
 					*this = other;
 					other.__destroy_and_destruct();
 				}
@@ -523,16 +523,16 @@ namespace my_stl
 		deque& operator=(std::initializer_list<T> ilist)
 		{
 			size_type ilist_size = ilist.size();
-			size_type space_size = iterator::buffer_size(); //Ò»¸ö»º³åÇøµÄÈİÁ¿
-			size_type capacity = (end_map - start.node) * space_size; // µ±Ç°dequeµÄÈİÁ¿
-			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapÏòÏÂÀ©Õ¹µÄ×ÜÈİÁ¿
-			size_type up_capacity = (start.node - map) * space_size + capacity; //mapÏòÉÏÀ©Õ¹µÄ×ÜÈİÁ¿
-			size_type all_capacity = map_size * space_size; //²»ÉêÇëĞÂmapµÄ×î´óÈİÁ¿
+			size_type space_size = iterator::buffer_size(); //ä¸€ä¸ªç¼“å†²åŒºçš„å®¹é‡
+			size_type capacity = (end_map - start.node) * space_size; // å½“å‰dequeçš„å®¹é‡
+			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapå‘ä¸‹æ‰©å±•çš„æ€»å®¹é‡
+			size_type up_capacity = (start.node - map) * space_size + capacity; //mapå‘ä¸Šæ‰©å±•çš„æ€»å®¹é‡
+			size_type all_capacity = map_size * space_size; //ä¸ç”³è¯·æ–°mapçš„æœ€å¤§å®¹é‡
 			if (size() >= ilist_size)
 			{
 				my_stl::copy(ilist.begin(), ilist.end(), start);
 				iterator new_finish = start + ilist_size;
-				//É¾³ı¶àÓàÔªËØ
+				//åˆ é™¤å¤šä½™å…ƒç´ 
 				while (finish != new_finish)
 					alloc.destroy((--finish).cur);
 				finish = new_finish;
@@ -543,32 +543,32 @@ namespace my_stl
 				my_stl::uninitialized_copy(ilist.begin() + size(), ilist.end(), finish);
 				finish = start + ilist_size;
 			}
-			else if (down_capacity > ilist_size) //Èç¹ûÏòÏÂÍØÕ¹¿Õ¼ä×ã¹»
+			else if (down_capacity > ilist_size) //å¦‚æœå‘ä¸‹æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
 				copy(ilist.begin(), ilist.begin() + size(), start);
-				__alloc_new_space(ilist_size - capacity);  //ÉêÇëĞÂ»º³åÇø
+				__alloc_new_space(ilist_size - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 				finish = my_stl::uninitialized_copy(ilist.begin() + size(), ilist.end(), finish);
 			}
-			else if (up_capacity > ilist_size) //Èç¹ûÏòÉÏÍØÕ¹¿Õ¼ä×ã¹»
+			else if (up_capacity > ilist_size) //å¦‚æœå‘ä¸Šæ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
-				map_pointer map_start = __alloc_new_space_forward(ilist_size - capacity);  //ÉêÇëĞÂ»º³åÇø
+				map_pointer map_start = __alloc_new_space_forward(ilist_size - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 				start.set_node(map_start);
 				start.cur = start.first;
 				finish = my_stl::copy(ilist.begin(), ilist.end(), start);
 			}
-			else if (all_capacity > ilist_size) //È«²¿ÍØÕ¹¿Õ¼ä×ã¹»
+			else if (all_capacity > ilist_size) //å…¨éƒ¨æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
-				map_pointer map_start = __alloc_new_space_forward(ilist_size - capacity);  //ÏòÉÏÉêÇëĞÂ»º³åÇø
+				map_pointer map_start = __alloc_new_space_forward(ilist_size - capacity);  //å‘ä¸Šç”³è¯·æ–°ç¼“å†²åŒº
 				start.set_node(map_start);
 				start.cur = start.first;
 				copy(ilist.begin(), ilist.begin() + size(), start);
-				__alloc_new_space(ilist_size - up_capacity);  //ÉêÇëĞÂ»º³åÇø
+				__alloc_new_space(ilist_size - up_capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 				finish = my_stl::uninitialized_copy(ilist.begin() + size(), ilist.end(), finish);
 			}
 			else
 			{
-				//Èç¹û²»×ãÒÔ´æ·ÅotherµÄËùÓĞÔªËØ£¬ÔòĞèÒªÖØĞÂÉêÇëmap
-				//ÉêÇëĞÂ¿Õ¼ä
+				//å¦‚æœä¸è¶³ä»¥å­˜æ”¾otherçš„æ‰€æœ‰å…ƒç´ ï¼Œåˆ™éœ€è¦é‡æ–°ç”³è¯·map
+				//ç”³è¯·æ–°ç©ºé—´
 				__alloc_new_map(ilist_size);
 				finish = my_stl::uninitialized_copy(ilist.begin(), ilist.end(), start);
 			}
@@ -577,15 +577,15 @@ namespace my_stl
 
 		void assign(size_type count, const T& value)
 		{
-			size_type space_size = iterator::buffer_size(); //Ò»¸ö»º³åÇøµÄÈİÁ¿
-			size_type capacity = (end_map - start.node) * space_size; // µ±Ç°dequeµÄÈİÁ¿
-			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapÏòÏÂÀ©Õ¹µÄ×ÜÈİÁ¿
-			size_type up_capacity = (start.node - map) * space_size + capacity; //mapÏòÉÏÀ©Õ¹µÄ×ÜÈİÁ¿
-			size_type all_capacity = map_size * space_size; //²»ÉêÇëĞÂmapµÄ×î´óÈİÁ¿
+			size_type space_size = iterator::buffer_size(); //ä¸€ä¸ªç¼“å†²åŒºçš„å®¹é‡
+			size_type capacity = (end_map - start.node) * space_size; // å½“å‰dequeçš„å®¹é‡
+			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapå‘ä¸‹æ‰©å±•çš„æ€»å®¹é‡
+			size_type up_capacity = (start.node - map) * space_size + capacity; //mapå‘ä¸Šæ‰©å±•çš„æ€»å®¹é‡
+			size_type all_capacity = map_size * space_size; //ä¸ç”³è¯·æ–°mapçš„æœ€å¤§å®¹é‡
 			if (size() >= count)
 			{
 				iterator new_finish = my_stl::fill_n(start, count, value);
-				//É¾³ı¶àÓàÔªËØ
+				//åˆ é™¤å¤šä½™å…ƒç´ 
 				while (finish != new_finish)
 					alloc.destroy((--finish).cur);
 				finish = new_finish;
@@ -595,33 +595,33 @@ namespace my_stl
 				my_stl::fill_n(start, size(), value);
 				finish = my_stl::uninitialized_fill_n(finish, count - size(), value);
 			}
-			else if (down_capacity > count) //Èç¹ûÏòÏÂÍØÕ¹¿Õ¼ä×ã¹»
+			else if (down_capacity > count) //å¦‚æœå‘ä¸‹æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
 				my_stl::fill_n(start, size(), value);
-				__alloc_new_space(count - capacity);  //ÉêÇëĞÂ»º³åÇø
+				__alloc_new_space(count - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 				finish = my_stl::uninitialized_fill_n(finish, count - size(), value);
 			}
-			else if (up_capacity > count) //Èç¹ûÏòÉÏÍØÕ¹¿Õ¼ä×ã¹»
+			else if (up_capacity > count) //å¦‚æœå‘ä¸Šæ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
-				map_pointer map_start = __alloc_new_space_forward(count - capacity);  //ÉêÇëĞÂ»º³åÇø
+				map_pointer map_start = __alloc_new_space_forward(count - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 				my_stl::fill_n(start, size(), value);
 				start -= count - size();
 				my_stl::uninitialized_fill_n(start, count - size(), value);
 			}
-			else if (all_capacity > count) //È«²¿ÍØÕ¹¿Õ¼ä×ã¹»
+			else if (all_capacity > count) //å…¨éƒ¨æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
 				my_stl::fill_n(start, size(), value);
 				difference_type offset = (count - capacity) / 2;
-				__alloc_new_space_forward(count - capacity - offset);  //ÏòÉÏÉêÇëĞÂ»º³åÇø
-				__alloc_new_space(count - capacity - offset);  //ÏòÏÂÉêÇëĞÂ»º³åÇø
+				__alloc_new_space_forward(count - capacity - offset);  //å‘ä¸Šç”³è¯·æ–°ç¼“å†²åŒº
+				__alloc_new_space(count - capacity - offset);  //å‘ä¸‹ç”³è¯·æ–°ç¼“å†²åŒº
 				start -= offset;
 				my_stl::uninitialized_fill_n(start, size_type(offset), value);
 				finish = my_stl::uninitialized_fill_n(finish, size_type(count - size()), value);
 			}
 			else
 			{
-				//Èç¹û²»×ãÒÔ´æ·ÅotherµÄËùÓĞÔªËØ£¬ÔòĞèÒªÖØĞÂÉêÇëmap
-				//ÉêÇëĞÂ¿Õ¼ä
+				//å¦‚æœä¸è¶³ä»¥å­˜æ”¾otherçš„æ‰€æœ‰å…ƒç´ ï¼Œåˆ™éœ€è¦é‡æ–°ç”³è¯·map
+				//ç”³è¯·æ–°ç©ºé—´
 				__alloc_new_map(count);
 				finish = my_stl::uninitialized_fill_n(start, count, value);
 			}
@@ -634,15 +634,15 @@ namespace my_stl
 		void assign(InputIt first, InputIt last)
 		{
 			size_type count = my_stl::distance(first, last);
-			size_type space_size = iterator::buffer_size(); //Ò»¸ö»º³åÇøµÄÈİÁ¿
-			size_type capacity = (end_map - start.node) * space_size; // µ±Ç°dequeµÄÈİÁ¿
-			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapÏòÏÂÀ©Õ¹µÄ×ÜÈİÁ¿
-			size_type up_capacity = (start.node - map) * space_size + capacity; //mapÏòÉÏÀ©Õ¹µÄ×ÜÈİÁ¿
-			size_type all_capacity = map_size * space_size; //²»ÉêÇëĞÂmapµÄ×î´óÈİÁ¿
+			size_type space_size = iterator::buffer_size(); //ä¸€ä¸ªç¼“å†²åŒºçš„å®¹é‡
+			size_type capacity = (end_map - start.node) * space_size; // å½“å‰dequeçš„å®¹é‡
+			size_type down_capacity = (map + map_size - end_map) * space_size + capacity; //mapå‘ä¸‹æ‰©å±•çš„æ€»å®¹é‡
+			size_type up_capacity = (start.node - map) * space_size + capacity; //mapå‘ä¸Šæ‰©å±•çš„æ€»å®¹é‡
+			size_type all_capacity = map_size * space_size; //ä¸ç”³è¯·æ–°mapçš„æœ€å¤§å®¹é‡
 			if (size() >= count)
 			{
 				iterator new_finish = my_stl::copy(first, last, start);
-				//É¾³ı¶àÓàÔªËØ
+				//åˆ é™¤å¤šä½™å…ƒç´ 
 				while (finish != new_finish)
 					alloc.destroy((--finish).cur);
 				finish = new_finish;
@@ -652,34 +652,34 @@ namespace my_stl
 				my_stl::copy(first, first + size(), start);
 				finish = my_stl::uninitialized_copy(first + size(), last, finish);
 			}
-			else if (down_capacity > count) //Èç¹ûÏòÏÂÍØÕ¹¿Õ¼ä×ã¹»
+			else if (down_capacity > count) //å¦‚æœå‘ä¸‹æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
 				my_stl::copy(first, first + size(), start);
-				__alloc_new_space(count - capacity);  //ÉêÇëĞÂ»º³åÇø
+				__alloc_new_space(count - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 				finish = my_stl::uninitialized_copy(first + size(), last, finish);
 			}
-			else if (up_capacity > count) //Èç¹ûÏòÉÏÍØÕ¹¿Õ¼ä×ã¹»
+			else if (up_capacity > count) //å¦‚æœå‘ä¸Šæ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
-				__alloc_new_space_forward(count - capacity);  //ÉêÇëĞÂ»º³åÇø
+				__alloc_new_space_forward(count - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 				size_type old_size = size();
 				my_stl::copy(last - old_size, last, start);
 				start -= count - size();
 				my_stl::uninitialized_copy(first, last - old_size, start);
 			}
-			else if (all_capacity > count) //È«²¿ÍØÕ¹¿Õ¼ä×ã¹»
+			else if (all_capacity > count) //å…¨éƒ¨æ‹“å±•ç©ºé—´è¶³å¤Ÿ
 			{
 				difference_type offset = (count - capacity) / 2;
 				my_stl::copy(first + offset, first + offset + size(), start);
-				__alloc_new_space_forward(count - capacity - offset);  //ÏòÉÏÉêÇëĞÂ»º³åÇø
-				__alloc_new_space(count - capacity - offset);  //ÏòÏÂÉêÇëĞÂ»º³åÇø
+				__alloc_new_space_forward(count - capacity - offset);  //å‘ä¸Šç”³è¯·æ–°ç¼“å†²åŒº
+				__alloc_new_space(count - capacity - offset);  //å‘ä¸‹ç”³è¯·æ–°ç¼“å†²åŒº
 				start -= offset;
 				my_stl::uninitialized_copy(first, first + offset, start);
 				finish = my_stl::uninitialized_copy(first + size(), last, finish);
 			}
 			else
 			{
-				//Èç¹û²»×ãÒÔ´æ·Åcount¸öÔªËØ£¬ÔòĞèÒªÖØĞÂÉêÇëmap
-				//ÉêÇëĞÂ¿Õ¼ä
+				//å¦‚æœä¸è¶³ä»¥å­˜æ”¾countä¸ªå…ƒç´ ï¼Œåˆ™éœ€è¦é‡æ–°ç”³è¯·map
+				//ç”³è¯·æ–°ç©ºé—´
 				__alloc_new_map(count);
 				finish = my_stl::uninitialized_copy(first, last, start);
 			}
@@ -736,7 +736,7 @@ namespace my_stl
 			if (map)
 			{
 				size_type space_size = iterator::buffer_size();
-				//ÊÍ·ÅÄÇĞ©ÔÚfinish.nodeÖ®ºóµÄÖĞ¿Ø½ÚµãÖ¸ÏòµÄ¿Õ»º³åÇø
+				//é‡Šæ”¾é‚£äº›åœ¨finish.nodeä¹‹åçš„ä¸­æ§èŠ‚ç‚¹æŒ‡å‘çš„ç©ºç¼“å†²åŒº
 				for (map_pointer p = finish.node + 1; p != end_map; ++p)
 				{
 					alloc.deallocate(*p, space_size);
@@ -749,7 +749,7 @@ namespace my_stl
 		void clear()
 		{
 			difference_type space_size = iterator::buffer_size();
-			//ÇåÀíÔªËØ
+			//æ¸…ç†å…ƒç´ 
 			while (finish != start)
 				alloc.destroy((--finish).cur);
 		}
@@ -798,33 +798,33 @@ namespace my_stl
 		//	iterator tmp_pos(pos);
 		//	if (count != 0)
 		//	{
-		//		size_type n = size() + count; //È«²¿ÔªËØÊıÁ¿
-		//		size_type space_size = iterator::buffer_size(); //Ò»¸ö»º³åÇøµÄÈİÁ¿
-		//		size_type capacity = (end_map - map) * space_size; // µ±Ç°dequeµÄÈİÁ¿
-		//		size_type all_capacity = map_size * space_size; //²»ÉêÇëĞÂmapµÄ×î´óÈİÁ¿
-		//		if (all_capacity > n)  //²»ĞèÒªÖØĞÂÉêÇëmap
+		//		size_type n = size() + count; //å…¨éƒ¨å…ƒç´ æ•°é‡
+		//		size_type space_size = iterator::buffer_size(); //ä¸€ä¸ªç¼“å†²åŒºçš„å®¹é‡
+		//		size_type capacity = (end_map - map) * space_size; // å½“å‰dequeçš„å®¹é‡
+		//		size_type all_capacity = map_size * space_size; //ä¸ç”³è¯·æ–°mapçš„æœ€å¤§å®¹é‡
+		//		if (all_capacity > n)  //ä¸éœ€è¦é‡æ–°ç”³è¯·map
 		//		{
-		//			if (capacity <= n) //µ±Ç°»º³åÇø¿ÕÓàÎ»ÖÃ²»×ãÒÔ·ÅÏÂcountĞÂÔªËØ
-		//				__alloc_new_space(n - capacity);  //ÉêÇëĞÂ»º³åÇø
+		//			if (capacity <= n) //å½“å‰ç¼“å†²åŒºç©ºä½™ä½ç½®ä¸è¶³ä»¥æ”¾ä¸‹countæ–°å…ƒç´ 
+		//				__alloc_new_space(n - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 		//		}
-		//		else  //ĞèÒªÖØĞÂÉêÇëmap
+		//		else  //éœ€è¦é‡æ–°ç”³è¯·map
 		//		{
 		//			__alloc_new_map(n);
 		//		}
 		//		iterator old_finish = finish;
 		//		if (size_type(finish - tmp_pos) >= count)
 		//		{
-		//			finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count¸öÔªËØ¸´ÖÆµ½finish¿ªÊ¼µÄÎ»ÖÃÈ¥
-		//			//[pos, old_finish)µÄÔªËØºóÒÆcount¸öµ¥Î»
+		//			finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) countä¸ªå…ƒç´ å¤åˆ¶åˆ°finishå¼€å§‹çš„ä½ç½®å»
+		//			//[pos, old_finish)çš„å…ƒç´ åç§»countä¸ªå•ä½
 		//			for (iterator p = old_finish; p != tmp_pos; --p)
 		//				*(p + count) = *p;
-		//			my_stl::fill_n(tmp_pos, count, value); //ÔÚÔ­À´posµÄÎ»ÖÃÌî³äcount¸övalue
+		//			my_stl::fill_n(tmp_pos, count, value); //åœ¨åŸæ¥posçš„ä½ç½®å¡«å……countä¸ªvalue
 		//		}
 		//		else
 		//		{
-		//			finish = my_stl::uninitialized_copy(pos, const_iterator(finish), tmp_pos + count);  //[pos, finish)ºóÒÆcount¸öµ¥Î»
-		//			my_stl::uninitialized_fill(iterator(old_finish), tmp_pos + count, value);  //[old_finish, pos + count) Ìî³ävalue
-		//			my_stl::fill(tmp_pos, iterator(old_finish), value); //[pos, old)finish) Ìî³ävalue
+		//			finish = my_stl::uninitialized_copy(pos, const_iterator(finish), tmp_pos + count);  //[pos, finish)åç§»countä¸ªå•ä½
+		//			my_stl::uninitialized_fill(iterator(old_finish), tmp_pos + count, value);  //[old_finish, pos + count) å¡«å……value
+		//			my_stl::fill(tmp_pos, iterator(old_finish), value); //[pos, old)finish) å¡«å……value
 		//		}
 		//	}
 		//	return tmp_pos;
@@ -839,33 +839,33 @@ namespace my_stl
 		//	if (first != last)
 		//	{
 		//		size_type count = my_stl::distance(first, last);
-		//		size_type n = size() + count; //È«²¿ÔªËØÊıÁ¿
-		//		size_type space_size = iterator::buffer_size(); //Ò»¸ö»º³åÇøµÄÈİÁ¿
-		//		size_type capacity = (end_map - map) * space_size; // µ±Ç°dequeµÄÈİÁ¿
-		//		size_type all_capacity = map_size * space_size; //²»ÉêÇëĞÂmapµÄ×î´óÈİÁ¿
-		//		if (all_capacity > n)  //²»ĞèÒªÖØĞÂÉêÇëmap
+		//		size_type n = size() + count; //å…¨éƒ¨å…ƒç´ æ•°é‡
+		//		size_type space_size = iterator::buffer_size(); //ä¸€ä¸ªç¼“å†²åŒºçš„å®¹é‡
+		//		size_type capacity = (end_map - map) * space_size; // å½“å‰dequeçš„å®¹é‡
+		//		size_type all_capacity = map_size * space_size; //ä¸ç”³è¯·æ–°mapçš„æœ€å¤§å®¹é‡
+		//		if (all_capacity > n)  //ä¸éœ€è¦é‡æ–°ç”³è¯·map
 		//		{
-		//			if (capacity <= n) //µ±Ç°»º³åÇø¿ÕÓàÎ»ÖÃ²»×ãÒÔ·ÅÏÂcountĞÂÔªËØ
-		//				__alloc_new_space(n - capacity);  //ÉêÇëĞÂ»º³åÇø
+		//			if (capacity <= n) //å½“å‰ç¼“å†²åŒºç©ºä½™ä½ç½®ä¸è¶³ä»¥æ”¾ä¸‹countæ–°å…ƒç´ 
+		//				__alloc_new_space(n - capacity);  //ç”³è¯·æ–°ç¼“å†²åŒº
 		//		}
-		//		else  //ĞèÒªÖØĞÂÉêÇëmap
+		//		else  //éœ€è¦é‡æ–°ç”³è¯·map
 		//		{
 		//			__alloc_new_map(n);
 		//		}
 		//		iterator old_finish = finish;
 		//		if (size_type(finish - tmp_pos) >= count)
 		//		{
-		//			finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) count¸öÔªËØ¸´ÖÆµ½finish¿ªÊ¼µÄÎ»ÖÃÈ¥
-		//			//[pos, old_finish)µÄÔªËØºóÒÆcount¸öµ¥Î»
+		//			finish = my_stl::uninitialized_copy(finish - count, finish, finish);  //[finish-n, finish) countä¸ªå…ƒç´ å¤åˆ¶åˆ°finishå¼€å§‹çš„ä½ç½®å»
+		//			//[pos, old_finish)çš„å…ƒç´ åç§»countä¸ªå•ä½
 		//			for (iterator p = old_finish; p != tmp_pos; --p)
 		//				*(p + count) = *p;
-		//			my_stl::copy(first, last, tmp_pos); //ÔÚÔ­À´posµÄÎ»ÖÃÌî³äcount¸övalue
+		//			my_stl::copy(first, last, tmp_pos); //åœ¨åŸæ¥posçš„ä½ç½®å¡«å……countä¸ªvalue
 		//		}
 		//		else
 		//		{
-		//			finish = my_stl::uninitialized_copy(tmp_pos, finish, tmp_pos + count);  //[pos, finish)ºóÒÆcount¸öµ¥Î»
-		//			my_stl::copy_n(first, size_type(old_finish - pos), tmp_pos); // Ç°²¿·Ö¸´ÖÆµ½[pos, old_finish)
-		//			my_stl::uninitialized_copy(first + (old_finish - pos), last, old_finish);  //ºó²¿·Ö¸´ÖÆµ½old_finish¿ªÊ¼µÄÎ»ÖÃ
+		//			finish = my_stl::uninitialized_copy(tmp_pos, finish, tmp_pos + count);  //[pos, finish)åç§»countä¸ªå•ä½
+		//			my_stl::copy_n(first, size_type(old_finish - pos), tmp_pos); // å‰éƒ¨åˆ†å¤åˆ¶åˆ°[pos, old_finish)
+		//			my_stl::uninitialized_copy(first + (old_finish - pos), last, old_finish);  //åéƒ¨åˆ†å¤åˆ¶åˆ°old_finishå¼€å§‹çš„ä½ç½®
 		//		}
 		//	}
 		//	return tmp_pos;
@@ -982,29 +982,29 @@ namespace my_stl
 
 
 	private:
-		iterator start, finish; // Ê×¡¢Î²µü´úÆ÷
-		//		reverse_iterator rstart, rfinish; //Ê×Î²·´Ïòµü´úÆ÷
-		map_pointer map;	//Ö¸ÏòÖĞ¿Øµ¥Ôª
-		map_pointer end_map; //Ö¸Ïòµ±Ç°¿ÉÓÃÖĞ¿Øµ¥ÔªµÄÎ²ºó
-		size_type map_size; //mapµÄ´óĞ¡
-		allocator_type alloc;    //ÄÚ´æÅäÖÃÆ÷
+		iterator start, finish; // é¦–ã€å°¾è¿­ä»£å™¨
+		//		reverse_iterator rstart, rfinish; //é¦–å°¾åå‘è¿­ä»£å™¨
+		map_pointer map;	//æŒ‡å‘ä¸­æ§å•å…ƒ
+		map_pointer end_map; //æŒ‡å‘å½“å‰å¯ç”¨ä¸­æ§å•å…ƒçš„å°¾å
+		size_type map_size; //mapçš„å¤§å°
+		allocator_type alloc;    //å†…å­˜é…ç½®å™¨
 		allocator<T*> alloc_map;
 
 		void __map_initialize(size_type n)
 		{
-			//¼ÆËãĞèÒª¼¸¸ö»º³åÇø
+			//è®¡ç®—éœ€è¦å‡ ä¸ªç¼“å†²åŒº
 			size_type space_size = iterator::buffer_size();
 			map_size = n / space_size + 1;
-			//ÉêÇëÖĞ¿ØÆ÷¿Õ¼ä
+			//ç”³è¯·ä¸­æ§å™¨ç©ºé—´
 			map = alloc_map.allocate(map_size);
-			//ÉêÇë»º´æÇø¿Õ¼ä¡¢¹¹ÔìÖĞ¿ØÆ÷¸÷ÔªËØ
+			//ç”³è¯·ç¼“å­˜åŒºç©ºé—´ã€æ„é€ ä¸­æ§å™¨å„å…ƒç´ 
 			for (int i = 0; i != map_size; ++i)
 				alloc_map.construct(&(map[i]), alloc.allocate(space_size));
-			//ÉèÖÃstartµü´úÆ÷µÄÖµ
+			//è®¾ç½®startè¿­ä»£å™¨çš„å€¼
 			start.set_node(map);
 			start.cur = start.first;
 			difference_type offset = n % space_size;
-			//ÉèÖÃfinishµü´úÆ÷µÄÖµ
+			//è®¾ç½®finishè¿­ä»£å™¨çš„å€¼
 			finish.set_node(map + map_size - 1);
 			finish.cur = finish.first + offset;
 			end_map = map + map_size;
@@ -1024,9 +1024,9 @@ namespace my_stl
 		void __destroy_and_destruct()
 		{
 			difference_type space_size = iterator::buffer_size();
-			//ÇåÀíÄÇĞ©ÎŞÓÃµÄ»º³åÇø
+			//æ¸…ç†é‚£äº›æ— ç”¨çš„ç¼“å†²åŒº
 			shrink_to_fit();
-			//ÇåÀí [start.node, finish.node)Ö¸ÏòÖ¸ÏòµÄÖĞ¿ØÇøºÍÆäÖĞ¿ØÇøÖ¸ÏòµÄ»º³åÇø
+			//æ¸…ç† [start.node, finish.node)æŒ‡å‘æŒ‡å‘çš„ä¸­æ§åŒºå’Œå…¶ä¸­æ§åŒºæŒ‡å‘çš„ç¼“å†²åŒº
 			for (map_pointer p = start.node; p != finish.node; ++p)
 			{
 				pointer fin = *p;
@@ -1037,7 +1037,7 @@ namespace my_stl
 					alloc.deallocate(*p, space_size);
 				alloc_map.destroy(p);
 			}
-			//ÇåÀí finish.nodeÖ¸ÏòÖ¸ÏòµÄÖĞ¿ØÇøºÍÆäÖĞ¿ØÇøÖ¸ÏòµÄ»º³åÇø
+			//æ¸…ç† finish.nodeæŒ‡å‘æŒ‡å‘çš„ä¸­æ§åŒºå’Œå…¶ä¸­æ§åŒºæŒ‡å‘çš„ç¼“å†²åŒº
 			if (finish.node)
 			{
 				for (pointer fin = *(finish.node); fin != finish.cur; ++fin)
@@ -1054,19 +1054,19 @@ namespace my_stl
 
 		void __alloc_new_map(size_type n)
 		{
-			//¼ÆËãĞèÒª¼¸¸ö»º³åÇø
+			//è®¡ç®—éœ€è¦å‡ ä¸ªç¼“å†²åŒº
 			size_type space_size = iterator::buffer_size();
 			size_type need_map_size = n / space_size + 1;
 			size_type new_map_size = std::max(need_map_size + 2, 2 * map_size);
-			//ÉêÇëÖĞ¿ØÆ÷¿Õ¼ä
+			//ç”³è¯·ä¸­æ§å™¨ç©ºé—´
 			map_pointer new_map = alloc_map.allocate(new_map_size);
 			size_type offset = (new_map_size - need_map_size) / 2;
-			//¸´ÖÆÔ­ÖĞ¿ØĞÅÏ¢
+			//å¤åˆ¶åŸä¸­æ§ä¿¡æ¯
 			size_type ind = 0;
 			for (map_pointer p = start.node; p != end_map; ++p, ++ind)
 				new_map[offset + ind] = *p;
 
-			//ÉêÇë»º´æÇø¿Õ¼ä¡¢¹¹ÔìÖĞ¿ØÆ÷¸÷ÔªËØ
+			//ç”³è¯·ç¼“å­˜åŒºç©ºé—´ã€æ„é€ ä¸­æ§å™¨å„å…ƒç´ 
 			for (int i = ind; i != need_map_size; ++i)
 				alloc_map.construct(&(new_map[i + offset]), alloc.allocate(space_size));
 			map_pointer new_end_map = new_map + offset + need_map_size;
@@ -1077,7 +1077,7 @@ namespace my_stl
 			map = new_map;
 			map_size = new_map_size;
 			end_map = new_end_map;
-			//ÉèÖÃstartµü´úÆ÷µÄÖµ
+			//è®¾ç½®startè¿­ä»£å™¨çš„å€¼
 			start.set_node(map + offset);
 			//			start.cur = start.first;
 
@@ -1085,19 +1085,19 @@ namespace my_stl
 		}
 		void __alloc_new_space(size_type n)
 		{
-			//¼ÆËãĞèÒª¼¸¸ö»º³åÇø
+			//è®¡ç®—éœ€è¦å‡ ä¸ªç¼“å†²åŒº
 			size_type space_size = iterator::buffer_size();
 			size_type need_map_size = n / space_size + 1;
-			//ÉêÇë»º´æÇø¿Õ¼ä¡¢´Óend_mapÎ»ÖÃ¹¹ÔìÖĞ¿Øµ¥Ôª
+			//ç”³è¯·ç¼“å­˜åŒºç©ºé—´ã€ä»end_mapä½ç½®æ„é€ ä¸­æ§å•å…ƒ
 			for (int i = 0; i != need_map_size; ++i)
 				alloc_map.construct(end_map++, alloc.allocate(space_size));
 		}
 		map_pointer __alloc_new_space_forward(size_type n)
 		{
-			//¼ÆËãĞèÒª¼¸¸ö»º³åÇø
+			//è®¡ç®—éœ€è¦å‡ ä¸ªç¼“å†²åŒº
 			size_type space_size = iterator::buffer_size();
 			size_type need_map_size = n / space_size + 1;
-			//ÉêÇë»º´æÇø¿Õ¼ä¡¢´Óend_mapÎ»ÖÃ¹¹ÔìÖĞ¿Øµ¥Ôª
+			//ç”³è¯·ç¼“å­˜åŒºç©ºé—´ã€ä»end_mapä½ç½®æ„é€ ä¸­æ§å•å…ƒ
 			map_pointer tmp = start.node;
 			for (int i = 0; i != need_map_size; ++i)
 				alloc_map.construct(--tmp, alloc.allocate(space_size));
@@ -1106,19 +1106,19 @@ namespace my_stl
 
 		void __alloc_new_front(size_type n)
 		{
-			//¼ÆËãĞèÒª¼¸¸ö»º³åÇø
+			//è®¡ç®—éœ€è¦å‡ ä¸ªç¼“å†²åŒº
 			size_type space_size = iterator::buffer_size();
 			size_type need_map_size = n / space_size + 1;
 			size_type new_map_size = std::max(need_map_size + 2, 2 * map_size);
-			//ÉêÇëÖĞ¿ØÆ÷¿Õ¼ä
+			//ç”³è¯·ä¸­æ§å™¨ç©ºé—´
 			map_pointer new_map = alloc_map.allocate(new_map_size);
 			size_type offset = (new_map_size - need_map_size) / 2;
-			//¸´ÖÆÔ­ÖĞ¿ØĞÅÏ¢
+			//å¤åˆ¶åŸä¸­æ§ä¿¡æ¯
 			size_type ind = 0;
 			for (map_pointer p = start.node; p != end_map; ++p, ++ind)
 				new_map[offset + ind] = *p;
 
-			//ÉêÇë»º´æÇø¿Õ¼ä¡¢¹¹ÔìÖĞ¿ØÆ÷¸÷ÔªËØ
+			//ç”³è¯·ç¼“å­˜åŒºç©ºé—´ã€æ„é€ ä¸­æ§å™¨å„å…ƒç´ 
 			for (int i = ind; i != need_map_size; ++i)
 				alloc_map.construct(&(new_map[i + offset]), alloc.allocate(space_size));
 			map_pointer new_end_map = new_map + offset + need_map_size;
@@ -1135,15 +1135,15 @@ namespace my_stl
 		iterator __insert_aux(iterator pos, const T& value)
 		{
 			difference_type offset = pos - start;
-			if ((size_type)offset < size() / 2)//²åÈëµã¿¿Ç°
+			if ((size_type)offset < size() / 2)//æ’å…¥ç‚¹é å‰
 			{
-				push_front(front()); //²åÈëµÚÒ»¸öÔªËØ
-				my_stl::copy(start + 2, pos, start + 1); //ÔªËØÒÆ¶¯
+				push_front(front()); //æ’å…¥ç¬¬ä¸€ä¸ªå…ƒç´ 
+				my_stl::copy(start + 2, pos, start + 1); //å…ƒç´ ç§»åŠ¨
 			}
-			else //²åÈëµã¿¿ºó
+			else //æ’å…¥ç‚¹é å
 			{
-				push_back(back()); //²åÈë×îºóÒ»¸öÔªËØ
-				my_stl::copy_backward(pos, finish - 2, finish - 1); //ÔªËØÍùºóÒÆ¶¯
+				push_back(back()); //æ’å…¥æœ€åä¸€ä¸ªå…ƒç´ 
+				my_stl::copy_backward(pos, finish - 2, finish - 1); //å…ƒç´ å¾€åç§»åŠ¨
 			}
 			*pos = value;
 			return pos;
@@ -1161,15 +1161,15 @@ namespace my_stl
 		iterator __move_insert_aux(iterator pos, T&& value)
 		{
 			difference_type offset = pos - start;
-			if ((size_type)offset < size() / 2)//²åÈëµã¿¿Ç°
+			if ((size_type)offset < size() / 2)//æ’å…¥ç‚¹é å‰
 			{
-				push_front(front()); //²åÈëµÚÒ»¸öÔªËØ
-				my_stl::copy(start + 2, pos, start + 1); //ÔªËØÒÆ¶¯
+				push_front(front()); //æ’å…¥ç¬¬ä¸€ä¸ªå…ƒç´ 
+				my_stl::copy(start + 2, pos, start + 1); //å…ƒç´ ç§»åŠ¨
 			}
-			else //²åÈëµã¿¿ºó
+			else //æ’å…¥ç‚¹é å
 			{
-				push_back(back()); //²åÈë×îºóÒ»¸öÔªËØ
-				my_stl::copy_backward(pos, finish - 2, finish - 1); //ÔªËØÍùºóÒÆ¶¯
+				push_back(back()); //æ’å…¥æœ€åä¸€ä¸ªå…ƒç´ 
+				my_stl::copy_backward(pos, finish - 2, finish - 1); //å…ƒç´ å¾€åç§»åŠ¨
 			}
 			__move_insert(pos, std::move(value), is_POD());
 			return pos;
