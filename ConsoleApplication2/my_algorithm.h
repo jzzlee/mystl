@@ -169,6 +169,43 @@ namespace my_stl
 		}
 	}
 
+	template< class ForwardIt, class Size, class T >
+	ForwardIt search_n(ForwardIt first, ForwardIt last, Size count, const T& value)
+	{
+		for (;; ++first)
+		{
+			ForwardIt it = first;
+			for (Size n = 0; n != count; ++n, ++it)
+			{
+				if (it == last)
+					return last;
+				if (!(*it == value))
+					break;
+				if (n == count - 1)
+					return first;
+			}
+		}
+	}
+
+	template< class ForwardIt, class Size, class T, class BinaryPredicate >
+	ForwardIt search_n(ForwardIt first, ForwardIt last, Size count, const T& value,
+		BinaryPredicate p)
+	{
+		for (;; ++first)
+		{
+			ForwardIt it = first;
+			for (Size n = 0; n != count; ++n, ++it)
+			{
+				if (it == last)
+					return last;
+				if (p(*it value))
+					break;
+				if (n == count - 1)
+					return first;
+			}
+		}
+	}
+
 	//在[first, last)中寻找最后一个匹配[s_first, s_last)的序列，使用operator==检查是否匹配
 	//若找到，返回序列首位置；否则，返回last.
 	template< class ForwardIt1, class ForwardIt2 >
@@ -217,6 +254,66 @@ namespace my_stl
 			}
 		}
 		return result;
+	}
+
+	//从[first, last)中寻找[s_first, s_last)中的任意元素，返回出现的位置
+	template< class InputIt, class ForwardIt >
+	InputIt find_first_of(InputIt first, InputIt last,
+		ForwardIt s_first, ForwardIt s_last)
+	{
+		for (; first != last; ++first)
+		{
+			for (ForwardIt it = s_first; it != s_last; ++it)
+			{
+				if (*first == *it)
+					return first;
+			}
+		}
+		return last;
+	}
+
+	//使用p来检查元素是否匹配.
+	template< class InputIt, class ForwardIt, class BinaryPredicate >
+	InputIt find_first_of(InputIt first, InputIt last,
+		ForwardIt s_first, ForwardIt s_last, BinaryPredicate p)
+	{
+		for (; first != last; ++first)
+		{
+			for (ForwardIt it = s_first; it != s_last; ++it)
+			{
+				if (p(*first, *it))
+					return first;
+			}
+		}
+		return last;
+	}
+
+	//在[first, last)中查找两个连续相同元素
+	template< class ForwardIt >
+	ForwardIt adjacent_find(ForwardIt first, ForwardIt last)
+	{
+		if (first == last)
+			return last;
+		for (ForwardIt before = first++; first != last; ++first, ++before)
+		{
+			if (*before == *first)
+				return before;
+		}
+		return last;
+	}
+
+	//使用p来检查元素是否匹配.
+	template< class ForwardIt, class BinaryPredicate>
+	ForwardIt adjacent_find(ForwardIt first, ForwardIt last, BinaryPredicate p)
+	{
+		if (first == last)
+			return last;
+		for (ForwardIt before = first++; first != last; ++first, ++before)
+		{
+			if (p(*before, *first))
+				return before;
+		}
+		return last;
 	}
 
 

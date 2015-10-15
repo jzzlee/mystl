@@ -2,6 +2,7 @@
 #define __MY_XUTILITY_H_
 
 #include "my_iterator.h"
+#include "my_type_traits.h"
 
 namespace my_stl
 {
@@ -47,16 +48,92 @@ namespace my_stl
 		return current;
 	}
 
-	//真正的copy
-	template< class InputIt, class ForwardIt >
-	ForwardIt copy(InputIt first, InputIt last, ForwardIt d_first)
+	//---------------------------------------------------------
+	//copy
+
+	template<typename RandomAccessIt, typename OutputIt, typename Distance>
+	inline OutputIt __copy_d(RandomAccessIt first, RandomAccessIt last, OutputIt d_first, Distance*)
 	{
-		typedef typename iterator_traits<ForwardIt>::value_type Value;
-		ForwardIt current = d_first;
-		for (; first != last; ++first, ++current) {
-			::new (static_cast<void*>(my_stl::addressof(*current))) Value(*first); //use placement new to initialize the object
+		for (Distance n = last - first; n > 0; --n, ++d_first, ++first)
+			*d_first = *first;
+		return d_first;
+	}
+
+	template<typename InputIt, typename OutputIt>
+	inline OutputIt __copy(InputIt first, InputIt last, OutputIt d_first, input_iterator_tag)
+	{
+		for (; first != last; ++first, ++d_first)
+			*d_first = *first;
+		return d_first;
+	}
+
+	template<typename RandomAccessIt, typename OutputIt>
+	inline OutputIt __copy(RandomAccessIt first, RandomAccessIt last, OutputIt d_first, random_access_iterator_tag)
+	{
+		return __copy_d(first, last, d_first, distance_type(first));
+	}
+
+	template<typename T>
+	inline T* __copy_t(const T *first, const T *last, T *d_first, __true_type)
+	{
+		std::memmove(d_first, first, sizeof(T) * (last - first));
+		return d_first + (last - first);
+	}
+
+	template<typename T>
+	inline T* __copy_t(const T *first, const T *last, T *d_first, __false_type)
+	{
+		return __copy_d(first, last, result, static_cast<ptrdiff_t*>(0));
+	}
+
+	template<typename InputIt, typename OutputIt>
+	struct __copy_dispatch
+	{
+		static OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
+		{
+			return __copy(first, last, d_first, iterator_category(first));
 		}
-		return current;
+	};
+	
+	//偏特化版本
+	template<typename T>
+	struct __copy_dispatch<T*, T*>
+	{
+		static T* copy(T* first, T* last, T* d_first)
+		{
+			typedef typename __type_traits<T>::has_trivial_assignment_operator trivial_assignment_type;
+			return __copy_t(first, last, d_first, trivial_assignment_type());
+		}
+	};
+
+	template<typename T>
+	struct __copy_dispatch<const T*, T*>
+	{
+		static T* copy(T* first, T* last, T* d_first)
+		{
+			typedef typename __type_traits<T>::has_trivial_assignment_operator trivial_assignment_type;
+			return __copy_t(first, last, d_first, trivial_assignment_type());
+		}
+	};
+
+	//真正的copy
+	template< class InputIt, class OutputIt >
+	inline OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
+	{
+		return __copy_dispatch<InputIt, OutputIt>::copy(first, last, d_first);
+	}
+
+	//特化版本
+	inline char* copy(const char* first, const char *last, char *d_first)
+	{
+		std::memmove(d_first, first, last - first);
+		return d_first + (last - first);
+	}
+
+	inline wchar_t* copy(const wchar_t* first, const wchar_t *last, wchar_t *d_first)
+	{
+		std::memmove(d_first, first, sizeof(wchar_t) * (last - first));
+		return d_first + (last - first);
 	}
 
 	//真正的copy_n函数
@@ -65,13 +142,15 @@ namespace my_stl
 	{
 		typedef typename iterator_traits<ForwardIt>::value_type Value;
 		ForwardIt current = d_first;
-		for (; count > 0; ++first, ++current, --count) {
-			::new (static_cast<void*>(my_stl::addressof(*current))) Value(*first); //use placement new to initialize the object
+		for (; count > 0; ++first, ++current, --count) 
+		{
+			*current = *first;
+//			::new (static_cast<void*>(my_stl::addressof(*current))) Value(*first); //use placement new to initialize the object
 		}
 		return current;
 	}
 	
-	//真正的copy
+	//真正的copy_backwrad
 	template< class InputIt, class ForwardIt >
 	ForwardIt copy_backward(InputIt first, InputIt last, ForwardIt d_first)
 	{
@@ -148,5 +227,7 @@ namespace my_stl
 		}
 		return last;
 	}
+
+
 }
 #endif
