@@ -1,10 +1,10 @@
-#ifndef __MY_UNOREDERED_MAP_H_
+ï»¿#ifndef __MY_UNOREDERED_MAP_H_
 #define __MY_UNOREDERED_MAP_H_
 #include "my_hash_tables.h"
 
 namespace my_stl
 {
-	//Ò»Ğ©ÉùÃ÷
+	//ä¸€äº›å£°æ˜
 	using std::size_t;
 	using std::ptrdiff_t;
 	using std::pair;
@@ -20,7 +20,7 @@ namespace my_stl
 	void swap(unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
 		unordered_map<Key, T, Hash, KeyEqual, Alloc>& rhs);
 
-	//Àà¶¨Òå
+	//ç±»å®šä¹‰
 	template<typename Key, typename T, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>, typename Allocator = allocator<pair<const Key, T> > >
 	class unordered_map
 	{
@@ -39,7 +39,7 @@ namespace my_stl
 		typedef typename Allocator::pointer pointer;
 		typedef typename Allocator::const_pointer const_pointer;
 
-		//´ÓvalueÑ¡³öKey
+		//ä»valueé€‰å‡ºKey
 		class select1st
 		{
 		public:
@@ -63,7 +63,7 @@ namespace my_stl
 		friend void swap(unordered_map<Key, T, Hash, KeyEqual, Alloc>& lhs,
 			unordered_map<Key, T, Hash, KeyEqual, Alloc>& rhs);
 
-		//´óÅú¹¹Ôìº¯Êı
+		//å¤§æ‰¹æ„é€ å‡½æ•°
 		explicit unordered_map(size_type bucket_count = __bucket_init_count,
 			const Hash& hash = Hash(),
 			const KeyEqual& equal = KeyEqual(),
@@ -95,7 +95,7 @@ namespace my_stl
 			table.insert_unique(init.begin(), init.end());
 		}
 
-		//Èı¸ö¸³Öµ²Ù×÷·û
+		//ä¸‰ä¸ªèµ‹å€¼æ“ä½œç¬¦
 		unordered_map& operator=(const unordered_map& other)
 		{
 			table = other.table;
@@ -116,7 +116,7 @@ namespace my_stl
 
 		allocator_type get_allocator() { return table.get_allocator(); }
 
-		//Ê×Î²µü´úÆ÷
+		//é¦–å°¾è¿­ä»£å™¨
 		iterator begin() { return table.begin(); }
 		const_iterator begin() const { return table.begin(); }
 		const_iterator cbegin() const { return ((const Myt*)this)->begin(); }
@@ -128,10 +128,10 @@ namespace my_stl
 		size_type size() const { return table.size(); }
 		size_type max_size() const { return table.max_size(); }
 
-		//Çå¿Õ
+		//æ¸…ç©º
 		void clear() { table.clear(); }
 
-		//²åÈë
+		//æ’å…¥
 		pair<iterator, bool> insert(const value_type& value)
 		{
 			return table.insert_unique(value);
@@ -175,7 +175,7 @@ namespace my_stl
 			return table.insert_unique(hint, std::forward<Args>(args)...);
 		}
 
-		//É¾³ı
+		//åˆ é™¤
 		iterator erase(const_iterator pos)
 		{
 			return table.erase(pos);
@@ -189,13 +189,13 @@ namespace my_stl
 			return table.erase(key);
 		}
 
-		//½»»»
+		//äº¤æ¢
 		void swap(unordered_map& other)
 		{
 			table.swap(other.table);
 		}
 
-		//Í¨¹ıkey»ñÈ¡T
+		//é€šè¿‡keyè·å–T
 		T& at(const Key& key)
 		{
 			iterator iter = table.find(key);
@@ -215,19 +215,19 @@ namespace my_stl
 		T& operator[](const Key& key)
 		{
 			iterator iter = table.find(key);
-			if (iter == end()) //Ã»ÕÒµ½
+			if (iter == end()) //æ²¡æ‰¾åˆ°
 				iter = insert(value_type(key, T())).first;
 			return (*iter).second;
 		}
 		T& operator[](Key&& key)
 		{
 			iterator iter = table.find(key);
-			if (iter == end()) //Ã»ÕÒµ½
+			if (iter == end()) //æ²¡æ‰¾åˆ°
 				iter = insert(std::move(value_type(key, T()))).first;
 			return (*iter).second;
 		}
 
-		//²éÕÒÍ³¼ÆµÈ
+		//æŸ¥æ‰¾ç»Ÿè®¡ç­‰
 		size_type count(const Key& key) const
 		{
 			return table.count(key);
@@ -253,7 +253,7 @@ namespace my_stl
 			return table.equal_range(key);
 		}
 
-		//Í°µÄÄÚ²¿Ê×Î²µü´úÆ÷
+		//æ¡¶çš„å†…éƒ¨é¦–å°¾è¿­ä»£å™¨
 		local_iterator begin(size_type n)
 		{
 			return table.begin(n);
@@ -279,7 +279,7 @@ namespace my_stl
 			return table.cend(n);
 		}
 
-		//Í°µÄÊıÁ¿
+		//æ¡¶çš„æ•°é‡
 		size_type bucket_count() const
 		{
 			return table.bucket_count();
@@ -372,7 +372,7 @@ namespace my_stl
 
 
 	///////////////////////////////////////////////////////////////////////
-	//ÒÔÏÂÊÇunordered_multimap.
+	//ä»¥ä¸‹æ˜¯unordered_multimap.
 	///////////////////////////////////////////////////////////////////////
 
 	template<typename Key, typename T, typename Hash, typename KeyEqual, typename Allocator>
@@ -386,7 +386,7 @@ namespace my_stl
 	void swap(unordered_multimap<Key, T, Hash, KeyEqual, Alloc>& lhs,
 		unordered_multimap<Key, T, Hash, KeyEqual, Alloc>& rhs);
 
-	//Àà¶¨Òå
+	//ç±»å®šä¹‰
 	template<typename Key, typename T, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>, typename Allocator = allocator<pair<const Key, T> > >
 	class unordered_multimap
 	{
@@ -405,7 +405,7 @@ namespace my_stl
 		typedef typename Allocator::pointer pointer;
 		typedef typename Allocator::const_pointer const_pointer;
 
-		//´ÓvalueÑ¡³öKey
+		//ä»valueé€‰å‡ºKey
 		class select1st
 		{
 		public:
@@ -429,7 +429,7 @@ namespace my_stl
 		friend void swap(unordered_multimap<Key, T, Hash, KeyEqual, Alloc>& lhs,
 			unordered_multimap<Key, T, Hash, KeyEqual, Alloc>& rhs);
 
-		//´óÅú¹¹Ôìº¯Êı
+		//å¤§æ‰¹æ„é€ å‡½æ•°
 		explicit unordered_multimap(size_type bucket_count = __bucket_init_count,
 			const Hash& hash = Hash(),
 			const KeyEqual& equal = KeyEqual(),
@@ -461,7 +461,7 @@ namespace my_stl
 			table.insert_equal(init.begin(), init.end());
 		}
 
-		//Èı¸ö¸³Öµ²Ù×÷·û
+		//ä¸‰ä¸ªèµ‹å€¼æ“ä½œç¬¦
 		unordered_multimap& operator=(const unordered_multimap& other)
 		{
 			table = other.table;
@@ -482,7 +482,7 @@ namespace my_stl
 
 		allocator_type get_allocator() { return table.get_allocator(); }
 
-		//Ê×Î²µü´úÆ÷
+		//é¦–å°¾è¿­ä»£å™¨
 		iterator begin() { return table.begin(); }
 		const_iterator begin() const { return table.begin(); }
 		const_iterator cbegin() const { return ((const Myt*)this)->begin(); }
@@ -494,10 +494,10 @@ namespace my_stl
 		size_type size() const { return table.size(); }
 		size_type max_size() const { return table.max_size(); }
 
-		//Çå¿Õ
+		//æ¸…ç©º
 		void clear() { table.clear(); }
 
-		//²åÈë
+		//æ’å…¥
 		iterator insert(const value_type& value)
 		{
 			return table.insert_equal(value);
@@ -541,7 +541,7 @@ namespace my_stl
 			return table.insert_equal(hint, std::forward<Args>(args)...);
 		}
 
-		//É¾³ı
+		//åˆ é™¤
 		iterator erase(const_iterator pos)
 		{
 			return table.erase(pos);
@@ -555,13 +555,13 @@ namespace my_stl
 			return table.erase(key);
 		}
 
-		//½»»»
+		//äº¤æ¢
 		void swap(unordered_multimap& other)
 		{
 			table.swap(other.table);
 		}
 
-		//²éÕÒÍ³¼ÆµÈ
+		//æŸ¥æ‰¾ç»Ÿè®¡ç­‰
 		size_type count(const Key& key) const
 		{
 			return table.count(key);
@@ -587,7 +587,7 @@ namespace my_stl
 			return table.equal_range(key);
 		}
 
-		//Í°µÄÄÚ²¿Ê×Î²µü´úÆ÷
+		//æ¡¶çš„å†…éƒ¨é¦–å°¾è¿­ä»£å™¨
 		local_iterator begin(size_type n)
 		{
 			return table.begin(n);
@@ -613,7 +613,7 @@ namespace my_stl
 			return table.cend(n);
 		}
 
-		//Í°µÄÊıÁ¿
+		//æ¡¶çš„æ•°é‡
 		size_type bucket_count() const
 		{
 			return table.bucket_count();
