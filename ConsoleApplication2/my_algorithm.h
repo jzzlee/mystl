@@ -1,4 +1,4 @@
-#ifndef __MY_ALGORITHM_H_
+﻿#ifndef __MY_ALGORITHM_H_
 #define __MY_ALGORITHM_H_
 
 #include "my_heap.h"
@@ -42,7 +42,8 @@ namespace my_stl
 		return f;
 	}
 
-	//统计[first, last)范围内value出现的次�?	template< class InputIt, class T >
+	//统计[first, last)范围内value出现的次数
+	template< class InputIt, class T >
 	typename iterator_traits<InputIt>::difference_type
 		count(InputIt first, InputIt last, const T &value)
 	{
@@ -56,7 +57,8 @@ namespace my_stl
 	}
 
 	
-	//统计[first, last)范围内满足p的value出现的次�?	template< class InputIt, class UnaryPredicate >
+	//统计[first, last)范围内满足p的value出现的次数
+	template< class InputIt, class UnaryPredicate >
 	typename iterator_traits<InputIt>::difference_type
 		count_if(InputIt first, InputIt last, UnaryPredicate p)
 	{
@@ -69,7 +71,8 @@ namespace my_stl
 		return n;
 	}
 
-	//查找[first1, last1)和[first2, ...)的第一组不相等的位�?	template< class InputIt1, class InputIt2 >
+	//查找[first1, last1)和[first2, ...)的第一组不相等的位置
+	template< class InputIt1, class InputIt2 >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
 		InputIt2 first2)
@@ -82,7 +85,8 @@ namespace my_stl
 		return pair<InputIt1, InputIt2>(first1, first2);
 	}
 	
-	//查找[first1, last1)和[first2, ...)的第一组不能使p(value1) == p(value2)为真的位�?	template< class InputIt1, class InputIt2, class BinaryPredicate >
+	//查找[first1, last1)和[first2, ...)的第一组不能使p(value1) == p(value2)为真的位置
+	template< class InputIt1, class InputIt2, class BinaryPredicate >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
 		InputIt2 first2,
@@ -96,7 +100,8 @@ namespace my_stl
 		return pair<InputIt1, InputIt2>(first1, first2);
 	}
 	
-	//查找[first1, last1)和[first2, last2)的第一组不相等的位�?	template< class InputIt1, class InputIt2 >
+	//查找[first1, last1)和[first2, last2)的第一组不相等的位置
+	template< class InputIt1, class InputIt2 >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
 		InputIt2 first2, InputIt2 last2)
@@ -109,7 +114,8 @@ namespace my_stl
 		return pair<InputIt1, InputIt2>(first1, first2);
 	}
 	
-	//查找[first1, last1)和[first2, last2)的第一组不能使p(value1) == p(value2)为真的位�?	template< class InputIt1, class InputIt2, class BinaryPredicate >
+	//查找[first1, last1)和[first2, last2)的第一组不能使p(value1) == p(value2)为真的位置
+	template< class InputIt1, class InputIt2, class BinaryPredicate >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
 		InputIt2 first2, InputIt2 last2,
@@ -143,7 +149,7 @@ namespace my_stl
 		}
 	}
 	
-	//返回[s_first, s_last)在[first, last)中出现的首位�?使用p()比较元素，如果未出现，则返回last. 
+	//返回[s_first, s_last)在[first, last)中出现的首位置,使用p()比较元素，如果未出现，则返回last. 
 	template< class ForwardIt1, class ForwardIt2, class BinaryPredicate >
 	ForwardIt1 search(ForwardIt1 first, ForwardIt1 last,
 		ForwardIt2 s_first, ForwardIt2 s_last, BinaryPredicate p)
@@ -163,7 +169,7 @@ namespace my_stl
 		}
 	}
 	
-	//查找连续count个value的序列出现的位置
+	//查找连续count个value出现的位置
 	template< class ForwardIt, class Size, class T >
 	ForwardIt search_n(ForwardIt first, ForwardIt last, Size count, const T& value)
 	{
@@ -182,7 +188,7 @@ namespace my_stl
 		}
 	}
 
-	//查找连续count个value的序列出现的位置
+	//查找连续count个使p(v, value)为真的值出现的位置,
 	template< class ForwardIt, class Size, class T, class BinaryPredicate >
 	ForwardIt search_n(ForwardIt first, ForwardIt last, Size count, const T& value,
 		BinaryPredicate p)
@@ -202,7 +208,8 @@ namespace my_stl
 		}
 	}
 	
-	//在[first, last)中寻找最后一个匹配[s_first, s_last)的序列，使用operator==检查是否匹�?	//若找到，返回序列首位置；否则，返回last.
+	//在[first, last)中寻找最后一个匹配[s_first, s_last)的序列，使用operator==检查是否匹配
+	//若找到，返回序列首位置；否则，返回last.	
 	template< class ForwardIt1, class ForwardIt2 >
 	ForwardIt1 find_end(ForwardIt1 first, ForwardIt1 last,
 		ForwardIt2 s_first, ForwardIt2 s_last)
@@ -226,7 +233,8 @@ namespace my_stl
 		return result;
 	}
 	
-	//在[first, last)中寻找最后一个匹配[s_first, s_last)的序列，使用p(v1, v2)检查是否匹�?	//若找到，返回序列首位置；否则，返回last.
+	//在[first, last)中寻找最后一个匹配[s_first, s_last)的序列，使用p(v1, v2)检查是否匹配
+	//若找到，返回序列首位置；否则，返回last.
 	template< class ForwardIt1, class ForwardIt2, class BinaryPredicate >
 	ForwardIt1 find_end(ForwardIt1 first, ForwardIt1 last,
 		ForwardIt2 s_first, ForwardIt2 s_last, BinaryPredicate p)
@@ -266,7 +274,7 @@ namespace my_stl
 		return last;
 	}
 
-	//使用p来检查元素是否匹�?
+	//使用p来检查元素是否匹配.
 	template< class InputIt, class ForwardIt, class BinaryPredicate >
 	InputIt find_first_of(InputIt first, InputIt last,
 		ForwardIt s_first, ForwardIt s_last, BinaryPredicate p)
@@ -282,7 +290,8 @@ namespace my_stl
 		return last;
 	}
 
-	//在[first, last)中查找两个连续相同元�?	template< class ForwardIt >
+	//在[first, last)中查找两个连续相同元素
+	template< class ForwardIt >
 	ForwardIt adjacent_find(ForwardIt first, ForwardIt last)
 	{
 		if (first == last)
@@ -295,7 +304,7 @@ namespace my_stl
 		return last;
 	}
 
-	//使用p来检查元素是否匹�?
+	//使用p来检查元素是否匹配.
 	template< class ForwardIt, class BinaryPredicate>
 	ForwardIt adjacent_find(ForwardIt first, ForwardIt last, BinaryPredicate p)
 	{
