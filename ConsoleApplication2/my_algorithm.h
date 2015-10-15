@@ -12,28 +12,28 @@ namespace my_stl
 	///////////////////////////////////////////////
 	//Non-modifying sequence operations 
 
-	//ÊÇ·ñ[first,last)ÖĞµÄËùÓĞÔªËØ¶¼Ê¹pÎªÕæ
+	//æ˜¯å¦[first,last)ä¸­çš„æ‰€æœ‰å…ƒç´ éƒ½ä½¿pä¸ºçœŸ
 	template< class InputIt, class UnaryPredicate >
 	bool all_of(InputIt first, InputIt last, UnaryPredicate p)
 	{
 		return my_stl::find_if_not(first, last, p) == last;
 	}
 	
-	//ÊÇ·ñ[first,last)ÖĞÖÁÉÙÓĞ1¸öÔªËØ¶¼Ê¹pÎªÕæ
+	//æ˜¯å¦[first,last)ä¸­è‡³å°‘æœ‰1ä¸ªå…ƒç´ éƒ½ä½¿pä¸ºçœŸ
 	template< class InputIt, class UnaryPredicate >
 	bool any_of(InputIt first, InputIt last, UnaryPredicate p)
 	{
 		return my_stl::find_if(first, last, p) != last;
 	}
 	
-	//ÊÇ·ñ[first,last)ÖĞµÄÃ»ÓĞÔªËØÊ¹pÎªÕæ
+	//æ˜¯å¦[first,last)ä¸­çš„æ²¡æœ‰å…ƒç´ ä½¿pä¸ºçœŸ
 	template< class InputIt, class UnaryPredicate >
 	bool none_of(InputIt first, InputIt last, UnaryPredicate p)
 	{
 		return my_stl::find_if(first, last, p) == last;
 	}
 
-	//¶Ô[first, last)ÖĞµÄÃ¿Ò»¸öÔªËØ£¬½øĞĞf²Ù×÷
+	//å¯¹[first, last)ä¸­çš„æ¯ä¸€ä¸ªå…ƒç´ ï¼Œè¿›è¡Œfæ“ä½œ
 	template< class InputIt, class UnaryFunction >
 	UnaryFunction for_each(InputIt first, InputIt last, UnaryFunction f)
 	{
@@ -42,7 +42,7 @@ namespace my_stl
 		return f;
 	}
 
-	//Í³¼Æ[first, last)·¶Î§ÄÚvalue³öÏÖµÄ´ÎÊı
+	//ç»Ÿè®¡[first, last)èŒƒå›´å†…valueå‡ºç°çš„æ¬¡æ•°
 	template< class InputIt, class T >
 	typename iterator_traits<InputIt>::difference_type
 		count(InputIt first, InputIt last, const T &value)
@@ -57,7 +57,7 @@ namespace my_stl
 	}
 
 	
-	//Í³¼Æ[first, last)·¶Î§ÄÚÂú×ãpµÄvalue³öÏÖµÄ´ÎÊı
+	//ç»Ÿè®¡[first, last)èŒƒå›´å†…æ»¡è¶³pçš„valueå‡ºç°çš„æ¬¡æ•°
 	template< class InputIt, class UnaryPredicate >
 	typename iterator_traits<InputIt>::difference_type
 		count_if(InputIt first, InputIt last, UnaryPredicate p)
@@ -71,7 +71,7 @@ namespace my_stl
 		return n;
 	}
 
-	//²éÕÒ[first1, last1)ºÍ[first2, ...)µÄµÚÒ»×é²»ÏàµÈµÄÎ»ÖÃ
+	//æŸ¥æ‰¾[first1, last1)å’Œ[first2, ...)çš„ç¬¬ä¸€ç»„ä¸ç›¸ç­‰çš„ä½ç½®
 	template< class InputIt1, class InputIt2 >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
@@ -85,7 +85,7 @@ namespace my_stl
 		return pair<InputIt1, InputIt2>(first1, first2);
 	}
 	
-	//²éÕÒ[first1, last1)ºÍ[first2, ...)µÄµÚÒ»×é²»ÄÜÊ¹p(value1) == p(value2)ÎªÕæµÄÎ»ÖÃ
+	//æŸ¥æ‰¾[first1, last1)å’Œ[first2, ...)çš„ç¬¬ä¸€ç»„ä¸èƒ½ä½¿p(value1) == p(value2)ä¸ºçœŸçš„ä½ç½®
 	template< class InputIt1, class InputIt2, class BinaryPredicate >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
@@ -100,7 +100,7 @@ namespace my_stl
 		return pair<InputIt1, InputIt2>(first1, first2);
 	}
 	
-	//²éÕÒ[first1, last1)ºÍ[first2, last2)µÄµÚÒ»×é²»ÏàµÈµÄÎ»ÖÃ
+	//æŸ¥æ‰¾[first1, last1)å’Œ[first2, last2)çš„ç¬¬ä¸€ç»„ä¸ç›¸ç­‰çš„ä½ç½®
 	template< class InputIt1, class InputIt2 >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
@@ -114,7 +114,7 @@ namespace my_stl
 		return pair<InputIt1, InputIt2>(first1, first2);
 	}
 	
-	//²éÕÒ[first1, last1)ºÍ[first2, last2)µÄµÚÒ»×é²»ÄÜÊ¹p(value1) == p(value2)ÎªÕæµÄÎ»ÖÃ
+	//æŸ¥æ‰¾[first1, last1)å’Œ[first2, last2)çš„ç¬¬ä¸€ç»„ä¸èƒ½ä½¿p(value1) == p(value2)ä¸ºçœŸçš„ä½ç½®
 	template< class InputIt1, class InputIt2, class BinaryPredicate >
 	pair<InputIt1, InputIt2>
 		mismatch(InputIt1 first1, InputIt1 last1,
@@ -129,7 +129,7 @@ namespace my_stl
 		return pair<InputIt1, InputIt2>(first1, first2);
 	}
 
-	//·µ»Ø[s_first, s_last)ÔÚ[first, last)ÖĞ³öÏÖµÄÊ×Î»ÖÃ£¬Ê¹ÓÃ==±È½ÏÔªËØ£¬Èç¹ûÎ´³öÏÖ£¬Ôò·µ»Ølast. 
+	//è¿”å›[s_first, s_last)åœ¨[first, last)ä¸­å‡ºç°çš„é¦–ä½ç½®ï¼Œä½¿ç”¨==æ¯”è¾ƒå…ƒç´ ï¼Œå¦‚æœæœªå‡ºç°ï¼Œåˆ™è¿”å›last. 
 	template< class ForwardIt1, class ForwardIt2 >
 	ForwardIt1 search(ForwardIt1 first, ForwardIt1 last,
 		ForwardIt2 s_first, ForwardIt2 s_last)
@@ -139,17 +139,17 @@ namespace my_stl
 			ForwardIt1 it = first;
 			for (ForwardIt2 s_it = s_first; ; ++it, ++s_it)
 			{
-				if (s_it == s_last) //Æ¥Åä³É¹¦
+				if (s_it == s_last) //åŒ¹é…æˆåŠŸ
 					return first;
-				if (it == last) //Æ¥ÅäÊ§°Ü
+				if (it == last) //åŒ¹é…å¤±è´¥
 					return last;
-				if (!(*it == *s_it))//µ±Ç°Æ¥ÅäÊ§°Ü
+				if (!(*it == *s_it))//å½“å‰åŒ¹é…å¤±è´¥
 					break;
 			}
 		}
 	}
 	
-	//·µ»Ø[s_first, s_last)ÔÚ[first, last)ÖĞ³öÏÖµÄÊ×Î»ÖÃ,Ê¹ÓÃp()±È½ÏÔªËØ£¬Èç¹ûÎ´³öÏÖ£¬Ôò·µ»Ølast. 
+	//è¿”å›[s_first, s_last)åœ¨[first, last)ä¸­å‡ºç°çš„é¦–ä½ç½®,ä½¿ç”¨p()æ¯”è¾ƒå…ƒç´ ï¼Œå¦‚æœæœªå‡ºç°ï¼Œåˆ™è¿”å›last. 
 	template< class ForwardIt1, class ForwardIt2, class BinaryPredicate >
 	ForwardIt1 search(ForwardIt1 first, ForwardIt1 last,
 		ForwardIt2 s_first, ForwardIt2 s_last, BinaryPredicate p)
@@ -159,18 +159,57 @@ namespace my_stl
 			ForwardIt1 it = first;
 			for (ForwardIt2 s_it = s_first; ; ++it, ++s_it)
 			{
-				if (s_it == s_last) //Æ¥Åä³É¹¦
+				if (s_it == s_last) //åŒ¹é…æˆåŠŸ
 					return first;
-				if (it == last) //Æ¥ÅäÊ§°Ü
+				if (it == last) //åŒ¹é…å¤±è´¥
 					return last;
-				if (!p(*it, *s_it))//µ±Ç°Æ¥ÅäÊ§°Ü
+				if (!p(*it, *s_it))//å½“å‰åŒ¹é…å¤±è´¥
 					break;
 			}
 		}
 	}
+	
+	//æŸ¥æ‰¾è¿ç»­countä¸ªvalueçš„åºåˆ—å‡ºç°çš„ä½ç½®
+	template< class ForwardIt, class Size, class T >
+	ForwardIt search_n(ForwardIt first, ForwardIt last, Size count, const T& value)
+	{
+		for (;; ++first)
+		{
+			ForwardIt it = first;
+			for (Size n = 0; n != count; ++n, ++it)
+			{
+				if (it == last)
+					return last;
+				if (!(*it == value))
+					break;
+				if (n == count - 1)
+					return first;
+			}
+		}
+	}
 
-	//ÔÚ[first, last)ÖĞÑ°ÕÒ×îºóÒ»¸öÆ¥Åä[s_first, s_last)µÄĞòÁĞ£¬Ê¹ÓÃoperator==¼ì²éÊÇ·ñÆ¥Åä
-	//ÈôÕÒµ½£¬·µ»ØĞòÁĞÊ×Î»ÖÃ£»·ñÔò£¬·µ»Ølast.
+	//æŸ¥æ‰¾è¿ç»­countä¸ªvalueçš„åºåˆ—å‡ºç°çš„ä½ç½®
+	template< class ForwardIt, class Size, class T, class BinaryPredicate >
+	ForwardIt search_n(ForwardIt first, ForwardIt last, Size count, const T& value,
+		BinaryPredicate p)
+	{
+		for (;; ++first)
+		{
+			ForwardIt it = first;
+			for (Size n = 0; n != count; ++n, ++it)
+			{
+				if (it == last)
+					return last;
+				if (p(*it, value))
+					break;
+				if (n == count - 1)
+					return first;
+			}
+		}
+	}
+	
+	//åœ¨[first, last)ä¸­å¯»æ‰¾æœ€åä¸€ä¸ªåŒ¹é…[s_first, s_last)çš„åºåˆ—ï¼Œä½¿ç”¨operator==æ£€æŸ¥æ˜¯å¦åŒ¹é…
+	//è‹¥æ‰¾åˆ°ï¼Œè¿”å›åºåˆ—é¦–ä½ç½®ï¼›å¦åˆ™ï¼Œè¿”å›last.
 	template< class ForwardIt1, class ForwardIt2 >
 	ForwardIt1 find_end(ForwardIt1 first, ForwardIt1 last,
 		ForwardIt2 s_first, ForwardIt2 s_last)
@@ -194,8 +233,8 @@ namespace my_stl
 		return result;
 	}
 	
-	//ÔÚ[first, last)ÖĞÑ°ÕÒ×îºóÒ»¸öÆ¥Åä[s_first, s_last)µÄĞòÁĞ£¬Ê¹ÓÃp(v1, v2)¼ì²éÊÇ·ñÆ¥Åä
-	//ÈôÕÒµ½£¬·µ»ØĞòÁĞÊ×Î»ÖÃ£»·ñÔò£¬·µ»Ølast.
+	//åœ¨[first, last)ä¸­å¯»æ‰¾æœ€åä¸€ä¸ªåŒ¹é…[s_first, s_last)çš„åºåˆ—ï¼Œä½¿ç”¨p(v1, v2)æ£€æŸ¥æ˜¯å¦åŒ¹é…
+	//è‹¥æ‰¾åˆ°ï¼Œè¿”å›åºåˆ—é¦–ä½ç½®ï¼›å¦åˆ™ï¼Œè¿”å›last.
 	template< class ForwardIt1, class ForwardIt2, class BinaryPredicate >
 	ForwardIt1 find_end(ForwardIt1 first, ForwardIt1 last,
 		ForwardIt2 s_first, ForwardIt2 s_last, BinaryPredicate p)
@@ -218,7 +257,66 @@ namespace my_stl
 		}
 		return result;
 	}
+	
+	//ä»[first, last)ä¸­å¯»æ‰¾[s_first, s_last)ä¸­çš„ä»»æ„å…ƒç´ ï¼Œè¿”å›å‡ºç°çš„ä½ç½®
+	template< class InputIt, class ForwardIt >
+	InputIt find_first_of(InputIt first, InputIt last,
+		ForwardIt s_first, ForwardIt s_last)
+	{
+		for (; first != last; ++first)
+		{
+			for (ForwardIt it = s_first; it != s_last; ++it)
+			{
+				if (*first == *it)
+					return first;
+			}
+		}
+		return last;
+	}
 
+	//ä½¿ç”¨pæ¥æ£€æŸ¥å…ƒç´ æ˜¯å¦åŒ¹é….
+	template< class InputIt, class ForwardIt, class BinaryPredicate >
+	InputIt find_first_of(InputIt first, InputIt last,
+		ForwardIt s_first, ForwardIt s_last, BinaryPredicate p)
+	{
+		for (; first != last; ++first)
+		{
+			for (ForwardIt it = s_first; it != s_last; ++it)
+			{
+				if (p(*first, *it))
+					return first;
+			}
+		}
+		return last;
+	}
+
+	//åœ¨[first, last)ä¸­æŸ¥æ‰¾ä¸¤ä¸ªè¿ç»­ç›¸åŒå…ƒç´ 
+	template< class ForwardIt >
+	ForwardIt adjacent_find(ForwardIt first, ForwardIt last)
+	{
+		if (first == last)
+			return last;
+		for (ForwardIt before = first++; first != last; ++first, ++before)
+		{
+			if (*before == *first)
+				return before;
+		}
+		return last;
+	}
+
+	//ä½¿ç”¨pæ¥æ£€æŸ¥å…ƒç´ æ˜¯å¦åŒ¹é….
+	template< class ForwardIt, class BinaryPredicate>
+	ForwardIt adjacent_find(ForwardIt first, ForwardIt last, BinaryPredicate p)
+	{
+		if (first == last)
+			return last;
+		for (ForwardIt before = first++; first != last; ++first, ++before)
+		{
+			if (p(*before, *first))
+				return before;
+		}
+		return last;
+	}
 
 
 }
