@@ -9,6 +9,8 @@ namespace my_stl
 	using std::size_t;
 	using std::ptrdiff_t;
 
+	//----------------------------------------------------------------------------------
+	//lexicographical_compare
 	template <class InputIterator1, class InputIterator2>
 	bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
 		InputIterator2 first2, InputIterator2 last2)
@@ -25,29 +27,26 @@ namespace my_stl
 		return (first2 != last2);
 	}
 
-	//底层fill函数
+	//------------------------------------------------------------------------
+	//fill
 	template<class ForwardIt, class T>
 	ForwardIt fill(ForwardIt first, ForwardIt last, const T& value)
 	{
-		typedef typename iterator_traits<ForwardIt>::value_type Value;
-		ForwardIt current = first;
-		for (; current != last; ++current) {
-			::new (static_cast<void*>(my_stl::addressof(*current))) Value(value); //use placement new to initialize the object
+		for (; first != last; ++first)
+		{
+			*first = value;
 		}
-		return current;
+		return first;
 	}
 
-	//底层的fill_n函数
+	//-----------------------------------------------------------------------------
+	//fill_n
 	template< class ForwardIt, class Size, class T >
 	ForwardIt fill_n(ForwardIt first, Size count, const T& value)
 	{
-		typedef typename iterator_traits<ForwardIt>::value_type Value;
-		ForwardIt current = first;
-
-		for (; count > 0; ++current, (void) --count) {
-			::new (static_cast<void*>(my_stl::addressof(*current))) Value(value); //use placement new to initialize the object
-		}
-		return current;
+		for (; count > 0; ++first, --count)
+			*first = value;
+		return first;
 	}
 
 	//---------------------------------------------------------
@@ -426,6 +425,187 @@ namespace my_stl
 		return d_first;
 	}
 
+	//---------------------------------------------------------
+	//move
+
+	template<typename RandomAccessIt, typename OutputIt, typename Distance>
+	inline OutputIt __move_d(RandomAccessIt first, RandomAccessIt last, OutputIt d_first, Distance*)
+	{
+		for (Distance n = last - first; n > 0; --n, ++d_first, ++first)
+			*d_first = std::move(*first);
+		return d_first;
+	}
+
+	template<typename InputIt, typename OutputIt>
+	inline OutputIt __move(InputIt first, InputIt last, OutputIt d_first, input_iterator_tag)
+	{
+		for (; first != last; ++first, ++d_first)
+			*d_first = std::move(*first);
+		return d_first;
+	}
+
+	template<typename RandomAccessIt, typename OutputIt>
+	inline OutputIt __move(RandomAccessIt first, RandomAccessIt last, OutputIt d_first, random_access_iterator_tag)
+	{
+		return __move_d(first, last, d_first, distance_type(first));
+	}
+
+	template<typename T>
+	inline T* __move_t(const T *first, const T *last, T *d_first, __true_type)
+	{
+		std::memmove(d_first, first, sizeof(T) * (last - first));
+		return d_first + (last - first);
+	}
+
+	template<typename T>
+	inline T* __move_t(const T *first, const T *last, T *d_first, __false_type)
+	{
+		return __move_d(first, last, d_first, static_cast<ptrdiff_t*>(0));
+	}
+
+	template<typename InputIt, typename OutputIt>
+	struct __move_dispatch
+	{
+		static OutputIt move(InputIt first, InputIt last, OutputIt d_first)
+		{
+			return __move(first, last, d_first, iterator_category(first));
+		}
+	};
+
+	//偏特化版本
+	template<typename T>
+	struct __move_dispatch<T*, T*>
+	{
+		static T* move(const T* first, const T* last, T* d_first)
+		{
+			typedef typename __type_traits<T>::has_trivial_assignment_operator trivial_assignment_type;
+			return __move_t(first, last, d_first, trivial_assignment_type());
+		}
+	};
+
+	template<typename T>
+	struct __move_dispatch<const T*, T*>
+	{
+		static T* move(const T* first, const T* last, T* d_first)
+		{
+			typedef typename __type_traits<T>::has_trivial_assignment_operator trivial_assignment_type;
+			return __move_t(first, last, d_first, trivial_assignment_type());
+		}
+	};
+
+	//真正的move
+	template< class InputIt, class OutputIt >
+	inline OutputIt move(InputIt first, InputIt last, OutputIt d_first)
+	{
+		return __move_dispatch<InputIt, OutputIt>::move(first, last, d_first);
+	}
+
+	//特化版本
+	inline char* move(const char* first, const char *last, char *d_first)
+	{
+		std::memmove(d_first, first, last - first);
+		return d_first + (last - first);
+	}
+
+	inline wchar_t* move(const wchar_t* first, const wchar_t *last, wchar_t *d_first)
+	{
+		std::memmove(d_first, first, sizeof(wchar_t) * (last - first));
+		return d_first + (last - first);
+	}
+
+	//--------------------------------------------------------------------------------
+	//move_backward
+	//与move相同，但是复制时从后向前复制
+
+	template< class BidirIt1, class BidirIt2, typename Distance >
+	inline BidirIt2 __move_backward_d(BidirIt1 first, BidirIt1 last, BidirIt2 d_last, Distance*)
+	{
+		for (Distance n = last - first; n != 0; --n)
+			*(--d_last) = std::move(*(--last));
+		return d_last;
+	}
+
+	template< class BidirIt1, class BidirIt2 >
+	inline BidirIt2 __move_backward(BidirIt1 first, BidirIt1 last, BidirIt2 d_last, bidirectional_iterator_tag)
+	{
+		while (last != first)
+			*(--d_last) = std::move(*(--last));
+		return d_last;
+	}
+
+	template< class BidirIt1, class BidirIt2 >
+	inline BidirIt2 __move_backward(BidirIt1 first, BidirIt1 last, BidirIt2 d_last, random_access_iterator_tag)
+	{
+		typedef typename iterator_traits<BidirIt1>::difference_type Distance;
+		return __move_backward_d(first, last, d_last, static_cast<Distance *>(0));
+	}
+
+	template<typename T>
+	inline T* __move_backward_t(const T *first, const T *last, T *d_last, __true_type)
+	{
+		std::memmove(d_last - (last - first), first, sizeof(T) * (last - first));
+		return d_last - (last - first);
+	}
+
+	template<typename T>
+	inline T* __move_backward_t(const T *first, const T *last, T *d_last, __false_type)
+	{
+		return __move_backward_d(first, last, d_last, static_cast<ptrdiff_t*>(0));
+	}
+
+	//泛化move_backward_dispatch
+	template< class BidirIt1, class BidirIt2 >
+	struct __move_backward_dispatch
+	{
+		static BidirIt2 move_backward(BidirIt1 first, BidirIt1 last, BidirIt2 d_last)
+		{
+			return __move_backward(first, last, d_last, iterator_category(first));
+		}
+	};
+
+	//原生pointer的特化
+	template<typename T>
+	struct __move_backward_dispatch < T*, T* >
+	{
+		typedef typename __type_traits<T>::has_trivial_assignment_operator trivial_assignment_type;
+		static T* move_backward(const T *first, const T *last, T *d_last)
+		{
+			return __move_backward_t(first, last, d_last, trivial_assignment_type());
+		}
+	};
+
+	//原生const pointer的特化
+	template<typename T>
+	struct __move_backward_dispatch <const T*, T* >
+	{
+		typedef typename __type_traits<T>::has_trivial_assignment_operator trivial_assignment_type;
+		static T* move_backward(const T *first, const T *last, T *d_last)
+		{
+			return __move_backward_t(first, last, d_last, trivial_assignment_type());
+		}
+	};
+
+	//move_backward泛化版本
+	template< class BidirIt1, class BidirIt2 >
+	BidirIt2 move_backward(BidirIt1 first, BidirIt1 last, BidirIt2 d_last)
+	{
+		return __move_backward_dispatch<BidirIt1, BidirIt2>::move_backward(first, last, d_last);
+	}
+	//char*的偏特化版本
+	inline char* move_backward(const char *first, const char *last, char *d_last)
+	{
+		char *d_first = d_last - (last - first);
+		std::memmove(d_first, first, last - first);
+		return d_first;
+	}
+
+	//wchar_t的偏特化
+	inline wchar_t* move_backward(const wchar_t *first, const wchar_t *last, wchar_t *d_last)
+	{
+		wchar_t *d_first = d_last - (last - first);
+		std::memmove(d_first, first, sizeof(wchar_t) * (last - first));
+		return d_first;
+	}
 	//--------------------------------------------------------------------------------------------------------------
 	//equal
 
@@ -490,6 +670,33 @@ namespace my_stl
 				return first;
 		}
 		return last;
+	}
+
+	//----------------------------------------------------
+	//swap
+	template< class T >
+	void swap(T& a, T& b);
+	template< class T2, size_t N >
+	void swap(T2(&a)[N], T2(&b)[N]);
+
+	//swaps the elements pointed to by two iterators
+	template<class ForwardIt1, class ForwardIt2>
+	void iter_swap(ForwardIt1 a, ForwardIt2 b)
+	{
+		using std::swap;
+		swap(*a, *b);
+	}
+
+	//swaps two ranges of elements 
+	template<class ForwardIt1, class ForwardIt2>
+	ForwardIt2 swap_ranges(ForwardIt1 first1,
+		ForwardIt1 last1,
+		ForwardIt2 first2)
+	{
+		while (first1 != last1) {
+			iter_swap(first1++, first2++);
+		}
+		return first2;
 	}
 
 
