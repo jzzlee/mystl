@@ -512,12 +512,7 @@ namespace my_stl
 	template<class RandomIt, class RandomFunc>
 	void random_shuffle(RandomIt first, RandomIt last, RandomFunc&& r)
 	{
-		typename iterator_traits<RandomIt>::difference_type i, n;
-		n = last - first;
-		for (i = n - 1; i > 0; --i) {
-			using std::swap;
-			swap(first[i], first[r(i + 1)]);
-		}
+		std::random_shuffle(first, last, r);
 	}
 	template<class RandomIt, class UniformRandomNumberGenerator>
 	void shuffle(RandomIt first, RandomIt last,
@@ -600,6 +595,158 @@ namespace my_stl
 		}
 		return ++d_first;
 	}
+
+	//------------------------------------------------------------------
+	//partition
+	template< class InputIt, class UnaryPredicate >
+	bool is_partitioned(InputIt first, InputIt last, UnaryPredicate p)
+	{
+		for (; first != last; ++first)
+			if (!p(*first))
+				break;
+		for (; first != last; ++first)
+			if (p(*first))
+				return false;
+		return true;
+	}
+
+	template< class ForwardIt, class UnaryPredicate >
+	ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPredicate p)
+	{
+		if (first == last)
+			return last;
+		ForwardIt part(first++);
+		while(first != last)
+		{
+			if (p(*part))
+				++part;
+			else if (p(*first))
+			{
+				my_stl::iter_swap(part, first);
+				++part;
+			}
+			++first;
+		}
+		return part;
+	}
+
+	template< class InputIt, class OutputIt1, class OutputIt2, class UnaryPredicate >
+	std::pair<OutputIt1, OutputIt2>
+		partition_copy(InputIt first, InputIt last, OutputIt1 d_first_true, OutputIt2 d_first_false,
+		UnaryPredicate p)
+	{
+		for (; first != last; ++first)
+		{
+			if (p(*first))
+				*d_first_true++ = *first;
+			else
+				*d_first_false++ = *first;
+		}
+		return std::make_pair(d_first_true, d_first_false);
+	}
+
+	template< class BidirIt, class UnaryPredicate >
+	BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPredicate p)
+	{
+		if (first == last)
+			return last;
+		BidirIt part(first++);
+		while (first != last)
+		{
+			if (p(*part))
+				++part;
+			else if (p(*first))
+			{
+				BidirIt it = first;
+				BidirIt next = it--;
+				for (; next != part; --it)
+				{
+					my_stl::iter_swap(it, next);
+					next = it;
+				}
+				++part;
+			}
+			++first;
+		}
+		return part;
+	}
+
+	template< class ForwardIt, class UnaryPredicate >
+	ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPredicate p)
+	{
+		for (; first != last; ++first)
+			if (!p(*first))
+				return first;
+		return last;
+	}
+
+	//-----------------------------------------------------------------------------------
+	//sort
+
+	template< class ForwardIt >
+	bool is_sorted(ForwardIt first, ForwardIt last)
+	{
+		if (first != last)
+		{
+			ForwardIt next = first;
+			while (++next != last)
+			{
+				if (*next < *first)
+					return false;
+				first = next;
+			}
+		}
+		return true;
+	}
+
+	template< class ForwardIt, class Compare >
+	bool is_sorted(ForwardIt first, ForwardIt last, Compare comp)
+	{
+		if (first != last)
+		{
+			ForwardIt next = first;
+			while (++next != last)
+			{
+				if (comp(*next, *first))
+					return false;
+				first = next;
+			}
+		}
+		return true;
+	}
+
+	template< class ForwardIt >
+	ForwardIt is_sorted_until(ForwardIt first, ForwardIt last)
+	{
+		if (first != last)
+		{
+			ForwardIt next = first;
+			while (++next != last)
+			{
+				if (*next < *first)
+					return next;
+				first = next;
+			}
+		}
+		return last;
+	}
+	template< class ForwardIt, class Compare >
+	ForwardIt is_sorted_until(ForwardIt first, ForwardIt last,
+		Compare comp)
+	{
+		if (first != last)
+		{
+			ForwardIt next = first;
+			while (++next != last)
+			{
+				if (comp(*next, *first))
+					return next;
+				first = next;
+			}
+		}
+		return last;
+	}
+
 }
 
 #endif
