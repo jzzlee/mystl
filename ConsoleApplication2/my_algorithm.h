@@ -631,7 +631,7 @@ namespace my_stl
 	}
 
 	template< class InputIt, class OutputIt1, class OutputIt2, class UnaryPredicate >
-	std::pair<OutputIt1, OutputIt2>
+	pair<OutputIt1, OutputIt2>
 		partition_copy(InputIt first, InputIt last, OutputIt1 d_first_true, OutputIt2 d_first_false,
 		UnaryPredicate p)
 	{
@@ -747,6 +747,273 @@ namespace my_stl
 		return last;
 	}
 
+
+	//---------------------------------------------------------------------------
+	//lower_bound
+	template< class ForwardIt, class T >
+	ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value)
+	{
+		ForwardIt it;
+		typename iterator_traits<ForwardIt>::difference_type count, step;
+		count = my_stl::distance(first, last);
+
+		while (count > 0) {
+			it = first;
+			step = count / 2;
+			my_stl::advance(it, step);
+			if (*it < value) {
+				first = ++it;
+				count -= step + 1;
+			}
+			else
+				count = step;
+		}
+		return first;
+	}
+
+	template< class ForwardIt, class T, class Compare >
+	ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
+	{
+		ForwardIt it;
+		typename iterator_traits<ForwardIt>::difference_type count, step;
+		count = my_stl::distance(first, last);
+
+		while (count > 0) 
+		{
+			it = first;
+			step = count / 2;
+			my_stl::advance(it, step);
+			if (comp(*it, value))
+			{
+				first = ++it;
+				count -= step + 1;
+			}
+			else
+				count = step;
+		}
+		return first;
+	}
+
+	//---------------------------------------------------------------------------
+	//lower_bound
+	template< class ForwardIt, class T >
+	ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value)
+	{
+		ForwardIt it;
+		typename iterator_traits<ForwardIt>::difference_type count, step;
+		count = my_stl::distance(first, last);
+
+		while (count > 0) {
+			it = first;
+			step = count / 2;
+			my_stl::advance(it, step);
+			if (!(value < *it)) {
+				first = ++it;
+				count -= step + 1;
+			}
+			else
+				count = step;
+		}
+		return first;
+	}
+	template< class ForwardIt, class T, class Compare >
+	ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
+	{
+		ForwardIt it;
+		typename iterator_traits<ForwardIt>::difference_type count, step;
+		count = my_stl::distance(first, last);
+
+		while (count > 0)
+		{
+			it = first;
+			step = count / 2;
+			my_stl::advance(it, step);
+			if (!comp(value, *it))
+			{
+				first = ++it;
+				count -= step + 1;
+			}
+			else
+				count = step;
+		}
+		return first;
+	}
+
+	//---------------------------------------------------------------------------
+	//binary_search
+	template< class ForwardIt, class T >
+	bool binary_search(ForwardIt first, ForwardIt last, const T& value)
+	{
+		first = lower_bound(first, last, value);
+		return (!(first == last) && !(value < *first));
+	}
+	
+	template< class ForwardIt, class T, class Compare >
+	bool binary_search(ForwardIt first, ForwardIt last, const T& value, Compare comp)
+	{
+		first = lower_bound(first, last, value);
+		return (!(first == last) && !comp(value, *first));
+	}
+
+	//---------------------------------------------------------------------------
+	//equal_range
+	template< class ForwardIt, class T >
+	pair<ForwardIt, ForwardIt>
+		equal_range(ForwardIt first, ForwardIt last,
+		const T& value)
+	{
+		return pair<ForwardIt, ForwardIt>(lower_bound(first, last, value),
+			upper_bound(first, last, value));
+	}
+
+	template< class ForwardIt, class T, class Compare >
+	pair<ForwardIt, ForwardIt>
+		equal_range(ForwardIt first, ForwardIt last,
+		const T& value, Compare comp)
+	{
+		return pair<ForwardIt, ForwardIt>(lower_bound(first, last, value, comp),
+			upper_bound(first, last, value, comp));
+	}
+
+	//---------------------------------------------------------------------------
+	//merge
+	template< class InputIt1, class InputIt2, class OutputIt >
+	OutputIt merge(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first)
+	{
+		while (first1 != last1 && first2 != last2)
+		{
+			if (*first2 < *first1)
+				*d_first++ = *first2++;
+			else
+				*d_first++ = *first1++;
+		}
+		if (first1 == last1)
+			return my_stl::copy(first2, last2, d_first);
+		else
+			return my_stl::copy(first1, last1, d_first);
+	}
+
+	template< class InputIt1, class InputIt2, class OutputIt, class Compare>
+	OutputIt merge(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first, Compare comp)
+	{
+		while (first1 != last1 && first2 != last2)
+		{
+			if (comp(*first2, *first1))
+				*d_first++ = *first2++;
+			else
+				*d_first++ = *first1++;
+		}
+		if (first1 == last1)
+			return my_stl::copy(first2, last2, d_first);
+		else
+			return my_stl::copy(first1, last1, d_first);
+	}
+
+	//---------------------------------------------------------------------------
+	//inplace_merge
+	template< class InputIt1, class InputIt2, class OutputIt >
+	OutputIt __merge_backward(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_last)
+	{
+		--first1;
+		--first2;
+		--last1;
+		--last2;
+		while (first1 != last1 && first2 != last2)
+		{
+			if (*last1 < *last2)
+				*(--d_last) = *(last2--);
+			else
+				*(--d_last) = *(last1--);
+		}
+		if (first1 == last1)
+			return my_stl::copy_backward(++first2, ++last2, d_last);
+		else
+			return my_stl::copy_backward(++first1, ++last1, d_last);
+	}
+
+	template< class InputIt1, class InputIt2, class OutputIt, class Compare >
+	OutputIt __merge_backward(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_last, Compare comp)
+	{
+		--first1;
+		--first2;
+		--last1;
+		--last2;
+		while (first1 != last1 && first2 != last2)
+		{
+			if (comp(*last1, *last2))
+				*(--d_last) = *(last2--);
+			else
+				*(--d_last) = *(last1--);
+		}
+		if (first1 == last1)
+			return my_stl::copy_backward(++first2, ++last2, d_last);
+		else
+			return my_stl::copy_backward(++first1, ++last1, d_last);
+	}
+
+	template< class BidirIt >
+	void __inplace_merge(BidirIt first, BidirIt middle, BidirIt last)
+	{
+		typedef typename iterator_traits<BidirIt>::value_type T;
+		typedef typename iterator_traits<BidirIt>::difference_type Distance;
+
+		Distance len1 = my_stl::distance(first, middle);
+		Distance len2 = my_stl::distance(middle, last);
+		if (len1 < len2)
+		{
+			my_stl::vector<T> tmp(first, middle);
+			merge(tmp.begin(), tmp.end(), middle, last, first);
+		}
+		else
+		{
+			my_stl::vector<T> tmp(middle, last);
+			__merge_backward(first, middle, tmp.begin(), tmp.end(), last);
+		}
+	}
+
+	template< class BidirIt, typename Compare >
+	void __inplace_merge(BidirIt first, BidirIt middle, BidirIt last, Compare comp)
+	{
+		typedef typename iterator_traits<BidirIt>::value_type T;
+		typedef typename iterator_traits<BidirIt>::difference_type Distance;
+
+		Distance len1 = my_stl::distance(first, middle);
+		Distance len2 = my_stl::distance(middle, last);
+		if (len1 < len2)
+		{
+			my_stl::vector<T> tmp(first, middle);
+			merge(tmp.begin(), tmp.end(), middle, last, first, comp);
+		}
+		else
+		{
+			my_stl::vector<T> tmp(middle, last);
+			__merge_backward(first, middle, tmp.begin(), tmp.end(), last, comp);
+		}
+	}
+
+	template< class BidirIt >
+	void inplace_merge(BidirIt first, BidirIt middle, BidirIt last)
+	{
+		if (first == middle || middle == last)
+			return;
+		__inplace_merge(first, middle, last);
+	}
+
+	template< class BidirIt, class Compare>
+	void inplace_merge(BidirIt first, BidirIt middle, BidirIt last, Compare comp)
+	{
+		if (first == middle || middle == last)
+			return;
+		__inplace_merge(first, middle, last, comp);
+	}
 }
 
 #endif
