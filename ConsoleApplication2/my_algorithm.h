@@ -747,7 +747,183 @@ namespace my_stl
 		return last;
 	}
 
+	//-----------------------------------------------------------------------------------
+	//sort
+	//元素很少使用插入排序，元素很多使用快速排序
 
+	const int __stl_threshold = 16;
+
+	template< class RandomIt >
+	void __insert_sort(RandomIt first, RandomIt last)
+	{
+		typename iterator_traits<RandomIt>::value_type key;
+		if (first == last)
+			return;
+		for (RandomIt it = first + 1; it != last; ++it)
+		{
+			key = *it;
+			RandomIt pre = it - 1;
+			while (pre - first >= 0 && key < *pre)
+			{
+				*(pre + 1) = *pre;
+				--pre;
+			}
+			*(++pre) = key;
+		}
+	}
+
+	template<typename RandomIt >
+	inline RandomIt __mid_select(RandomIt first, RandomIt middle, RandomIt last)
+	{
+		typedef typename iterator_traits<RandomIt>::value_type T;
+		T first_value = *first;
+		T middle_value = *middle;
+		T last_value = *last;
+		if (first_value <= last_value)
+		{
+			if (middle_value <= first_value)
+				return first;
+			if (middle_value <= last_value)
+				return middle;
+			else
+				return last;
+		}
+		else
+		{
+			if (middle_value <= last_value)
+				return last;
+			if (middle_value <= first_value)
+				return middle;
+			else
+				return first;
+		}
+	}
+
+	template< class RandomIt, typename T >
+	RandomIt __partition(RandomIt first, RandomIt last, T*)
+	{
+		RandomIt middle = first + (last - first) / 2;
+		middle = __mid_select(first, middle, (last - 1));
+		my_stl::iter_swap(middle, last - 1);
+		T x = *(--last);
+		RandomIt it = first - 1;
+		for (RandomIt p = first; p != last; ++p)
+		{
+			if (*p <= x)
+			{
+				++it;
+				my_stl::iter_swap(it, p);
+			}
+		}
+		my_stl::iter_swap(++it, last);
+		return it;
+	}
+
+	template< class RandomIt >
+	void __quick_sort(RandomIt first, RandomIt last)
+	{
+		if (last - first < 2)
+			return;
+		RandomIt q = __partition(first, last, value_type(first));
+		__quick_sort(first, q);
+		__quick_sort(++q, last);
+	}
+
+	template< class RandomIt >
+	void sort(RandomIt first, RandomIt last)
+	{
+		if (last - first > __stl_threshold)
+			__quick_sort(first, last);
+		else
+			__insert_sort(first, last);
+	}
+
+	//----------------------------------------------------
+	//sort 使用comp比较
+
+	template< class RandomIt, typename Compare >
+	void __insert_sort(RandomIt first, RandomIt last, Compare comp)
+	{
+		typename iterator_traits<RandomIt>::value_type key;
+		if (first == last)
+			return;
+		for (RandomIt it = first + 1; it != last; ++it)
+		{
+			key = *it;
+			RandomIt pre = it - 1;
+			while (pre - first >= 0 && comp(key, *pre))
+			{
+				*(pre + 1) = *pre;
+				--pre;
+			}
+			*(++pre) = key;
+		}
+	}
+
+	template<typename RandomIt, typename Compare >
+	inline RandomIt __mid_select(RandomIt first, RandomIt middle, RandomIt last, Compare comp)
+	{
+		typedef typename iterator_traits<RandomIt>::value_type T;
+		T first_value = *first;
+		T middle_value = *middle;
+		T last_value = *last;
+		if (comp(first_value, last_value))
+		{
+			if (comp(middle_value, first_value))
+				return first;
+			if (comp(middle_value, last_value))
+				return middle;
+			else
+				return last;
+		}
+		else
+		{
+			if (comp(middle_value, last_value))
+				return last;
+			if (comp(middle_value, first_value))
+				return middle;
+			else
+				return first;
+		}
+	}
+
+	template< class RandomIt, typename T, typename Compare >
+	RandomIt __partition(RandomIt first, RandomIt last, T*, Compare comp)
+	{
+		RandomIt middle = first + (last - first) / 2;
+		middle = __mid_select(first, middle, (last - 1), comp);
+		my_stl::iter_swap(middle, --last);
+		T x = *last;
+		RandomIt it = first - 1;
+		for (RandomIt p = first; p != last; ++p)
+		{
+			if (!(comp(x, *p)))
+			{
+				++it;
+				my_stl::iter_swap(it, p);
+			}
+		}
+		my_stl::iter_swap(++it, last);
+		return it;
+	}
+
+	template< class RandomIt, typename Compare >
+	void __quick_sort(RandomIt first, RandomIt last, Compare comp)
+	{
+		if (last - first < 2)
+			return;
+		RandomIt q = __partition(first, last, value_type(first), comp);
+		__quick_sort(first, q, comp);
+		__quick_sort(++q, last, comp);
+	}
+	template< class RandomIt, class Compare >
+	void sort(RandomIt first, RandomIt last, Compare comp)
+	{
+		if (last - first > __stl_threshold)
+			__quick_sort(first, last, comp);
+		else
+			__insert_sort(first, last, comp);
+	}
 	//---------------------------------------------------------------------------
 	//lower_bound
 	template< class ForwardIt, class T >

@@ -100,10 +100,10 @@ namespace my_stl
 
 	//获取某个迭代器的value_type
 	template<typename Iterator>
-	inline typename iterator_traits<Iterator>::ivalue_type *
+	inline typename iterator_traits<Iterator>::value_type *
 		value_type(const Iterator &)
 	{
-		return static_cast<typename iterator_traits<Iterator>::value_type *>(0);
+		return (typename iterator_traits<Iterator>::value_type *)0;
 	}
 
 	//advance
