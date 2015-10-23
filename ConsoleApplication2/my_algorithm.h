@@ -9,7 +9,7 @@ namespace my_stl
 {
 	using std::pair;
 
-	///////////////////////////////////////////////
+	//------------------------------------------------------
 	//Non-modifying sequence operations 
 
 	//是否[first,last)中的所有元素都使p为真
@@ -923,6 +923,98 @@ namespace my_stl
 			__quick_sort(first, last, comp);
 		else
 			__insert_sort(first, last, comp);
+	}
+
+	//---------------------------------------------------------------------------
+	//partition_sort
+	//middle-first个元素按comp比较顺序排到最前面
+
+	template< class RandomIt, typename T, typename Distance, typename Compare>
+	void __partial_sort(RandomIt first, RandomIt middle, RandomIt last, T*, Distance*, Compare comp)
+	{
+		//前middle-first个元素构造最大堆
+		my_stl::make_heap(first, middle, comp);
+		//在[middle, last)区间依次找到元素替换堆中最大元素
+		for (RandomIt it = middle; it != last; ++it)
+		{
+			if (comp(*it, *first))
+			{
+				T tmp = *first;
+				__adjust_heap(first, Distance(0), Distance(middle - first), *it, comp);
+				*it = tmp;
+			}
+		}
+		my_stl::sort_heap(first, middle, comp);
+	}
+
+	template< class RandomIt >
+	void partial_sort(RandomIt first, RandomIt middle, RandomIt last)
+	{
+		if (first == middle)
+			return;
+		if (middle == last)
+			sort(first, last);
+		else
+			__partial_sort(first, middle, last, value_type(first), distance_type(first), std::less<>());
+	}
+	
+	template< class RandomIt, class Compare >
+	void partial_sort(RandomIt first, RandomIt middle, RandomIt last, Compare comp)
+	{
+		if (first == middle)
+			return;
+		if (middle == last)
+			sort(first, last, comp);
+		else
+			__partial_sort(first, middle, last, value_type(first), distance_type(first), comp);
+	}
+
+	//---------------------------------------------------------------------------
+	//partial_sort_copy
+	template< class InputIt, class RandomIt, typename T, typename Distance, typename Compare >
+	RandomIt __partial_sort_copy(InputIt first, InputIt last, RandomIt d_first, RandomIt d_last, T*, Distance*, Compare comp)
+	{
+		Distance n = my_stl::distance(first, last);
+		if (n <= d_last - d_first) //源数据较少
+		{
+			my_stl::copy(first, last, d_first);
+			my_stl::sort(d_first, d_first + n, comp);
+			return d_first + n;
+		}
+		else  //源数据较多
+		{
+			//复制前d_last - d_first个到目的位置
+			my_stl::copy_n(first, d_last - d_first, d_first);
+			//构造堆
+			my_stl::make_heap(d_first, d_last, comp);
+			//first前进d_last-d_first个位置
+			my_stl::advance(first, d_last - d_first);
+			//在[first, last)区间依次找到元素替换堆中最大元素
+			for (; first != last; ++first)
+			{
+				if (comp(*first, *d_first))
+				{
+					__adjust_heap(d_first, Distance(0), Distance(d_last - d_first), *first, comp);
+				}
+			}
+			my_stl::sort_heap(d_first, d_last, comp);
+			return d_last;
+		}
+	}
+
+	template< class InputIt, class RandomIt >
+	RandomIt partial_sort_copy(InputIt first, InputIt last,
+		RandomIt d_first, RandomIt d_last)
+	{
+		return __partial_sort_copy(first, last, d_first, d_last, value_type(first), distance_type(first), std::less<>());
+	}
+	
+	template< class InputIt, class RandomIt, class Compare >
+	RandomIt partial_sort_copy(InputIt first, InputIt last,
+		RandomIt d_first, RandomIt d_last,
+		Compare comp)
+	{
+		return __partial_sort_copy(first, last, d_first, d_last, value_type(first), distance_type(first), comp);
 	}
 	//---------------------------------------------------------------------------
 	//lower_bound

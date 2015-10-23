@@ -80,7 +80,7 @@ namespace my_stl
 	void sort_heap(RandomIt first, RandomIt last, Compare comp)
 	{
 		while (last != first)
-			pop_heap(first, last--, comp);
+			my_stl::pop_heap(first, last--, comp);
 	}
 
 	template< class RandomIt >
@@ -88,7 +88,7 @@ namespace my_stl
 	{
 		while (last != first)
 		{
-			pop_heap(first, last--);
+			my_stl::pop_heap(first, last--);
 		}
 	}
 
