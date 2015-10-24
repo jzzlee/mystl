@@ -684,7 +684,8 @@ namespace my_stl
 	void iter_swap(ForwardIt1 a, ForwardIt2 b)
 	{
 		using std::swap;
-		swap(*a, *b);
+		if (a != b)
+			swap(*a, *b);
 	}
 
 	//swaps two ranges of elements 

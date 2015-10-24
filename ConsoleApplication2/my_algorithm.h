@@ -1016,6 +1016,7 @@ namespace my_stl
 	{
 		return __partial_sort_copy(first, last, d_first, d_last, value_type(first), distance_type(first), comp);
 	}
+
 	//---------------------------------------------------------------------------
 	//lower_bound
 	template< class ForwardIt, class T >
@@ -1119,7 +1120,7 @@ namespace my_stl
 	template< class ForwardIt, class T, class Compare >
 	bool binary_search(ForwardIt first, ForwardIt last, const T& value, Compare comp)
 	{
-		first = lower_bound(first, last, value);
+		first = lower_bound(first, last, value, comp)
 		return (!(first == last) && !comp(value, *first));
 	}
 
@@ -1194,7 +1195,7 @@ namespace my_stl
 		--last2;
 		while (first1 != last1 && first2 != last2)
 		{
-			if (*last1 < *last2)
+			if (!(*last2 < *last1))
 				*(--d_last) = *(last2--);
 			else
 				*(--d_last) = *(last1--);
@@ -1216,7 +1217,7 @@ namespace my_stl
 		--last2;
 		while (first1 != last1 && first2 != last2)
 		{
-			if (comp(*last1, *last2))
+			if (!comp(*last2, *last1))
 				*(--d_last) = *(last2--);
 			else
 				*(--d_last) = *(last1--);
@@ -1238,7 +1239,7 @@ namespace my_stl
 		if (len1 < len2)
 		{
 			my_stl::vector<T> tmp(first, middle);
-			merge(tmp.begin(), tmp.end(), middle, last, first);
+			my_stl::merge(tmp.begin(), tmp.end(), middle, last, first);
 		}
 		else
 		{
@@ -1258,7 +1259,7 @@ namespace my_stl
 		if (len1 < len2)
 		{
 			my_stl::vector<T> tmp(first, middle);
-			merge(tmp.begin(), tmp.end(), middle, last, first, comp);
+			my_stl::merge(tmp.begin(), tmp.end(), middle, last, first, comp);
 		}
 		else
 		{
@@ -1281,6 +1282,66 @@ namespace my_stl
 		if (first == middle || middle == last)
 			return;
 		__inplace_merge(first, middle, last, comp);
+	}
+
+	//----------------------------------------------------------------------------
+	//stable_sort
+	//稳定排序，使用merge_sort实现
+	template< class RandomIt >
+	void stable_sort(RandomIt first, RandomIt last)
+	{
+		if (last - first <= 1)
+			return;
+		RandomIt middle = first + (last - first) / 2;
+		my_stl::stable_sort(first, middle);
+		my_stl::stable_sort(middle, last);
+		my_stl::inplace_merge(first, middle, last);
+	}
+	
+	template< class RandomIt, class Compare >
+	void stable_sort(RandomIt first, RandomIt last, Compare comp)
+	{
+		if (last - first <= 1)
+			return;
+		RandomIt middle = first + (last - first) / 2;
+		my_stl::stable_sort(first, middle, comp);
+		my_stl::stable_sort(middle, last, comp);
+		my_stl::inplace_merge(first, middle, last, comp);
+	}
+
+	//---------------------------------------------------------------------
+	//nth_element
+
+	template< class RandomIt >
+	void nth_element(RandomIt first, RandomIt nth, RandomIt last)
+	{
+		if (nth == last)
+			return;
+		while (last - first > 3)
+		{
+			RandomIt cut = my_stl::__partition(first, last, value_type(first), std::less<>());
+			if (cut <= nth)
+				first = cut;
+			else
+				last = cut;
+		}
+		my_stl::__insert_sort(first, last);
+	}
+	
+	template< class RandomIt, class Compare >
+	void nth_element(RandomIt first, RandomIt nth, RandomIt last, Compare comp)
+	{
+		if (nth == last)
+			return;
+		while (last - first > 3)
+		{
+			RandomIt cut = my_stl::__partition(first, last, value_type(first), comp);
+			if (cut <= nth)
+				first = cut;
+			else
+				last = cut;
+		}
+		my_stl::__insert_sort(first, last, comp);
 	}
 }
 
