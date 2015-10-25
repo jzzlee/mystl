@@ -1126,13 +1126,146 @@ namespace my_stl
 
 	//---------------------------------------------------------------------------
 	//equal_range
+
+	//random_access_iterator版本
+	template<typename RandomIt, typename T, typename Distance >
+	pair<RandomIt, RandomIt>
+		__equal_range(RandomIt first, RandomIt last, const T &value, Distance*, random_access_iterator_tag)
+	{
+		Distance len = last - first;
+		Distance half;
+		RandomIt middle, left, right;
+		while (len > 0)
+		{
+			half = len >> 1;
+			middle = first + half;
+			if (*middle < value)
+			{
+				first = middle + 1;
+				len = len - half - 1;
+			}
+			else if (*middle > value)
+				len = half;
+			else
+			{
+				//前半段找lower_bound
+				left = my_stl::lower_bound(first, middle, value);
+				//前半段找upper_bound
+				right = my_stl::upper_bound(++middle, first + len, value);
+				return pair<RandomIt, RandomIt>(left, right);
+			}
+		}
+		return pair<RandomIt, RandomIt>(first, first);
+	}
+
+	//forward_iterator版本
+	template<typename ForwardIt, typename T, typename Distance >
+	pair<ForwardIt, ForwardIt>
+		__equal_range(ForwardIt first, ForwardIt last, const T &value, Distance*, forward_iterator_tag)
+	{
+		Distance len = my_stl::distance(first, last);
+		Distance half;
+		ForwardIt middle, left, right;
+		while (len > 0)
+		{
+			half = len >> 1;
+			middle = first;
+			my_stl::advance(middle, half);
+			if (*middle < value)
+			{
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+			else if (*middle > value)
+				len = half;
+			else
+			{
+				//前半段找lower_bound
+				left = my_stl::lower_bound(first, middle, value);
+				//前半段找upper_bound
+				my_stl::advance(first, len);
+				right = my_stl::upper_bound(++middle, first, value);
+				return pair<ForwardIt, ForwardIt>(left, right);
+			}
+		}
+		return pair<ForwardIt, ForwardIt>(first, first);
+	}
+
 	template< class ForwardIt, class T >
 	pair<ForwardIt, ForwardIt>
 		equal_range(ForwardIt first, ForwardIt last,
 		const T& value)
 	{
+		return my_stl::__equal_range(first, last, value, distance_type(first), iterator_category(first));
 		return pair<ForwardIt, ForwardIt>(lower_bound(first, last, value),
 			upper_bound(first, last, value));
+	}
+
+	//comp版本
+	//random_access_iterator版本
+	template<typename RandomIt, typename T, typename Distance, typename Compare >
+	pair<RandomIt, RandomIt>
+		__equal_range(RandomIt first, RandomIt last, const T &value, Compare comp, Distance*, random_access_iterator_tag)
+	{
+		Distance len = last - first;
+		Distance half;
+		RandomIt middle, left, right;
+		while (len > 0)
+		{
+			half = len >> 1;
+			middle = first + half;
+			if (comp(*middle, value))
+			{
+				first = middle + 1;
+				len = len - half - 1;
+			}
+			else if (comp(value, *middle))
+				len = half;
+			else
+			{
+				//前半段找lower_bound
+				left = my_stl::lower_bound(first, middle, value, comp);
+				//前半段找upper_bound
+				right = my_stl::upper_bound(++middle, first + len, value, comp);
+				return pair<RandomIt, RandomIt>(left, right);
+			}
+		}
+		return pair<RandomIt, RandomIt>(first, first);
+	}
+
+	//forward_iterator版本
+	template<typename ForwardIt, typename T, typename Distance, typename Compare >
+	pair<ForwardIt, ForwardIt>
+		__equal_range(ForwardIt first, ForwardIt last, const T &value, Compare comp, Distance*, forward_iterator_tag)
+	{
+		Distance len = my_stl::distance(first, last);
+		Distance half;
+		ForwardIt middle, left, right;
+		while (len > 0)
+		{
+			half = len >> 1;
+			middle = first;
+			my_stl::advance(middle, half);
+			if (comp(*middle, value))
+			{
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+			else if (comp(value, *middle))
+				len = half;
+			else
+			{
+				//前半段找lower_bound
+				left = my_stl::lower_bound(first, middle, value, comp);
+				//前半段找upper_bound
+				my_stl::advance(first, len);
+				right = my_stl::upper_bound(++middle, first, value, comp);
+				return pair<ForwardIt, ForwardIt>(left, right);
+			}
+		}
+		return pair<ForwardIt, ForwardIt>(first, first);
 	}
 
 	template< class ForwardIt, class T, class Compare >
@@ -1140,10 +1273,9 @@ namespace my_stl
 		equal_range(ForwardIt first, ForwardIt last,
 		const T& value, Compare comp)
 	{
-		return pair<ForwardIt, ForwardIt>(lower_bound(first, last, value, comp),
-			upper_bound(first, last, value, comp));
-	}
+		return my_stl::__equal_range(first, last, value, comp, distance_type(first), iterator_category(first));
 
+	}
 	//---------------------------------------------------------------------------
 	//merge
 	template< class InputIt1, class InputIt2, class OutputIt >
@@ -1343,6 +1475,274 @@ namespace my_stl
 		}
 		my_stl::__insert_sort(first, last, comp);
 	}
+
+	//-----------------------------------------------------------------------
+	//includes
+	//应用于有序序列，[first2, last2)中的元素都在[first1, last1)中返回true,否则，返回false.
+
+	template< class InputIt1, class InputIt2 >
+	bool includes(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2)
+	{
+		for (; first2 != last2; ++first1)
+		{
+			if (first1 == last1 || *first2 < *first1)
+				return false;
+			if (!(*first1 < *first2))
+				++first2;
+		}
+		return true;
+	}
+	
+	template< class InputIt1, class InputIt2, class Compare >
+	bool includes(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2, Compare comp)
+	{
+		for (; first2 != last2; ++first1)
+		{
+			if (first1 == last1 || comp(*first2, *first1))
+				return false;
+			if (!comp(*first1, *first2))
+				++first2;
+		}
+		return true;
+	}
+
+	//------------------------------------------------------------------
+	//Minimum/maximum operations 
+	//------------------------------------------------------------------
+
+	//------------------------------------------------------------------
+	//max_element
+	template< class ForwardIt >
+	ForwardIt max_element(ForwardIt first, ForwardIt last)
+	{
+		if (first == last)
+		{
+			return last;
+		}
+		ForwardIt largest = first;
+		typename iterator_traits<ForwardIt>::value_type largest_value = *largest;
+		++first;
+		for (; first != last; ++first) 
+		{
+			if (largest_value < *first)
+			{
+				largest = first;
+				largest_value = *first;
+			}
+		}
+		return largest;
+	}
+
+	template< class ForwardIt, class Compare >
+	ForwardIt max_element(ForwardIt first, ForwardIt last, Compare comp)
+	{
+		if (first == last)
+		{
+			return last;
+		}
+		ForwardIt largest = first;
+		typename iterator_traits<ForwardIt>::value_type largest_value = *largest;
+		++first;
+		for (; first != last; ++first)
+		{
+			if (comp(largest_value, *first))
+			{
+				largest = first;
+				largest_value = *first;
+			}
+		}
+		return largest;
+	}
+
+	//------------------------------------------------------------------
+	//max
+	template< class T >
+	const T& max(const T& a, const T& b)
+	{
+		return a < b ? b : a;
+	}
+
+	template< class T, class Compare >
+	const T& max(const T& a, const T& b, Compare comp)
+	{
+		return comp(a, b) ? b : a;
+	}
+
+	template< class T >
+	T max(std::initializer_list<T> ilist)
+	{
+		return *my_stl::max_element(ilist.begin(), ilist.end());
+	}
+
+	template< class T, class Compare >
+	T max(std::initializer_list<T> ilist, Compare comp)
+	{
+		return *my_stl::max_element(ilist.begin(), ilist.end(), comp);
+	}
+
+	//------------------------------------------------------------------
+	//min_element
+	template< class ForwardIt >
+	ForwardIt min_element(ForwardIt first, ForwardIt last)
+	{
+		if (first == last)
+		{
+			return last;
+		}
+		typename iterator_traits<ForwardIt>::value_type smallest_value = *first;
+		ForwardIt smallest = first;
+		++first;
+		for (; first != last; ++first)
+		{
+			if (*first < smallest_value)
+			{
+				smallest = first;
+				smallest_value = *first;
+			}
+		}
+		return smallest;
+	}
+
+	template< class ForwardIt, class Compare >
+	ForwardIt min_element(ForwardIt first, ForwardIt last, Compare comp)
+	{
+		if (first == last)
+		{
+			return last;
+		}
+		typename iterator_traits<ForwardIt>::value_type smallest_value = *first;
+		ForwardIt smallest = first;
+		++first;
+		for (; first != last; ++first)
+		{
+			if (comp(*first, smallest_value))
+			{
+				smallest = first;
+				smallest_value = *first;
+			}
+		}
+		return smallest;
+	}
+
+	//------------------------------------------------------------------
+	//min
+	template< class T >
+	inline const T& min(const T& a, const T& b)
+	{
+		return b < a ? b : a;
+	}
+
+	template< class T, class Compare >
+	inline const T& min(const T& a, const T& b, Compare comp)
+	{
+		return comp(b, a) ? b : a;
+	}
+
+	template< class T >
+	T min(std::initializer_list<T> ilist)
+	{
+		return *my_stl::min_element(ilist.begin(), ilist.end());
+	}
+
+	template< class T, class Compare >
+	T min(std::initializer_list<T> ilist, Compare comp)
+	{
+		return *my_stl::min_element(ilist.begin(), ilist.end(), comp);
+	}
+
+	//----------------------------------------------------------------
+	//minmax__element
+
+	template< class ForwardIt >
+	pair<ForwardIt, ForwardIt>
+		minmax_element(ForwardIt first, ForwardIt last)
+	{
+		if (first == last)
+			return pair<ForwardIt, ForwardIt>(last, last);
+		ForwardIt smallest = first;
+		ForwardIt largest = first;
+		typename iterator_traits<ForwardIt>::value_type smallest_value, largest_value, value;
+		smallest_value = largest_value = *first;
+		++first;
+		for (; first != last; ++first)
+		{
+			value = *first;
+			if (value < smallest_value)
+			{
+				smallest = first;
+				smallest_value = value;
+			}
+			else if (!(value < largest_value))
+			{
+				largest = first;
+				largest_value = value;
+			}
+		}
+		return pair<ForwardIt, ForwardIt>(smallest, largest);
+	}
+
+	template< class ForwardIt, class Compare >
+	pair<ForwardIt, ForwardIt>
+		minmax_element(ForwardIt first, ForwardIt last, Compare comp)
+	{
+		if (first == last)
+			return pair<ForwardIt, ForwardIt>(last, last);
+		ForwardIt smallest = first;
+		ForwardIt largest = first;
+		typename iterator_traits<ForwardIt>::value_type smallest_value, largest_value, value;
+		smallest_value = largest_value = *first;
+		++first;
+		for (; first != last; ++first)
+		{
+			value = *first;
+			if (comp(value, smallest_value))
+			{
+				smallest = first;
+				smallest_value = value;
+			}
+			else if (!comp(value, largest_value))
+			{
+				largest = first;
+				largest_value = value;
+			}
+		}
+		return pair<ForwardIt, ForwardIt>(smallest, largest);
+	}
+
+	//----------------------------------------------------------------
+	//minmax
+
+	template< class T >
+	inline pair<const T&, const T&> minmax(const T& a, const T& b)
+	{
+		return b < a ? pair<const T&, const T&>(b, a) :
+			pair<const T&, const T&>(a, b);
+	}
+
+	template< typename T, typename Compare>
+	inline pair<const T&, const T&> mimmax(const T &a, const T &b, Compare comp)
+	{
+		return comp(b, a) ? pair<const T&, const T&>(b, a) :
+			pair<const T&, const T&>(a, b);
+	}
+
+	template< class T >
+	pair<T, T> minmax(std::initializer_list<T> ilist)
+	{
+		auto p = std::minmax_element(ilist.begin(), ilist.end());
+		return pair<T, T>(*p.first, *p.second);
+	}
+
+	template< class T, class Compare >
+	pair<T, T> minmax(std::initializer_list<T> ilist, Compare comp)
+	{
+		auto p = std::minmax_element(ilist.begin(), ilist.end(), comp);
+		return pair<T, T>(*p.first, *p.second);
+	}
+
+
 }
 
 #endif
