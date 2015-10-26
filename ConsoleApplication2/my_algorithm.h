@@ -1509,6 +1509,220 @@ namespace my_stl
 	}
 
 	//------------------------------------------------------------------
+	//set_difference
+	//构造[first1, last1)和[first2, last2)的差集
+	//返回最后一个构造元素之后的迭代器
+
+	template< class InputIt1, class InputIt2, class OutputIt >
+	OutputIt set_difference(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first)
+	{
+		while ( first1 != last2 && first2 != last2)
+		{
+			if (*first1 < *first2)
+			{
+				*d_first++ = *first1++;
+			}
+			else 
+			{
+				if (!(*first2 < *first1))
+				{
+					++first1;
+				}
+				++first2;
+			}
+		}
+		return my_stl::copy(first1, last1, d_first);
+	}
+	
+	template< class InputIt1, class InputIt2,
+	class OutputIt, class Compare >
+		OutputIt set_difference(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first, Compare comp)
+	{
+		while (first1 != last2 && first2 != last2)
+		{
+			if (comp(*first1, *first2))
+			{
+				*d_first++ = *first1++;
+			}
+			else
+			{
+				if (!comp(*first2, *first1))
+				{
+					++first1;
+				}
+				++first2;
+			}
+		}
+		return my_stl::copy(first1, last1, d_first);
+	}
+
+	//------------------------------------------------------------------
+	//set_intersection 
+	//构造[first1, last1)和[first2, last2)的差集
+	//返回尾后迭代器
+
+	template< class InputIt1, class InputIt2, class OutputIt >
+	OutputIt set_intersection(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first)
+	{
+		while (first1 != last1 && first2 != last2) 
+		{
+			if (*first1 < *first2) 
+			{
+				++first1;
+			}
+			else  
+			{
+				if (!(*first2 < *first1)) 
+				{
+					*d_first++ = *first1++;
+				}
+				++first2;
+			}
+		}
+		return d_first;
+	}
+	
+	template< class InputIt1, class InputIt2,
+	class OutputIt, class Compare >
+		OutputIt set_intersection(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first, Compare comp)
+	{
+		while (first1 != last1 && first2 != last2)
+		{
+			if (comp(*first1, *first2))
+			{
+				++first1;
+			}
+			else
+			{
+				if (!comp(*first2, *first1))
+				{
+					*d_first++ = *first1++;
+				}
+				++first2;
+			}
+		}
+		return d_first;
+	}
+
+	//------------------------------------------------------------------
+	//set_symmetric_difference
+	//构造[first1, last1)和[first2, last2)的对称差集，在S1中不在S2中和在S2中而不在S1中的元素
+	//返回尾后迭代器
+	template< class InputIt1, class InputIt2, class OutputIt >
+	OutputIt set_symmetric_difference(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first)
+	{
+		while (first1 != last1)
+		{
+			if (first2 == last2)
+				return my_stl::copy(first1, last1, d_first);
+			if (*first1 < *first2)
+				*d_first++ = *first1++;
+			else
+			{
+				if (*first2 < *first1)
+					*d_first++ = *first2++;
+				else
+				{
+					++first1;
+					++first2;
+				}
+			}
+		}
+		return my_stl::copy(first2, last2, d_first);
+	}
+
+	template< class InputIt1, class InputIt2,
+	class OutputIt, class Compare >
+		OutputIt set_symmetric_difference(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first, Compare comp)
+	{
+		while (first1 != last1)
+		{
+			if (first2 == last2)
+				return my_stl::copy(first1, last1, d_first);
+			if (comp(*first1, *first2))
+				*d_first++ = *first1++;
+			else
+			{
+				if (comp(*first2, *first1))
+					*d_first++ = *first2++;
+				else
+				{
+					++first1;
+					++first2;
+				}
+			}
+		}
+		return my_stl::copy(first2, last2, d_first);
+	}
+
+	//------------------------------------------------------------------
+	//set_union
+	//构造并集
+	//返回尾后迭代器
+	template< class InputIt1, class InputIt2, class OutputIt >
+	OutputIt set_union(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first)
+	{
+		for (; first1 != last1; ++first1)
+		{
+			if (first2 == last2)
+				return my_stl::copy(first1, last1, d_first);
+			if (*first1 < *first2)
+				*d_first++ = *first1;
+			else
+			{
+				if (*first2 < *first1)
+					*d_first++ = *first2++;
+				else
+				{
+					*d_first++ = *first1;
+					++first2;
+				}
+			}
+		}
+		return my_stl::copy(first2, last2, d_first);
+	}
+
+	template< class InputIt1, class InputIt2,
+	class OutputIt, class Compare >
+		OutputIt set_union(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first, Compare comp)
+	{
+		for (; first1 != last1; ++first1)
+		{
+			if (first2 == last2)
+				return my_stl::copy(first1, last1, d_first);
+			if (*comp(first1, *first2))
+				*d_first++ = *first1;
+			else
+			{
+				if (comp(*first2, *first1))
+					*d_first++ = *first2++;
+				else
+				{
+					*d_first++ = *first1;
+					++first2;
+				}
+			}
+		}
+		return my_stl::copy(first2, last2, d_first);
+	}
+
+	//------------------------------------------------------------------
 	//Minimum/maximum operations 
 	//------------------------------------------------------------------
 
