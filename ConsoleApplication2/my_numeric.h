@@ -1,4 +1,4 @@
-#ifndef __MY_NEMERIC_H_
+ï»¿#ifndef __MY_NEMERIC_H_
 #define __MY_NEMERIC_H_
 
 #include "my_iterator.h"
@@ -12,7 +12,7 @@ namespace my_stl
 
 	//------------------------------------------------------------------
 	//iota
-	//ÒÔvalueÎª³õÖµ£¬Ê¹ÓÃ++value£¬µİÔöÌî³ä[first, last)
+	//ä»¥valueä¸ºåˆå€¼ï¼Œä½¿ç”¨++valueï¼Œé€’å¢å¡«å……[first, last)
 
 	template< class ForwardIterator, class T >
 	void iota(ForwardIterator first, ForwardIterator last, T value)
@@ -23,8 +23,8 @@ namespace my_stl
 
 	//------------------------------------------------------------------
 	//accumulate
-	//ÒÔ³õÖµinitÀÛ»ı[first, last)ÖĞµÄÔªËØ£¬Ä¬ÈÏÊ¹ÓÃoperator+ÀÛ»ı
-	//·µ»ØÀÛ»ıÖµ
+	//ä»¥åˆå€¼initç´¯ç§¯[first, last)ä¸­çš„å…ƒç´ ï¼Œé»˜è®¤ä½¿ç”¨operator+ç´¯ç§¯
+	//è¿”å›ç´¯ç§¯å€¼
 
 	template< class InputIt, class T >
 	T accumulate(InputIt first, InputIt last, T init)
@@ -34,8 +34,8 @@ namespace my_stl
 		return init;
 	}
 
-	//ÒÔ³õÖµinitÀÛ»ı[first, last)ÖĞµÄÔªËØ£¬Ê¹ÓÃop(sum, current_value)ÀÛ»ı
-	//·µ»ØÀÛ»ıÖµ
+	//ä»¥åˆå€¼initç´¯ç§¯[first, last)ä¸­çš„å…ƒç´ ï¼Œä½¿ç”¨op(sum, current_value)ç´¯ç§¯
+	//è¿”å›ç´¯ç§¯å€¼
 
 	template< class InputIt, class T, class BinaryOperation >
 	T accumulate(InputIt first, InputIt last, T init,
@@ -48,8 +48,8 @@ namespace my_stl
 
 	//------------------------------------------------------------------
 	//inner_product
-	//ÒÔvalueÎª³õÖµ£¬½«[first1, last1)ºÍ[first2, ...)¶ÔÓ¦ÔªËØoperator*µÄ½á¹ûÓÃoperator+ÀÛ»ıµ½value.
-	//·µ»Øvalue.
+	//ä»¥valueä¸ºåˆå€¼ï¼Œå°†[first1, last1)å’Œ[first2, ...)å¯¹åº”å…ƒç´ operator*çš„ç»“æœç”¨operator+ç´¯ç§¯åˆ°value.
+	//è¿”å›value.
 
 	template< class InputIt1, class InputIt2, class T >
 	T inner_product(InputIt1 first1, InputIt1 last1,
@@ -60,8 +60,8 @@ namespace my_stl
 		return value;
 	}
 
-	//ÒÔvalueÎª³õÖµ£¬½«[first1, last1)ºÍ[first2, ...)¶ÔÓ¦ÔªËØop2ÔËËãµÄ½á¹ûÓÃop1ÔËËãÀÛ»ıµ½value.
-	//·µ»Øvalue.
+	//ä»¥valueä¸ºåˆå€¼ï¼Œå°†[first1, last1)å’Œ[first2, ...)å¯¹åº”å…ƒç´ op2è¿ç®—çš„ç»“æœç”¨op1è¿ç®—ç´¯ç§¯åˆ°value.
+	//è¿”å›value.
 	template<class InputIt1, class InputIt2, class T,
 	class BinaryOperation1, class BinaryOperation2>
 		T inner_product(InputIt1 first1, InputIt1 last1,
@@ -76,9 +76,9 @@ namespace my_stl
 
 	//--------------------------------------------------------------
 	//adjacent_difference
-	//¼ÆËã[first, last)ÖĞÃ¿×éÏàÁÚÔªËØµÄ²î£¬±£´æµ½[d_first,...)£¬
-	//d_firstÔªËØÓëfirstÔªËØÏàÍ¬£¬Ä¬ÈÏÊ¹ÓÃoperator-
-	//·µ»ØÎ²ºóµü´úÆ÷
+	//è®¡ç®—[first, last)ä¸­æ¯ç»„ç›¸é‚»å…ƒç´ çš„å·®ï¼Œä¿å­˜åˆ°[d_first,...)ï¼Œ
+	//d_firstå…ƒç´ ä¸firstå…ƒç´ ç›¸åŒï¼Œé»˜è®¤ä½¿ç”¨operator-
+	//è¿”å›å°¾åè¿­ä»£å™¨
 
 	template< class InputIt, class OutputIt >
 	OutputIt adjacent_difference(InputIt first, InputIt last,
@@ -99,8 +99,8 @@ namespace my_stl
 		return d_first;
 	}
 
-	//Ê¹ÓÃop¼ÆËãÏàÁÚÔªËØµÄ²î
-	//·µ»ØÎ²ºóµü´úÆ÷
+	//ä½¿ç”¨opè®¡ç®—ç›¸é‚»å…ƒç´ çš„å·®
+	//è¿”å›å°¾åè¿­ä»£å™¨
 
 	template< class InputIt, class OutputIt, class BinaryOperation >
 	OutputIt adjacent_difference(InputIt first, InputIt last,
@@ -123,7 +123,7 @@ namespace my_stl
 
 	//----------------------------------------------------------
 	//partial_sum
-	//Ê¹ÓÃoperator+£¬¼ÆËãÀÛ»ıºÍ£¬·µ»ØÎ²ºóµü´úÆ÷
+	//ä½¿ç”¨operator+ï¼Œè®¡ç®—ç´¯ç§¯å’Œï¼Œè¿”å›å°¾åè¿­ä»£å™¨
 
 	template< class InputIt, class OutputIt >
 	OutputIt partial_sum(InputIt first, InputIt last, OutputIt d_first)
@@ -140,7 +140,7 @@ namespace my_stl
 		return d_first;
 	}
 
-	//Ê¹ÓÃop¼ÆËãÀÛ»ıºÍ£¬·µ»ØÎ²ºóµü´úÆ÷
+	//ä½¿ç”¨opè®¡ç®—ç´¯ç§¯å’Œï¼Œè¿”å›å°¾åè¿­ä»£å™¨
 
 	template< class InputIt, class OutputIt, class BinaryOperation >
 	OutputIt partial_sum(InputIt first, InputIt last, OutputIt d_first,

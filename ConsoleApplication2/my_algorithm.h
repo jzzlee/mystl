@@ -3,12 +3,12 @@
 
 #include "my_heap.h"
 #include "my_xutility.h"
-#include <iostream>
 #include <random>
+
 namespace my_stl
 {
 	using std::pair;
-
+	using namespace std::placeholders;
 	//------------------------------------------------------
 	//Non-modifying sequence operations 
 
@@ -1956,7 +1956,183 @@ namespace my_stl
 		return pair<T, T>(*p.first, *p.second);
 	}
 
+	//---------------------------------------------------------------------
+	//is_permutation
+	//检查[first, last)是不是[d_first, d_last)的一个排列
+	template<class ForwardIt1, class ForwardIt2>
+	bool is_permutation(ForwardIt1 first, ForwardIt1 last,
+		ForwardIt2 d_first)
+	{
+		//找到第一对不同元素
+		std::tie(first, d_first) = my_stl::mismatch(first, last, d_first);
+		//统计[first, last)中每个元素出现次数，检查与其在[d_first, d_last)中出现次数是否一致
+		if (first != last) 
+		{
+			ForwardIt2 d_last = d_first;
+			my_stl::advance(d_last, my_stl::distance(first, last));
+			for (ForwardIt1 i = first; i != last; ++i) 
+			{
+				if (i != my_stl::find(first, i, *i))
+					continue; // *i 已经统计过
+				auto m = my_stl::count(d_first, d_last, *i);
+				if (m == 0 || my_stl::count(i, last, *i) != m) 
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
+	template< class ForwardIt1, class ForwardIt2, class BinaryPredicate >
+	bool is_permutation(ForwardIt1 first, ForwardIt1 last,
+		ForwardIt2 d_first, BinaryPredicate p)
+	{
+		//找到第一对不同元素
+		std::tie(first, d_first) = my_stl::mismatch(first, last, d_first, p);
+		//统计[first, last)中每个元素出现次数，检查与其在[d_first, d_last)中出现次数是否一致
+		if (first != last)
+		{
+			ForwardIt2 d_last = d_first;
+			my_stl::advance(d_last, my_stl::distance(first, last));
+			iterator_traits<ForwardIt1>::value_type value;
+			for (ForwardIt1 i = first; i != last; ++i)
+			{
+				value = *i;
+				if (i != my_stl::find(first, i, value))
+					continue; // *i 已经统计过
+				auto m = my_stl::count_if(d_first, d_last, std::bind(p, _1, value));
+				if (my_stl::count_if(i, last, std::bind(p, _1, value)) != m)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	//-----------------------------------------------------------
+	//next_permutation
+	//转换[first, last)为它的下一个排列，返回true
+	//如果当前已经是最后一种排列，产生第一种排列，返回false
+	template< class BidirIt >
+	bool next_permutation(BidirIt first, BidirIt last)
+	{
+		if (first == last)
+			return false;
+		BidirIt pre = last;
+		if (first == --pre)
+			return false;
+		for (;;)
+		{
+			BidirIt it = pre--;
+			if (*pre < *it)//前一个元素小于后一个元素
+			{
+				BidirIt j = last;
+				while (!(*pre < *(--j))) //找到比*pre大的元素
+					;
+				my_stl::iter_swap(pre, j);//交换两个元素值
+				my_stl::reverse(it, last); //将[it, last)元素逆序
+				return true;
+			}
+			if (pre == first)//到最前头了
+			{
+				my_stl::reverse(first, last);
+				return false;
+			}
+		}
+	}
+	
+	template< class BidirIt, class Compare >
+	bool next_permutation(BidirIt first, BidirIt last, Compare comp)
+	{
+		if (first == last)
+			return false;
+		BidirIt pre = last;
+		if (first == --pre)
+			return false;
+		for (;;)
+		{
+			BidirIt it = pre--;
+			if (comp(*pre, *it))//前一个元素小于后一个元素
+			{
+				BidirIt j = last;
+				while (!comp(*pre, *(--j))) //找到比*pre大的元素
+					;
+				my_stl::iter_swap(pre, j);//交换两个元素值
+				my_stl::reverse(it, last); //将[it, last)元素逆序
+				return true;
+			}
+			if (pre == first)//到最前头了
+			{
+				my_stl::reverse(first, last);
+				return false;
+			}
+		}
+	}
+
+	//----------------------------------------------------------
+	//prev_permutation
+	//转换[first, last)为它的上一个排列，返回true
+	//如果当前已经是第一种排列，产生最后一种排列，返回false
+
+	template< class BidirIt >
+	bool prev_permutation(BidirIt first, BidirIt last)
+	{
+		if (first == last) //空
+			return false;
+		BidirIt pre = last;
+		if (first == --pre) //只有1个元素
+			return false;
+		for (;;)
+		{
+			BidirIt it = pre--;
+			if (*it < *pre)
+			{
+				BidirIt j = last;
+				while (!(*--j < *pre)) //找到不大于*pre的元素
+					;
+				my_stl::iter_swap(pre, j);//交换
+				my_stl::reverse(it, last);//逆置
+				return true;
+			}
+			if (pre == first)
+			{
+				my_stl::reverse(first, last);
+				return false;
+			}
+		}
+	}
+
+	template< class BidirIt, class Compare >
+	bool prev_permutation(BidirIt first, BidirIt last, Compare comp)
+	{
+		if (first == last) //空
+			return false;
+		BidirIt pre = last;
+		if (first == --pre) //只有1个元素
+			return false;
+		for (;;)
+		{
+			BidirIt it = pre--;
+			if (comp(*it, *pre))
+			{
+				BidirIt j = last;
+				while (!comp(*--j, *pre)) //找到不大于*pre的元素
+					;
+				my_stl::iter_swap(pre, j);//交换
+				my_stl::reverse(it, last);//逆置
+				return true;
+			}
+			if (pre == first)
+			{
+				my_stl::reverse(first, last);
+				return false;
+			}
+		}
+	}
+
+	
 }
 
 #endif
